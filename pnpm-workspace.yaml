@@ -1,4 +1,11 @@
 packages:
-  - "packages/*"
+  # TypeScript shared libraries
+  - "libs/shared-schemas"
+  
+  # TypeScript frontends (React apps)
+  - "apps/*/web"
+  
+  # Developer tooling
+  - "tools/generators"
 
 autoInstallPeers: true
