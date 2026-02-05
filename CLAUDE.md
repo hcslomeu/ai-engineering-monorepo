@@ -4,6 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## Before Starting Any Task
+
+Always read these files first to understand current progress and context:
+
+```bash
+cat PROGRESS.md   # Current work package status
+cat SKILLS.md     # Learning progress tracker
+```
+
+---
+
 ## Project Overview
 
 **ai-engineering-monorepo** is an enterprise-grade AI Engineering Monorepo designed for hands-on learning and production-ready implementations. It combines Python (AI/ML, Data Engineering) and TypeScript (React frontends) in a hybrid workspace orchestrated by Nx.
@@ -167,6 +178,34 @@ pnpm nx run-many -t test
 pnpm nx g @nx/js:lib libs/<package-name> --publishable --importPath=@ai-engineering-monorepo/<package-name>
 ```
 
+### Git Workflow
+
+```bash
+# Create feature branch (use WP-XXX prefix)
+git checkout -b feature/WP-XXX-short-description
+
+# Commit with conventional commits
+git commit -m "feat(scope): description"
+git commit -m "fix(scope): description"
+git commit -m "chore(scope): description"
+
+# Create PR linking to issue
+gh pr create --title "feat: WP-XXX description" --body "Closes #XX"
+```
+
+---
+
+## GitHub Project
+
+Issues are tracked at: https://github.com/hcslomeu/ai-engineering-monorepo/issues
+
+Work packages follow the pattern: `WP-XXX: Title`
+
+- **WP-001 to WP-006**: Foundation phase
+- **WP-101 to WP-108**: AlphaWhale
+- **WP-201 to WP-208**: MediGuard
+- **WP-301 to WP-309**: RailSense
+
 ---
 
 ## Testing Strategy
@@ -276,3 +315,90 @@ When assisting, provide:
 - Explanations of the "why" behind architectural decisions
 - Small, digestible work packages
 - Theory before implementation for new frameworks
+
+
+---
+
+## Code Generation Standards
+
+### Portfolio-Ready Code
+
+All generated code must be production-quality and suitable for a professional portfolio. Follow these rules:
+
+#### DO:
+- Write concise, professional docstrings that explain WHAT the code does
+- Use clear variable and function names that are self-documenting
+- Include type hints for all function parameters and return values
+- Follow PEP 8 and project linting rules (ruff)
+- Add inline comments only when the logic is genuinely complex
+- Explore basic to hard concepts and conventions outside of the code
+
+#### DO NOT:
+- Include pedagogical or teaching comments (e.g., "This is called encapsulation...")
+- Explain basic programming concepts in docstrings or comments
+- Add comments that reveal AI-assisted generation
+- Include step-by-step explanations of standard patterns
+- Over-comment obvious code
+
+#### Examples
+
+```python
+# ❌ BAD - Teaching comment
+class GitHubCLI:
+    """
+    Wrapper class for the GitHub CLI (`gh`) tool.
+    
+    This is the ENCAPSULATION principle - hiding complexity behind
+    a simple interface.
+    """
+
+# ✅ GOOD - Professional docstring
+class GitHubCLI:
+    """Wrapper for GitHub CLI operations."""
+```
+
+```python
+# ❌ BAD - Explaining basic concepts
+# The underscore prefix (_run) is a Python convention meaning
+# "this is an internal method, not part of the public API".
+def _run(self, args: list[str]) -> CommandResult:
+
+# ✅ GOOD - No comment needed, convention is self-evident
+def _run(self, args: list[str]) -> CommandResult:
+```
+
+```python
+# ❌ BAD - Over-explaining
+# Using a set here because sets automatically remove duplicates.
+# If WP-002 has ["python", "library"] and WP-003 has ["python", "testing"],
+# the set will contain {"python", "library", "testing"}.
+labels = set()
+
+# ✅ GOOD - Simple and clear
+labels: set[str] = set()
+```
+
+### Docstring Format
+
+Use Google-style docstrings, kept minimal:
+
+```python
+def create_issue(self, title: str, body: str) -> dict:
+    """
+    Create a new GitHub issue.
+
+    Args:
+        title: Issue title
+        body: Issue body in Markdown
+
+    Returns:
+        Dictionary with 'number' and 'url' of created issue
+    """
+```
+
+### When Comments ARE Appropriate
+
+- Explaining non-obvious business logic
+- Documenting workarounds for known issues
+- TODO/FIXME markers with ticket references
+- Complex algorithms that genuinely need explanation
