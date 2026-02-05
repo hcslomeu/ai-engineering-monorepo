@@ -44,6 +44,7 @@ Thumbs.db
 
 # Claude Code - personal files only
 .claude/learning-context.md
+.claude/learning-progress.md
 .claude/*.local.md
 
 # Python

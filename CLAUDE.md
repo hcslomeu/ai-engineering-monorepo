@@ -9,8 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Always read these files first to understand current progress and context:
 
 ```bash
-cat PROGRESS.md   # Current work package status
-cat SKILLS.md     # Learning progress tracker
+cat PROGRESS.md                    # Current work package status
+cat .claude/learning-progress.md   # Skills development tracker (private)
+cat .claude/learning-context.md    # Session preferences (private)
 ```
 
 ---
@@ -238,7 +239,7 @@ poetry run pytest --cov=libs --cov=apps --cov-report=html
 | `pnpm-workspace.yaml` | pnpm workspace packages |
 | `pyproject.toml` | Root Poetry configuration + tool settings |
 | `tsconfig.base.json` | Base TypeScript configuration |
-| `SKILLS.md` | Learning progress tracker |
+| `.claude/learning-progress.md` | Skills development tracker (private) |
 | `PROGRESS.md` | Work package completion log |
 
 ---
@@ -306,11 +307,12 @@ This project uses a `.claude/` folder for Claude Code configuration:
 
 ```
 .claude/
-├── skills/              # Project-specific skills (committed)
-└── learning-context.md  # Personal session preferences (gitignored)
+├── skills/               # Project-specific skills (committed)
+├── learning-context.md   # Session preferences (gitignored)
+└── learning-progress.md  # Skills development tracker (gitignored)
 ```
 
-See `.claude/learning-context.md` for session-specific instructions (not tracked in git).
+Private files in `.claude/` are gitignored and contain personal learning context.
 
 ---
 

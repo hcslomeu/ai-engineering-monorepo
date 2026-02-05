@@ -25,7 +25,7 @@ This document tracks the completion status of work packages in the AI Engineerin
 - [x] Configure pnpm workspace
 - [x] Initialise Poetry workspace
 - [x] Create folder hierarchy
-- [x] Create tracking files (SKILLS.md, PROGRESS.md)
+- [x] Create tracking files (PROGRESS.md, .claude/learning-progress.md)
 - [x] Create CLAUDE.md
 - [x] Initial Git commit
 - [x] Push to GitHub remote
