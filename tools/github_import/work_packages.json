@@ -1,0 +1,409 @@
+{
+  "project": "AI Engineering Monorepo",
+  "total_estimate_hours": {
+    "min": 130,
+    "max": 170
+  },
+  "phases": [
+    {
+      "id": "phase-0",
+      "name": "Foundation",
+      "estimate_hours": { "min": 12, "max": 16 },
+      "work_packages": [
+        {
+          "id": "WP-001",
+          "title": "Monorepo Foundation Scaffold",
+          "status": "done",
+          "estimate_hours": 3,
+          "priority": "P0-Critical",
+          "labels": ["infrastructure", "setup"],
+          "milestone": "Foundation",
+          "description": "Set up Nx monorepo with Poetry, pnpm, and folder hierarchy",
+          "skills": ["monorepo-concepts", "nx-basics", "poetry-basics"],
+          "dependencies": []
+        },
+        {
+          "id": "WP-002",
+          "title": "py-core Shared Library",
+          "status": "todo",
+          "estimate_hours": 3,
+          "priority": "P0-Critical",
+          "labels": ["python", "library", "foundation"],
+          "milestone": "Foundation",
+          "description": "Config management, logging utilities, custom exceptions, first unit tests",
+          "skills": ["python-classes", "pydantic", "pytest", "type-hints"],
+          "dependencies": ["WP-001"]
+        },
+        {
+          "id": "WP-003",
+          "title": "CI/CD Pipeline (GitHub Actions)",
+          "status": "todo",
+          "estimate_hours": 2,
+          "priority": "P0-Critical",
+          "labels": ["ci-cd", "infrastructure", "devops"],
+          "milestone": "Foundation",
+          "description": "Automated pytest, ruff, bandit, mypy on every push",
+          "skills": ["github-actions", "yaml", "ci-cd-concepts"],
+          "dependencies": ["WP-002"]
+        },
+        {
+          "id": "WP-004",
+          "title": "ts-core Shared Library (Zod)",
+          "status": "todo",
+          "estimate_hours": 3,
+          "priority": "P1-High",
+          "labels": ["typescript", "library", "foundation"],
+          "milestone": "Foundation",
+          "description": "Zod schemas, JSON Schema generation, shared TypeScript utilities",
+          "skills": ["typescript-basics", "zod", "json-schema"],
+          "dependencies": ["WP-001"]
+        },
+        {
+          "id": "WP-005",
+          "title": "Docker Base Images",
+          "status": "todo",
+          "estimate_hours": 3,
+          "priority": "P1-High",
+          "labels": ["docker", "infrastructure", "devops"],
+          "milestone": "Foundation",
+          "description": "Python and Node base images with proper layering and caching",
+          "skills": ["dockerfile", "multi-stage-builds", "docker-compose"],
+          "dependencies": ["WP-001"]
+        },
+        {
+          "id": "WP-006",
+          "title": "MkDocs Documentation Site",
+          "status": "todo",
+          "estimate_hours": 2,
+          "priority": "P2-Medium",
+          "labels": ["documentation", "infrastructure"],
+          "milestone": "Foundation",
+          "description": "MkDocs Material setup for internal technical documentation",
+          "skills": ["mkdocs", "markdown", "technical-writing"],
+          "dependencies": ["WP-001"]
+        }
+      ]
+    },
+    {
+      "id": "phase-1",
+      "name": "AlphaWhale",
+      "estimate_hours": { "min": 40, "max": 50 },
+      "work_packages": [
+        {
+          "id": "WP-101",
+          "title": "BigQuery Data Ingestion",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P1-High",
+          "labels": ["bigquery", "data-engineering", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Connect to financial data sources, ingest raw market data to BigQuery",
+          "skills": ["bigquery", "pandas", "data-ingestion"],
+          "dependencies": ["WP-002"]
+        },
+        {
+          "id": "WP-102",
+          "title": "Airflow DAG (Bronze to Silver)",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["airflow", "data-engineering", "medallion", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "First Airflow DAG implementing Bronze to Silver transformation",
+          "skills": ["airflow-dags", "taskflow-api", "data-quality"],
+          "dependencies": ["WP-002", "WP-005"]
+        },
+        {
+          "id": "WP-103",
+          "title": "Databricks Feature Engineering",
+          "status": "todo",
+          "estimate_hours": 6,
+          "priority": "P1-High",
+          "labels": ["databricks", "feature-engineering", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Delta Tables, Silver to Gold transformations, trading features",
+          "skills": ["databricks", "delta-lake", "feature-engineering"],
+          "dependencies": ["WP-102"]
+        },
+        {
+          "id": "WP-104",
+          "title": "LangGraph Trading Agent",
+          "status": "todo",
+          "estimate_hours": 7,
+          "priority": "P0-Critical",
+          "labels": ["langgraph", "agents", "ai", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Stateful trading agent with tool calling and decision nodes",
+          "skills": ["langgraph", "state-machines", "tool-calling"],
+          "dependencies": ["WP-002", "WP-103"]
+        },
+        {
+          "id": "WP-105",
+          "title": "WhatsApp Human-in-Loop",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["whatsapp", "human-in-loop", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Evolution API integration for trade approval notifications",
+          "skills": ["webhooks", "async-processing", "user-interaction"],
+          "dependencies": ["WP-104"]
+        },
+        {
+          "id": "WP-106",
+          "title": "LangSmith Observability",
+          "status": "todo",
+          "estimate_hours": 3,
+          "priority": "P1-High",
+          "labels": ["langsmith", "observability", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Tracing, evaluation datasets, and agent performance monitoring",
+          "skills": ["langsmith", "tracing", "evaluation"],
+          "dependencies": ["WP-104"]
+        },
+        {
+          "id": "WP-107",
+          "title": "AlphaWhale React Dashboard",
+          "status": "todo",
+          "estimate_hours": 7,
+          "priority": "P2-Medium",
+          "labels": ["react", "typescript", "frontend", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Trading dashboard with shadcn/ui, real-time updates",
+          "skills": ["react", "typescript", "shadcn-ui", "tailwind"],
+          "dependencies": ["WP-004", "WP-104"]
+        },
+        {
+          "id": "WP-108",
+          "title": "AlphaWhale Integration Testing",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["testing", "integration", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "End-to-end testing, load testing, performance validation",
+          "skills": ["integration-testing", "mocking", "performance-testing"],
+          "dependencies": ["WP-104", "WP-105", "WP-107"]
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "MediGuard",
+      "estimate_hours": { "min": 35, "max": 45 },
+      "work_packages": [
+        {
+          "id": "WP-201",
+          "title": "FHIR API Integration",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["fhir", "healthcare", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "Connect to FHIR endpoints, parse clinical resources",
+          "skills": ["fhir-r4", "api-integration", "healthcare-data"],
+          "dependencies": ["WP-002"]
+        },
+        {
+          "id": "WP-202",
+          "title": "HuggingFace PII Masking",
+          "status": "todo",
+          "estimate_hours": 6,
+          "priority": "P0-Critical",
+          "labels": ["huggingface", "pii", "privacy", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "Local PII detection and redaction using transformer models",
+          "skills": ["transformers", "ner", "privacy-engineering"],
+          "dependencies": ["WP-002"]
+        },
+        {
+          "id": "WP-203",
+          "title": "AWS S3 and Lambda Pipeline",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["aws", "s3", "lambda", "serverless", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "Document ingestion pipeline with S3 triggers and Lambda processing",
+          "skills": ["boto3", "lambda", "event-driven"],
+          "dependencies": ["WP-002", "WP-202"]
+        },
+        {
+          "id": "WP-204",
+          "title": "LlamaIndex Medical RAG",
+          "status": "todo",
+          "estimate_hours": 7,
+          "priority": "P0-Critical",
+          "labels": ["llamaindex", "rag", "ai", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "Advanced medical document retrieval with citation tracking",
+          "skills": ["llamaindex", "rag-patterns", "chunking-strategies"],
+          "dependencies": ["WP-002", "WP-203"]
+        },
+        {
+          "id": "WP-205",
+          "title": "Pinecone Vector Store",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P1-High",
+          "labels": ["pinecone", "vectordb", "embeddings", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "Serverless vector database setup with medical embeddings",
+          "skills": ["pinecone", "embeddings", "vector-search"],
+          "dependencies": ["WP-204"]
+        },
+        {
+          "id": "WP-206",
+          "title": "LangGraph Clinical Query Agent",
+          "status": "todo",
+          "estimate_hours": 6,
+          "priority": "P1-High",
+          "labels": ["langgraph", "agents", "healthcare", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "Query routing, source validation, and response generation",
+          "skills": ["langgraph", "guardrails", "query-routing"],
+          "dependencies": ["WP-204", "WP-205"]
+        },
+        {
+          "id": "WP-207",
+          "title": "MediGuard Clinical UI",
+          "status": "todo",
+          "estimate_hours": 6,
+          "priority": "P2-Medium",
+          "labels": ["react", "typescript", "frontend", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "HIPAA-conscious clinical interface with audit logging",
+          "skills": ["react", "audit-logging", "healthcare-ui"],
+          "dependencies": ["WP-004", "WP-206"]
+        },
+        {
+          "id": "WP-208",
+          "title": "MediGuard Compliance Testing",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P0-Critical",
+          "labels": ["testing", "compliance", "security", "mediguard"],
+          "milestone": "MediGuard",
+          "description": "PHI handling validation, security scanning, audit trails",
+          "skills": ["compliance-testing", "security-scanning", "hipaa"],
+          "dependencies": ["WP-206", "WP-207"]
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "RailSense",
+      "estimate_hours": { "min": 45, "max": 55 },
+      "work_packages": [
+        {
+          "id": "WP-301",
+          "title": "Kafka Darwin Feed Consumer",
+          "status": "todo",
+          "estimate_hours": 6,
+          "priority": "P0-Critical",
+          "labels": ["kafka", "streaming", "transportation", "railsense"],
+          "milestone": "RailSense",
+          "description": "Real-time UK Rail Darwin push port consumer",
+          "skills": ["kafka", "streaming", "message-processing"],
+          "dependencies": ["WP-002", "WP-005"]
+        },
+        {
+          "id": "WP-302",
+          "title": "Bronze Layer Raw Events",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P1-High",
+          "labels": ["medallion", "data-engineering", "railsense"],
+          "milestone": "RailSense",
+          "description": "Raw event storage with schema evolution support",
+          "skills": ["schema-evolution", "data-storage", "medallion"],
+          "dependencies": ["WP-301"]
+        },
+        {
+          "id": "WP-303",
+          "title": "Silver Layer Cleaned Data",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P1-High",
+          "labels": ["medallion", "data-engineering", "railsense"],
+          "milestone": "RailSense",
+          "description": "Data cleansing, deduplication, and conforming",
+          "skills": ["data-cleansing", "deduplication", "data-quality"],
+          "dependencies": ["WP-302"]
+        },
+        {
+          "id": "WP-304",
+          "title": "PyTorch LSTM Delay Predictor",
+          "status": "todo",
+          "estimate_hours": 9,
+          "priority": "P0-Critical",
+          "labels": ["pytorch", "lstm", "deep-learning", "railsense"],
+          "milestone": "RailSense",
+          "description": "Custom LSTM model for train delay prediction",
+          "skills": ["pytorch", "lstm", "time-series", "mlflow"],
+          "dependencies": ["WP-002", "WP-303"]
+        },
+        {
+          "id": "WP-305",
+          "title": "Gold Layer Features and Vectors",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["medallion", "feature-engineering", "railsense"],
+          "milestone": "RailSense",
+          "description": "ML-ready features and embedding vectors",
+          "skills": ["feature-engineering", "embeddings", "data-pipelines"],
+          "dependencies": ["WP-303", "WP-304"]
+        },
+        {
+          "id": "WP-306",
+          "title": "CrewAI Maintenance Crew",
+          "status": "todo",
+          "estimate_hours": 7,
+          "priority": "P1-High",
+          "labels": ["crewai", "multi-agent", "ai", "railsense"],
+          "milestone": "RailSense",
+          "description": "Automated maintenance task assignment and coordination",
+          "skills": ["crewai", "multi-agent", "task-delegation"],
+          "dependencies": ["WP-002", "WP-304"]
+        },
+        {
+          "id": "WP-307",
+          "title": "Supabase Real-time Dashboard",
+          "status": "todo",
+          "estimate_hours": 7,
+          "priority": "P1-High",
+          "labels": ["supabase", "react", "real-time", "railsense"],
+          "milestone": "RailSense",
+          "description": "Live delay predictions with Supabase real-time subscriptions",
+          "skills": ["supabase", "real-time", "postgresql"],
+          "dependencies": ["WP-004", "WP-304", "WP-306"]
+        },
+        {
+          "id": "WP-308",
+          "title": "Terraform Infrastructure",
+          "status": "todo",
+          "estimate_hours": 5,
+          "priority": "P1-High",
+          "labels": ["terraform", "iac", "aws", "railsense"],
+          "milestone": "RailSense",
+          "description": "Infrastructure as Code for all RailSense cloud resources",
+          "skills": ["terraform", "aws", "iac"],
+          "dependencies": ["WP-301", "WP-307"]
+        },
+        {
+          "id": "WP-309",
+          "title": "RailSense Load Testing",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P2-Medium",
+          "labels": ["testing", "performance", "railsense"],
+          "milestone": "RailSense",
+          "description": "High-volume stream testing and optimization",
+          "skills": ["load-testing", "performance-optimization", "locust"],
+          "dependencies": ["WP-307", "WP-308"]
+        }
+      ]
+    }
+  ]
+}
