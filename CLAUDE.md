@@ -300,22 +300,17 @@ Check that `pnpm-workspace.yaml` includes the correct paths.
 
 ---
 
-## Learning Context
+## Claude Code Configuration
 
-This repository is being built as a learning project. The developer:
+This project uses a `.claude/` folder for Claude Code configuration:
 
-- Is proficient with Python data stacks (Pandas/NumPy)
-- Is a **novice at Python Classes** (needs practice)
-- Has **zero experience with TypeScript/JavaScript**
-- Has **zero experience with Monorepo patterns**
-- Learns best through hands-on implementation
+```
+.claude/
+├── skills/              # Project-specific skills (committed)
+└── learning-context.md  # Personal session preferences (gitignored)
+```
 
-When assisting, provide:
-- Syntax refreshers for Docker/Git/SQL
-- Explanations of the "why" behind architectural decisions
-- Small, digestible work packages
-- Theory before implementation for new frameworks
-
+See `.claude/learning-context.md` for session-specific instructions (not tracked in git).
 
 ---
 
