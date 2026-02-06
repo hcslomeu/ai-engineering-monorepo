@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "py-core"
+version = "0.1.0"
+description = "Core utilities, logging, and configuration for AI Engineering Monorepo"
+authors = ["Humberto Lomeu"]
+readme = "README.md"
+packages = [{ include = "py_core", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.0"
+pydantic-settings = "^2.0"
+structlog = "^24.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-cov = "^4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
