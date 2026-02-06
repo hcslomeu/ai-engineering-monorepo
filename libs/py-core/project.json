@@ -1,0 +1,29 @@
+{
+  "name": "py-core",
+  "sourceRoot": "libs/py-core/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "lang:python"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run pytest libs/py-core/tests -v",
+        "cwd": "."
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run ruff check libs/py-core/src",
+        "cwd": "."
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run mypy libs/py-core/src",
+        "cwd": "."
+      }
+    }
+  }
+}
