@@ -8,42 +8,39 @@ import structlog
 from structlog.types import Processor
 
 
-def _get_json_processors() -> list[Processor]:
-    """Return processors for JSON output."""
+def _get_base_processors() -> list[Processor]:
+    """Return base processors shared by all formats."""
     return [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
-        structlog.processors.JSONRenderer(),
     ]
+
+
+def _get_json_processors() -> list[Processor]:
+    """Return processors for JSON output."""
+    return _get_base_processors() + [structlog.processors.JSONRenderer()]
 
 
 def _get_console_processors() -> list[Processor]:
     """Return processors for human-readable console output."""
-    return [
-        structlog.contextvars.merge_contextvars,
-        structlog.processors.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.dev.ConsoleRenderer(colors=True),
-    ]
+    return _get_base_processors() + [structlog.dev.ConsoleRenderer(colors=True)]
 
 
 def configure_logging(
     level: str = "INFO",
-    format: str = "json",  # noqa: A002
+    log_format: str = "json",
 ) -> None:
     """
     Configure structured logging for the application.
 
     Args:
         level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        format: Output format ('json' for production, 'console' for development)
+        log_format: Output format ('json' for production, 'console' for development)
     """
-    processors = _get_json_processors() if format == "json" else _get_console_processors()
+    processors = _get_json_processors() if log_format == "json" else _get_console_processors()
 
     structlog.configure(
         processors=processors,
