@@ -1,6 +1,7 @@
 """Tests for configuration module."""
 
 import pytest
+from pydantic import ValidationError
 
 from py_core.config import Settings
 from py_core.config.settings import get_settings

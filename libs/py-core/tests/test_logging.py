@@ -33,7 +33,7 @@ class TestConfigureLogging:
 
     def test_json_format_produces_valid_json(self, capsys) -> None:
         """JSON format should output parseable JSON."""
-        configure_logging(level="INFO", format="json")
+        configure_logging(level="INFO", log_format="json")
         logger = get_logger("test")
 
         logger.info("test message", key="value")
@@ -48,7 +48,7 @@ class TestConfigureLogging:
 
     def test_filters_below_configured_level(self, capsys) -> None:
         """Logger should ignore messages below the configured level."""
-        configure_logging(level="WARNING", format="json")
+        configure_logging(level="WARNING", log_format="json")
         logger = get_logger("test")
 
         logger.info("should be ignored")
