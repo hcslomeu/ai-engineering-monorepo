@@ -41,7 +41,7 @@ class TestSettings:
         """Settings should reject environment values not in the allowed list."""
         monkeypatch.setenv("ENVIRONMENT", "invalid")
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             Settings()
 
 
