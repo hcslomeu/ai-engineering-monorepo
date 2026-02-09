@@ -198,7 +198,7 @@ gh pr create --title "feat: WP-XXX description" --body "Closes #XX"
 
 ### Git Commit Guidelines
 
-When commits, staging, or pushing is needed:
+When committing, staging, or pushing is necessary:
 
 - **Provide git commands as text** for the user to copy and run, rather than executing them directly. This saves tokens and gives the user control.
 - **No co-authorship**: Do not add `Co-Authored-By` lines to commit messages. The developer is the sole author.

@@ -188,7 +188,7 @@ class ProjectImporter:
                     continue
 
                 try:
-                    _ = self.cli.create_issue(
+                    result = self.cli.create_issue(
                         title=wp.full_title,
                         body=wp.issue_body,
                         labels=wp.labels,
@@ -196,7 +196,7 @@ class ProjectImporter:
                     )
 
                     self.stats["issues_created"] += 1
-                    print(f"      ✅ {wp.id}: {wp.title}")
+                    print(f"      ✅ {wp.id}: {wp.title} ({result['url']})")
 
                 except GitHubCLIError as e:
                     self.stats["issues_failed"] += 1

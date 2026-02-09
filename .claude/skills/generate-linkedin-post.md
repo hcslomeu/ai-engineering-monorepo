@@ -26,7 +26,7 @@ Before generating, read:
 
 - **Length**: 1,200-1,600 characters (LinkedIn algorithm sweet spot)
 - **Line breaks**: Single-line paragraphs with blank lines between (LinkedIn collapses long blocks)
-- **Bullet points**: Use arrow symbols (->)for visual scanning
+- **Bullet points**: Use arrow symbols (->) for visual scanning
 - **Emojis**: Maximum 1-2 strategic emojis, placed at section transitions
 - **Hashtags**: 3-5 relevant hashtags on their own line at the end
 - **No links in body**: LinkedIn suppresses posts with links; add link in comments instead (note this in the output file)
