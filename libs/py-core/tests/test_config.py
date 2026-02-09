@@ -20,9 +20,7 @@ class TestSettings:
         assert settings.log_level == "INFO"
         assert settings.log_format == "json"
 
-    def test_loads_from_environment_variables(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_loads_from_environment_variables(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Settings should load values from environment variables."""
         monkeypatch.setenv("APP_NAME", "test-app")
         monkeypatch.setenv("ENVIRONMENT", "production")
@@ -36,9 +34,7 @@ class TestSettings:
         assert settings.debug is True
         assert settings.log_level == "DEBUG"
 
-    def test_rejects_invalid_environment(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_rejects_invalid_environment(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Settings should reject environment values not in the allowed list."""
         monkeypatch.setenv("ENVIRONMENT", "invalid")
 

@@ -67,3 +67,6 @@ build/
 htmlcov/
 .coverage
 .coverage.*
+
+# Temp files folder - used by me
+/uploaded-files

@@ -75,7 +75,7 @@ class GitHubCLI:
             raise GitHubCLIError(
                 "GitHub CLI (gh) not found. Install from: https://cli.github.com/",
                 command=" ".join(full_command),
-            )
+            ) from None
 
     def _run_or_raise(self, args: list[str], error_message: str) -> CommandResult:
         """Execute a command and raise on failure."""
@@ -107,9 +107,13 @@ class GitHubCLI:
             True if created, False if already exists
         """
         args = [
-            "label", "create", name,
-            "--repo", self.repo_full,
-            "--color", color,
+            "label",
+            "create",
+            name,
+            "--repo",
+            self.repo_full,
+            "--color",
+            color,
         ]
 
         if description:
@@ -152,9 +156,12 @@ class GitHubCLI:
             return False
 
         args = [
-            "api", f"repos/{self.repo_full}/milestones",
-            "--method", "POST",
-            "--field", f"title={title}",
+            "api",
+            f"repos/{self.repo_full}/milestones",
+            "--method",
+            "POST",
+            "--field",
+            f"title={title}",
         ]
 
         if description:
@@ -175,11 +182,16 @@ class GitHubCLI:
         """Get all issues in the repository."""
         result = self._run_or_raise(
             [
-                "issue", "list",
-                "--repo", self.repo_full,
-                "--state", state,
-                "--json", "number,title,state,labels",
-                "--limit", "200",
+                "issue",
+                "list",
+                "--repo",
+                self.repo_full,
+                "--state",
+                state,
+                "--json",
+                "number,title,state,labels",
+                "--limit",
+                "200",
             ],
             "Failed to list issues",
         )
@@ -200,10 +212,14 @@ class GitHubCLI:
             Dictionary with 'number' and 'url' of created issue
         """
         args = [
-            "issue", "create",
-            "--repo", self.repo_full,
-            "--title", title,
-            "--body", body,
+            "issue",
+            "create",
+            "--repo",
+            self.repo_full,
+            "--title",
+            title,
+            "--body",
+            body,
         ]
 
         if labels:

@@ -8,9 +8,7 @@ from .importer import ProjectImporter
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Import work packages into GitHub Issues"
-    )
+    parser = argparse.ArgumentParser(description="Import work packages into GitHub Issues")
     parser.add_argument(
         "--dry-run",
         action="store_true",
