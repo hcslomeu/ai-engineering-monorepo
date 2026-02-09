@@ -33,9 +33,7 @@ class TestGetLogger:
 class TestConfigureLogging:
     """Tests for configure_logging function."""
 
-    def test_json_format_produces_valid_json(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_json_format_produces_valid_json(self, capsys: pytest.CaptureFixture[str]) -> None:
         """JSON format should output parseable JSON."""
         configure_logging(level="INFO", log_format="json")
         logger = get_logger("test")
@@ -50,9 +48,7 @@ class TestConfigureLogging:
         assert "timestamp" in log_entry
         assert "level" in log_entry
 
-    def test_filters_below_configured_level(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_filters_below_configured_level(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Logger should ignore messages below the configured level."""
         configure_logging(level="WARNING", log_format="json")
         logger = get_logger("test")
