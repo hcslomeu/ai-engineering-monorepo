@@ -46,6 +46,10 @@ Thumbs.db
 .claude/learning-context.md
 .claude/learning-progress.md
 .claude/*.local.md
+.claude/linkedin-posts/
+
+# Gemini
+.gemini
 
 # Python
 __pycache__/
@@ -67,3 +71,6 @@ build/
 htmlcov/
 .coverage
 .coverage.*
+
+# Temp files folder - used by me
+/uploaded-files

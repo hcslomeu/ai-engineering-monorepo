@@ -4,8 +4,7 @@ import json
 from pathlib import Path
 
 from .cli import GitHubCLI, GitHubCLIError
-from .models import Phase, WorkPackage
-
+from .models import Phase
 
 LABEL_COLORS: dict[str, str] = {
     # Languages & Frameworks
@@ -197,7 +196,7 @@ class ProjectImporter:
                     )
 
                     self.stats["issues_created"] += 1
-                    print(f"      ✅ {wp.id}: {wp.title}")
+                    print(f"      ✅ {wp.id}: {wp.title} ({result['url']})")
 
                 except GitHubCLIError as e:
                     self.stats["issues_failed"] += 1
@@ -208,13 +207,19 @@ class ProjectImporter:
         print("\n" + "=" * 50)
         print("📊 IMPORT SUMMARY")
         print("=" * 50)
-        print(f"   Labels:     {self.stats['labels_created']} created, "
-              f"{self.stats['labels_skipped']} skipped")
-        print(f"   Milestones: {self.stats['milestones_created']} created, "
-              f"{self.stats['milestones_skipped']} skipped")
-        print(f"   Issues:     {self.stats['issues_created']} created, "
-              f"{self.stats['issues_skipped']} skipped, "
-              f"{self.stats['issues_failed']} failed")
+        print(
+            f"   Labels:     {self.stats['labels_created']} created, "
+            f"{self.stats['labels_skipped']} skipped"
+        )
+        print(
+            f"   Milestones: {self.stats['milestones_created']} created, "
+            f"{self.stats['milestones_skipped']} skipped"
+        )
+        print(
+            f"   Issues:     {self.stats['issues_created']} created, "
+            f"{self.stats['issues_skipped']} skipped, "
+            f"{self.stats['issues_failed']} failed"
+        )
         print("=" * 50)
 
         if self.dry_run:

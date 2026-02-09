@@ -18,15 +18,11 @@ class Settings(BaseSettings):
 
     # Application
     app_name: str = Field(default="ai-engineering-monorepo")
-    environment: Literal["development", "staging", "production"] = Field(
-        default="development"
-    )
+    environment: Literal["development", "staging", "production"] = Field(default="development")
     debug: bool = Field(default=False)
 
     # Logging
-    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
-        default="INFO"
-    )
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(default="INFO")
     log_format: Literal["json", "console"] = Field(default="json")
 
 

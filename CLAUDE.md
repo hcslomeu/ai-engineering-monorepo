@@ -14,6 +14,8 @@ cat .claude/learning-progress.md   # Skills development tracker (private)
 cat .claude/learning-context.md    # Session preferences (private)
 ```
 
+**Check learning mode**: Read the `Learning Mode` section in `.claude/learning-context.md`. If set to `LEARNING`, follow all pacing rules and explain before/after code generation. If set to `PRODUCTION`, generate code efficiently.
+
 ---
 
 ## Project Overview
@@ -194,6 +196,16 @@ git commit -m "chore(scope): description"
 gh pr create --title "feat: WP-XXX description" --body "Closes #XX"
 ```
 
+### Git Commit Guidelines
+
+When committing, staging, or pushing is necessary:
+
+- **Provide git commands as text** for the user to copy and run, rather than executing them directly. This saves tokens and gives the user control.
+- **No co-authorship**: Do not add `Co-Authored-By` lines to commit messages. The developer is the sole author.
+- **Conventional commits**: Always use the format `type(scope): description` as shown above.
+- Subject line under 72 characters, imperative mood.
+- Reference WP numbers when applicable.
+
 ---
 
 ## GitHub Project
@@ -206,6 +218,16 @@ Work packages follow the pattern: `WP-XXX: Title`
 - **WP-101 to WP-108**: AlphaWhale
 - **WP-201 to WP-208**: MediGuard
 - **WP-301 to WP-309**: RailSense
+
+### Work Package Completion Checklist
+
+When a work package is marked as completed:
+
+1. Update `PROGRESS.md` with completion date and notes
+2. Update `.claude/learning-progress.md` with new skills learned
+3. Generate a LinkedIn post using the skill in `.claude/skills/generate-linkedin-post.md`
+4. Save the post to `.claude/linkedin-posts/WP-XXX-short-title.md`
+5. Suggest: "Consider generating a prompt for a diagram for this post using Gemini Banana (this will save Claude tokens)"
 
 ---
 

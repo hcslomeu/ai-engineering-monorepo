@@ -84,9 +84,7 @@ class Phase:
     @classmethod
     def from_dict(cls, data: dict) -> "Phase":
         """Create a Phase from a dictionary."""
-        work_packages = [
-            WorkPackage.from_dict(wp) for wp in data.get("work_packages", [])
-        ]
+        work_packages = [WorkPackage.from_dict(wp) for wp in data.get("work_packages", [])]
 
         return cls(
             id=data["id"],
