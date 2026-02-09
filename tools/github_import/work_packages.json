@@ -1,8 +1,10 @@
 {
   "project": "AI Engineering Monorepo",
-  "total_estimate_hours": {
-    "min": 130,
-    "max": 170
+  "last_updated": "2026-02-09",
+  "strategy": "AlphaWhale 100% first, then MediGuard, RailSense deferred",
+  "total_estimate_days": {
+    "min": 37,
+    "max": 42
   },
   "phases": [
     {
@@ -25,7 +27,7 @@
         {
           "id": "WP-002",
           "title": "py-core Shared Library",
-          "status": "todo",
+          "status": "done",
           "estimate_hours": 3,
           "priority": "P0-Critical",
           "labels": ["python", "library", "foundation"],
@@ -36,33 +38,33 @@
         },
         {
           "id": "WP-003",
-          "title": "CI/CD Pipeline (GitHub Actions)",
-          "status": "todo",
+          "title": "CI Pipeline",
+          "status": "done",
           "estimate_hours": 2,
           "priority": "P0-Critical",
           "labels": ["ci-cd", "infrastructure", "devops"],
           "milestone": "Foundation",
-          "description": "Automated pytest, ruff, bandit, mypy on every push",
+          "description": "GitHub Actions with 4 parallel jobs: pytest, ruff, bandit, mypy",
           "skills": ["github-actions", "yaml", "ci-cd-concepts"],
           "dependencies": ["WP-002"]
         },
         {
           "id": "WP-004",
-          "title": "ts-core Shared Library (Zod)",
+          "title": "ts-core and Shared Frontend Scaffold",
           "status": "todo",
-          "estimate_hours": 3,
+          "estimate_hours": 16,
           "priority": "P1-High",
-          "labels": ["typescript", "library", "foundation"],
+          "labels": ["typescript", "library", "foundation", "frontend"],
           "milestone": "Foundation",
-          "description": "Zod schemas, JSON Schema generation, shared TypeScript utilities",
-          "skills": ["typescript-basics", "zod", "json-schema"],
+          "description": "Zod schemas mirroring Pydantic models, Next.js project setup with shadcn/ui design system, shared layout, sidebar navigation, and routing for all projects (/alphawhale, /mediguard, /railsense)",
+          "skills": ["typescript-basics", "zod", "nextjs-setup", "shadcn-ui", "tailwind-css", "app-router"],
           "dependencies": ["WP-001"]
         },
         {
           "id": "WP-005",
           "title": "Docker Base Images",
           "status": "todo",
-          "estimate_hours": 3,
+          "estimate_hours": 8,
           "priority": "P1-High",
           "labels": ["docker", "infrastructure", "devops"],
           "milestone": "Foundation",
@@ -74,7 +76,7 @@
           "id": "WP-006",
           "title": "MkDocs Documentation Site",
           "status": "todo",
-          "estimate_hours": 2,
+          "estimate_hours": 4,
           "priority": "P2-Medium",
           "labels": ["documentation", "infrastructure"],
           "milestone": "Foundation",
@@ -87,13 +89,25 @@
     {
       "id": "phase-1",
       "name": "AlphaWhale",
-      "estimate_hours": { "min": 40, "max": 50 },
+      "estimate_hours": { "min": 55, "max": 70 },
       "work_packages": [
+        {
+          "id": "WP-100",
+          "title": "LangChain Hello World",
+          "status": "todo",
+          "estimate_hours": 8,
+          "priority": "P0-Critical",
+          "labels": ["langchain", "python", "ai", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Build 3-4 simple tools (calculate_rsi, fetch_btc_price, get_market_summary) and connect them to a ChatModel. Understand how LLMs choose tools based on docstrings and Pydantic auto-schema from type hints.",
+          "skills": ["chat-models", "prompt-templates", "output-parsers", "tool-decorator", "pydantic-auto-schema"],
+          "dependencies": ["WP-002"]
+        },
         {
           "id": "WP-101",
           "title": "BigQuery Data Ingestion",
           "status": "todo",
-          "estimate_hours": 4,
+          "estimate_hours": 8,
           "priority": "P1-High",
           "labels": ["bigquery", "data-engineering", "alphawhale"],
           "milestone": "AlphaWhale",
@@ -103,87 +117,171 @@
         },
         {
           "id": "WP-102",
-          "title": "Airflow DAG (Bronze to Silver)",
+          "title": "Airflow Hello World",
           "status": "todo",
-          "estimate_hours": 5,
+          "estimate_hours": 12,
           "priority": "P1-High",
           "labels": ["airflow", "data-engineering", "medallion", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "First Airflow DAG implementing Bronze to Silver transformation",
-          "skills": ["airflow-dags", "taskflow-api", "data-quality"],
+          "description": "Learn Airflow concepts (DAGs, Tasks, Operators), set up local environment via Docker Compose with Astro CLI, write first DAG, understand the scheduler",
+          "skills": ["airflow-concepts", "dags-tasks-operators", "docker-compose-airflow", "astro-cli", "scheduler-understanding"],
           "dependencies": ["WP-002", "WP-005"]
         },
         {
           "id": "WP-103",
           "title": "Databricks Feature Engineering",
           "status": "todo",
-          "estimate_hours": 6,
+          "estimate_hours": 16,
           "priority": "P1-High",
           "labels": ["databricks", "feature-engineering", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "Delta Tables, Silver to Gold transformations, trading features",
-          "skills": ["databricks", "delta-lake", "feature-engineering"],
-          "dependencies": ["WP-102"]
+          "description": "Delta Tables, Silver to Gold transformations, trading features (RSI, MACD, Bollinger Bands)",
+          "skills": ["databricks", "delta-lake", "feature-engineering", "technical-indicators"],
+          "dependencies": ["WP-113"]
         },
         {
           "id": "WP-104",
-          "title": "LangGraph Trading Agent",
+          "title": "LangGraph Hello World",
           "status": "todo",
-          "estimate_hours": 7,
+          "estimate_hours": 12,
           "priority": "P0-Critical",
           "labels": ["langgraph", "agents", "ai", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "Stateful trading agent with tool calling and decision nodes",
-          "skills": ["langgraph", "state-machines", "tool-calling"],
-          "dependencies": ["WP-002", "WP-103"]
+          "description": "Build a minimal StateGraph: receives a question, decides to call a tool or respond, returns answer. Learn StateGraph, nodes, edges, conditional routing, and ToolNode.",
+          "skills": ["state-graph", "nodes-and-edges", "conditional-routing", "tool-node", "langgraph-basics"],
+          "dependencies": ["WP-100"]
         },
         {
           "id": "WP-105",
           "title": "WhatsApp Human-in-Loop",
           "status": "todo",
-          "estimate_hours": 5,
+          "estimate_hours": 16,
           "priority": "P1-High",
           "labels": ["whatsapp", "human-in-loop", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "Evolution API integration for trade approval notifications",
-          "skills": ["webhooks", "async-processing", "user-interaction"],
-          "dependencies": ["WP-104"]
+          "description": "Evolution API integration for trade approval notifications, webhook receivers, connecting approval flow to LangGraph interrupt_before, async state resumption",
+          "skills": ["webhooks", "async-processing", "user-interaction", "evolution-api"],
+          "dependencies": ["WP-114"]
         },
         {
           "id": "WP-106",
           "title": "LangSmith Observability",
           "status": "todo",
-          "estimate_hours": 3,
+          "estimate_hours": 8,
           "priority": "P1-High",
           "labels": ["langsmith", "observability", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "Tracing, evaluation datasets, and agent performance monitoring",
+          "description": "Tracing setup, viewing thought chains, understanding token usage and latency. Wire before building the real agent so every experiment is traced.",
           "skills": ["langsmith", "tracing", "evaluation"],
-          "dependencies": ["WP-104"]
+          "dependencies": ["WP-100"]
         },
         {
           "id": "WP-107",
-          "title": "AlphaWhale React Dashboard",
+          "title": "AlphaWhale Frontend Views",
           "status": "todo",
-          "estimate_hours": 7,
-          "priority": "P2-Medium",
+          "estimate_hours": 24,
+          "priority": "P1-High",
           "labels": ["react", "typescript", "frontend", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "Trading dashboard with shadcn/ui, real-time updates",
-          "skills": ["react", "typescript", "shadcn-ui", "tailwind"],
-          "dependencies": ["WP-004", "WP-104"]
+          "description": "Add AlphaWhale-specific views to the shared Next.js app: chat interface, crypto screening dashboard, real-time agent state visualization, embedded LangSmith trace viewer",
+          "skills": ["react-components", "websocket-real-time", "chat-interface", "agent-state-visualization"],
+          "dependencies": ["WP-004", "WP-114"]
         },
         {
           "id": "WP-108",
           "title": "AlphaWhale Integration Testing",
           "status": "todo",
-          "estimate_hours": 5,
+          "estimate_hours": 8,
           "priority": "P1-High",
           "labels": ["testing", "integration", "alphawhale"],
           "milestone": "AlphaWhale",
-          "description": "End-to-end testing, load testing, performance validation",
+          "description": "End-to-end flow: data pipeline, agent reasoning, WhatsApp alert, human approval, agent continues. Pytest integration tests.",
           "skills": ["integration-testing", "mocking", "performance-testing"],
-          "dependencies": ["WP-104", "WP-105", "WP-107"]
+          "dependencies": ["WP-114", "WP-105", "WP-107"]
+        },
+        {
+          "id": "WP-109",
+          "title": "123 Strategy and Backtests",
+          "status": "todo",
+          "estimate_hours": 12,
+          "priority": "P1-High",
+          "labels": ["alphawhale", "python"],
+          "milestone": "AlphaWhale",
+          "description": "Implement the 1-2-3 trading strategy, basic backtesting framework with vectorbt or manual pandas, connecting strategy signals to agent decision logic",
+          "skills": ["trading-strategy", "backtesting", "vectorbt", "pandas"],
+          "dependencies": ["WP-103"]
+        },
+        {
+          "id": "WP-110",
+          "title": "Polymarket API Integration",
+          "status": "deferred",
+          "estimate_hours": 4,
+          "priority": "P2-Medium",
+          "labels": ["alphawhale", "integration"],
+          "milestone": "AlphaWhale",
+          "description": "Add Polymarket API for market sentiment insights",
+          "skills": ["api-integration", "market-data"],
+          "dependencies": ["WP-114"]
+        },
+        {
+          "id": "WP-111",
+          "title": "Statistical Treatment on Data",
+          "status": "deferred",
+          "estimate_hours": 8,
+          "priority": "P2-Medium",
+          "labels": ["python", "pytorch", "deep-learning", "feature-engineering"],
+          "milestone": "AlphaWhale",
+          "description": "Weibull distributions, statistical analysis on trading data",
+          "skills": ["statistics", "distributions", "quantitative-analysis"],
+          "dependencies": ["WP-103"]
+        },
+        {
+          "id": "WP-112",
+          "title": "FastMCP Refactor",
+          "status": "todo",
+          "estimate_hours": 16,
+          "priority": "P1-High",
+          "labels": ["mcp", "alphawhale", "ai", "python"],
+          "milestone": "AlphaWhale",
+          "description": "Extract AlphaWhale @tool functions into a FastMCP server. Connect LangGraph via langchain-mcp-adapters. Demo the same tools in Claude Desktop.",
+          "skills": ["fastmcp", "langchain-mcp-adapters", "mcp-protocol", "claude-desktop-integration"],
+          "dependencies": ["WP-114"]
+        },
+        {
+          "id": "WP-113",
+          "title": "Airflow Bronze to Silver DAG",
+          "status": "todo",
+          "estimate_hours": 16,
+          "priority": "P1-High",
+          "labels": ["airflow", "data-engineering", "medallion", "alphawhale"],
+          "milestone": "AlphaWhale",
+          "description": "Build the actual Bronze to Silver transformation DAG: PythonOperator for BigQuery extraction, Pydantic data validation, Silver layer cleaning (dedup, type casting, null handling), task dependencies and retries",
+          "skills": ["python-operator", "bigquery-extraction", "pydantic-validation", "silver-layer-patterns", "task-dependencies-retries"],
+          "dependencies": ["WP-102"]
+        },
+        {
+          "id": "WP-114",
+          "title": "AlphaWhale Agent v1",
+          "status": "todo",
+          "estimate_hours": 20,
+          "priority": "P0-Critical",
+          "labels": ["langgraph", "agents", "ai", "alphawhale", "human-in-loop"],
+          "milestone": "AlphaWhale",
+          "description": "Multi-tool LangGraph agent with screening node, analysis node, risk assessment node, human-in-loop checkpoint. State management with TypedDict. Conditional edges for risk-based human approval.",
+          "skills": ["multi-tool-agent", "state-management-typeddict", "conditional-edges", "interrupt-before-checkpoint", "human-approval-flow"],
+          "dependencies": ["WP-104"]
+        },
+        {
+          "id": "WP-115",
+          "title": "n8n Agent Orchestration",
+          "status": "todo",
+          "estimate_hours": 12,
+          "priority": "P2-Medium",
+          "labels": ["n8n", "alphawhale", "integration", "ai"],
+          "milestone": "AlphaWhale",
+          "description": "Integrate n8n as a workflow orchestration layer for agent triggers and notifications. Connect agent workflows via webhooks, route notifications through n8n pipelines.",
+          "skills": ["n8n-workflows", "webhook-integration", "notification-pipelines", "visual-workflow-builder"],
+          "dependencies": ["WP-114", "WP-105"]
         }
       ]
     },
@@ -196,7 +294,7 @@
           "id": "WP-201",
           "title": "FHIR API Integration",
           "status": "todo",
-          "estimate_hours": 5,
+          "estimate_hours": 12,
           "priority": "P1-High",
           "labels": ["fhir", "healthcare", "mediguard"],
           "milestone": "MediGuard",
@@ -208,7 +306,7 @@
           "id": "WP-202",
           "title": "HuggingFace PII Masking",
           "status": "todo",
-          "estimate_hours": 6,
+          "estimate_hours": 12,
           "priority": "P0-Critical",
           "labels": ["huggingface", "pii", "privacy", "mediguard"],
           "milestone": "MediGuard",
@@ -232,7 +330,7 @@
           "id": "WP-204",
           "title": "LlamaIndex Medical RAG",
           "status": "todo",
-          "estimate_hours": 7,
+          "estimate_hours": 16,
           "priority": "P0-Critical",
           "labels": ["llamaindex", "rag", "ai", "mediguard"],
           "milestone": "MediGuard",
@@ -244,7 +342,7 @@
           "id": "WP-205",
           "title": "Pinecone Vector Store",
           "status": "todo",
-          "estimate_hours": 4,
+          "estimate_hours": 8,
           "priority": "P1-High",
           "labels": ["pinecone", "vectordb", "embeddings", "mediguard"],
           "milestone": "MediGuard",
@@ -256,7 +354,7 @@
           "id": "WP-206",
           "title": "LangGraph Clinical Query Agent",
           "status": "todo",
-          "estimate_hours": 6,
+          "estimate_hours": 12,
           "priority": "P1-High",
           "labels": ["langgraph", "agents", "healthcare", "mediguard"],
           "milestone": "MediGuard",
@@ -266,14 +364,14 @@
         },
         {
           "id": "WP-207",
-          "title": "MediGuard Clinical UI",
+          "title": "MediGuard Frontend Views",
           "status": "todo",
-          "estimate_hours": 6,
+          "estimate_hours": 16,
           "priority": "P2-Medium",
           "labels": ["react", "typescript", "frontend", "mediguard"],
           "milestone": "MediGuard",
-          "description": "HIPAA-conscious clinical interface with audit logging",
-          "skills": ["react", "audit-logging", "healthcare-ui"],
+          "description": "Add MediGuard-specific views to the shared Next.js app: clinical query interface, document upload, RAG responses with citations, PII redaction visualization, audit log viewer",
+          "skills": ["document-upload-ui", "rag-response-display", "citation-highlighting", "pii-redaction-viz", "audit-log-viewer"],
           "dependencies": ["WP-004", "WP-206"]
         },
         {
@@ -369,15 +467,15 @@
         },
         {
           "id": "WP-307",
-          "title": "Supabase Real-time Dashboard",
+          "title": "RailSense Frontend Views",
           "status": "todo",
-          "estimate_hours": 7,
+          "estimate_hours": 24,
           "priority": "P1-High",
-          "labels": ["supabase", "react", "real-time", "railsense"],
+          "labels": ["supabase", "react", "real-time", "railsense", "frontend", "typescript"],
           "milestone": "RailSense",
-          "description": "Live delay predictions with Supabase real-time subscriptions",
-          "skills": ["supabase", "real-time", "postgresql"],
-          "dependencies": ["WP-004", "WP-304", "WP-306"]
+          "description": "Add RailSense-specific views to the shared Next.js app: real-time delay predictions dashboard, route/station map, historical patterns, live Darwin data feed. Supabase as real-time backend data layer.",
+          "skills": ["supabase-realtime-subscriptions", "map-visualization", "live-data-feed-ui", "delay-prediction-charts"],
+          "dependencies": ["WP-004", "WP-306"]
         },
         {
           "id": "WP-308",
@@ -402,6 +500,73 @@
           "description": "High-volume stream testing and optimization",
           "skills": ["load-testing", "performance-optimization", "locust"],
           "dependencies": ["WP-307", "WP-308"]
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Portfolio",
+      "estimate_hours": { "min": 28, "max": 36 },
+      "work_packages": [
+        {
+          "id": "WP-500",
+          "title": "Portfolio README and Architecture Diagrams",
+          "status": "todo",
+          "estimate_hours": 8,
+          "priority": "P1-High",
+          "labels": ["portfolio", "documentation"],
+          "milestone": "Portfolio",
+          "description": "Compelling README with Mermaid architecture diagrams, architecture decision records, and project storytelling",
+          "skills": ["mermaid-diagrams", "readme-storytelling", "architecture-decision-records"],
+          "dependencies": ["WP-108"]
+        },
+        {
+          "id": "WP-501",
+          "title": "Demo Videos",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P2-Medium",
+          "labels": ["portfolio"],
+          "milestone": "Portfolio",
+          "description": "Screen recordings: agent reasoning, WhatsApp flow, LangSmith traces, MCP in Claude Desktop",
+          "skills": ["screen-recording", "demo-scripting"],
+          "dependencies": ["WP-500"]
+        },
+        {
+          "id": "WP-502",
+          "title": "Deploy to Railway/Render",
+          "status": "todo",
+          "estimate_hours": 8,
+          "priority": "P1-High",
+          "labels": ["portfolio", "deployment", "docker"],
+          "milestone": "Portfolio",
+          "description": "Deploy the full stack (API, dashboard, agent) with environment management and production secrets",
+          "skills": ["railway-or-render", "environment-management", "production-secrets", "docker-deployment"],
+          "dependencies": ["WP-108", "WP-005"]
+        },
+        {
+          "id": "WP-503",
+          "title": "MkDocs Polish",
+          "status": "todo",
+          "estimate_hours": 4,
+          "priority": "P2-Medium",
+          "labels": ["portfolio", "documentation"],
+          "milestone": "Portfolio",
+          "description": "Final documentation pass: API docs, setup guides, architecture explanations",
+          "skills": ["mkdocs-material", "api-documentation", "technical-writing"],
+          "dependencies": ["WP-006", "WP-500"]
+        },
+        {
+          "id": "WP-504",
+          "title": "Portfolio Landing Page",
+          "status": "todo",
+          "estimate_hours": 12,
+          "priority": "P1-High",
+          "labels": ["portfolio", "frontend", "landing-page"],
+          "milestone": "Portfolio",
+          "description": "The '/' route of the unified Next.js app. Showcases all three projects, architecture diagrams, demo videos, and key technologies. Built with Claude frontend skill.",
+          "skills": ["landing-page-design", "responsive-layout", "claude-frontend-skill", "portfolio-storytelling"],
+          "dependencies": ["WP-004", "WP-500", "WP-501"]
         }
       ]
     }
