@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from typing import Any
+from typing import Any, cast
 
 import structlog
 from structlog.types import Processor
@@ -65,4 +65,4 @@ def get_logger(name: str | None = None, **initial_context: Any) -> structlog.Bou
     logger = structlog.get_logger(name)
     if initial_context:
         logger = logger.bind(**initial_context)
-    return logger
+    return cast(structlog.BoundLogger, logger)
