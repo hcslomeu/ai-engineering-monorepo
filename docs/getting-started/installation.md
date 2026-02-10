@@ -28,7 +28,7 @@ cd ai-engineering-monorepo
 corepack enable
 ```
 
-Corepack ships with Node.js and manages pnpm versions automatically using the `packageManager` field in `package.json`.
+Corepack ships with Node.js and manages pnpm versions. Run `corepack enable` to activate it.
 
 ### 3. Install TypeScript dependencies
 

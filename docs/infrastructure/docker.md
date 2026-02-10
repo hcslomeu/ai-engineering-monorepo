@@ -12,7 +12,7 @@ The monorepo provides two multi-stage Dockerfiles (Python and Node) plus a Docke
 
 Two-stage build: install dependencies in one stage, run application in another.
 
-```
+```text
 Stage 1: deps       Stage 2: runtime
 ┌─────────────┐     ┌─────────────────┐
 │ python:3.11  │     │ python:3.11-slim│
@@ -37,7 +37,7 @@ Stage 1: deps       Stage 2: runtime
 
 Three-stage build: install dependencies, build application, run with minimal runtime.
 
-```
+```text
 Stage 1: deps       Stage 2: builder     Stage 3: runtime
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │ node:22-slim │     │ (from deps) │     │ node:22-slim│

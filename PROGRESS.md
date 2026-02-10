@@ -59,7 +59,7 @@
 | WP-002 | py-core Shared Library | Feb 6, 2026 | #35 | Pydantic config, structlog logging, custom exceptions, 13 tests |
 | WP-003 | CI Pipeline | Feb 9, 2026 | #36 | 4 parallel jobs: pytest, ruff, bandit, mypy |
 | WP-005 | Docker Base Images | Feb 10, 2026 | #47 | Python + Node multi-stage Dockerfiles, Compose, .dockerignore |
-| WP-006 | MkDocs Documentation | Feb 10, 2026 | — | MkDocs Material site, 9 docs pages, deploy-docs workflow, Nx target |
+| WP-006 | MkDocs Documentation | Feb 10, 2026 | #49 | MkDocs Material site, 9 docs pages, deploy-docs workflow, Nx target |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

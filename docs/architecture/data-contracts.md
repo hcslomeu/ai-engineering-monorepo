@@ -4,7 +4,7 @@
 
 All data pipelines follow a three-layer pattern: **Bronze → Silver → Gold**. Each layer has a clear purpose and strict boundaries.
 
-```
+```text
   External APIs          Kafka Topics          Webhooks
        │                      │                    │
        ▼                      ▼                    ▼
@@ -37,7 +37,7 @@ All data pipelines follow a three-layer pattern: **Bronze → Silver → Gold**.
 
 Data contracts ensure that Python backends and TypeScript frontends always agree on data shapes.
 
-```
+```text
 libs/schemas/definitions/        ← JSON Schema (source of truth)
        │
        ├──→ libs/schemas/generated/python/       ← Pydantic models (auto-generated)

@@ -6,7 +6,7 @@ The Python CI pipeline runs on every push to `main` or `feature/*` branches and 
 
 **Workflow file:** `.github/workflows/ci-python.yaml`
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │                  Push / Pull Request                  │
 └──────────┬──────────┬──────────┬──────────┬──────────┘
