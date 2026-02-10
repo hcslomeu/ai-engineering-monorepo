@@ -72,5 +72,8 @@ htmlcov/
 .coverage
 .coverage.*
 
+# MkDocs build output
+site/
+
 # Temp files folder - used by me
 /uploaded-files

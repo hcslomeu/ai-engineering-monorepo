@@ -271,9 +271,9 @@ poetry run pytest --cov=libs --cov=apps --cov-report=html
 ### Prerequisites
 
 - Node.js 18+ (recommend using nvm)
-- pnpm 8+ (via Corepack: `corepack enable`)
+- pnpm 10+ (via Corepack: `corepack enable`)
 - Python 3.11+ (recommend using pyenv)
-- Poetry 1.7+
+- Poetry 2.x
 - Docker Desktop
 
 ### Initial Setup
@@ -335,6 +335,25 @@ This project uses a `.claude/` folder for Claude Code configuration:
 ```
 
 Private files in `.claude/` are gitignored and contain personal learning context.
+
+### MCP Servers
+
+The following MCP servers are configured and should be used in these scenarios:
+
+| Server | When to Use |
+|--------|-------------|
+| **context7** | Fetch up-to-date library docs (LangChain, FastAPI, pytest, MkDocs, etc.) before writing code that depends on external libraries |
+| **doc-gen** | Generate documentation structure for new libraries or complex modules |
+| **langchain (Docs by LangChain)** | LangChain/LangGraph-specific API reference and patterns when building agents in `libs/py-agents/` or `apps/*/agent/` |
+
+**Prefer MCP lookups over pasting docs** — use context7 or langchain to fetch reference material instead of copying documentation into the conversation. This keeps context clean and ensures up-to-date information.
+
+### Custom Skills
+
+Skills in `.claude/skills/` automate repeated workflows:
+
+- **`generate-linkedin-post`**: Generate LinkedIn post after WP completion. Invoke with `/generate-linkedin-post`.
+- **`claude-code-practices`**: Review advanced Claude Code feature adoption. Invoke with `/claude-code-practices`.
 
 ---
 

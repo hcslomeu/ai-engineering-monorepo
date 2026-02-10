@@ -1,0 +1,22 @@
+{
+  "name": "docs",
+  "sourceRoot": "docs",
+  "projectType": "application",
+  "tags": ["scope:shared", "type:docs"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run mkdocs serve",
+        "cwd": "."
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run mkdocs build --strict",
+        "cwd": "."
+      }
+    }
+  }
+}
