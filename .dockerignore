@@ -1,0 +1,40 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+*.egg-info
+
+# Node
+node_modules
+.next
+dist
+out-tsc
+
+# IDE
+.vscode
+.idea
+*.sublime-workspace
+
+# CI/CD and docs
+.github
+docs
+
+# Docker (avoid recursive context)
+infra/docker
+infra/terraform
+
+# Misc
+.claude
+.nx
+tmp
+coverage
+*.md
+!libs/*/README.md
