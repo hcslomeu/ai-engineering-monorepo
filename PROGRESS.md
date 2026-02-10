@@ -58,7 +58,7 @@
 | WP-001 | Monorepo Foundation Scaffold | Jan 26, 2026 | — | Nx + pnpm + Poetry hybrid workspace |
 | WP-002 | py-core Shared Library | Feb 6, 2026 | #35 | Pydantic config, structlog logging, custom exceptions, 13 tests |
 | WP-003 | CI Pipeline | Feb 9, 2026 | #36 | 4 parallel jobs: pytest, ruff, bandit, mypy |
-| WP-005 | Docker Base Images | Feb 10, 2026 | — | Python + Node multi-stage Dockerfiles, Compose, .dockerignore |
+| WP-005 | Docker Base Images | Feb 10, 2026 | #47 | Python + Node multi-stage Dockerfiles, Compose, .dockerignore |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

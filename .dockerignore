@@ -31,6 +31,10 @@ docs
 infra/docker
 infra/terraform
 
+# Secrets
+.env
+.env.*
+
 # Misc
 .claude
 .nx

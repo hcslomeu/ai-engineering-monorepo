@@ -12,7 +12,8 @@ services:
       target: runtime
     container_name: ai-mono-python
     env_file:
-      - ../.env
+      - path: ../.env
+        required: false
     # Future: expose API port
     # ports:
     #   - "8000:8000"
@@ -25,7 +26,8 @@ services:
       target: runtime
     container_name: ai-mono-node
     env_file:
-      - ../.env
+      - path: ../.env
+        required: false
     # Future: expose frontend port
     # ports:
     #   - "3000:3000"

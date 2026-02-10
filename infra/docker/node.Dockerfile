@@ -4,7 +4,7 @@ FROM node:22-slim AS deps
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.28.1 --activate
 
 WORKDIR /app
 
@@ -23,8 +23,10 @@ FROM deps AS builder
 
 WORKDIR /app
 
-# Copy all source code (deps already installed from previous stage)
-COPY . .
+# Copy source code (specific directories, not COPY . . which leaks .env)
+COPY nx.json tsconfig.base.json tsconfig.json ./
+COPY libs/ libs/
+COPY apps/ apps/
 
 # Future: build the Next.js app (requires WP-004)
 # RUN pnpm nx build alpha-whale-web
@@ -37,13 +39,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Future: copy Next.js standalone output (requires WP-004)
-# COPY --from=builder /app/apps/alpha-whale/web/.next/standalone ./
-# COPY --from=builder /app/apps/alpha-whale/web/.next/static ./.next/static
-# COPY --from=builder /app/apps/alpha-whale/web/public ./public
-
-# Non-root user for security (node:22-slim ships with a 'node' user at UID/GID 1000)
-RUN chown -R node:node /app
+# Future: copy Next.js standalone output with correct ownership (requires WP-004)
+# COPY --chown=node:node --from=builder /app/apps/alpha-whale/web/.next/standalone ./
+# COPY --chown=node:node --from=builder /app/apps/alpha-whale/web/.next/static ./.next/static
+# COPY --chown=node:node --from=builder /app/apps/alpha-whale/web/public ./public
 
 USER node
 
