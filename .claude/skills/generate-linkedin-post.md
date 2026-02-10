@@ -5,7 +5,7 @@ Generate a LinkedIn post about a completed work package from the AI Engineering 
 ## When to Use
 
 - After completing a work package (triggered by the WP Completion Checklist in CLAUDE.md)
-- When the user explicitly asks for a LinkedIn post about their progress
+- When the user explicitly asks for a LinkedIn post about their progress or interesting concept to be shared
 
 ## Inputs
 

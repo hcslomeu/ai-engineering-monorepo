@@ -1,15 +1,15 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-02-09
+> **Last Updated:** 2026-02-10
 
 ---
 
 ## Current Position
 
 - **Active Phase:** Phase 0 — Foundation
-- **Active WP:** None (starting WP-005 next)
-- **Next WP:** WP-005 (Docker Base Images)
+- **Active WP:** None (WP-005 complete)
+- **Next WP:** WP-006 (MkDocs Documentation)
 - **Blocker:** None
 
 ---
@@ -26,7 +26,9 @@
 | Pytest (unit testing) | ✅ Practised | WP-002, WP-003 | 🟢 Comfortable |
 | Mypy (type checking) | ✅ Practised | WP-003 | 🟡 Needs more reps |
 | Bandit (security scanning) | ✅ Practised | WP-003 | 🟡 Needs more reps |
-| Docker multi-stage builds | ⬜ Not started | WP-005 | 🔴 |
+| Docker multi-stage builds | ✅ Practised | WP-005 | 🟡 Needs more reps |
+| Docker Compose | ✅ Practised | WP-005 | 🟡 Needs more reps |
+| .dockerignore | ✅ Practised | WP-005 | 🟢 Comfortable |
 | MkDocs Material | ⬜ Not started | WP-006 | 🔴 |
 | LangChain @tool decorator | ⬜ Not started | WP-100 | 🔴 |
 | LangChain prompt templates | ⬜ Not started | WP-100 | 🔴 |
@@ -56,6 +58,7 @@
 | WP-001 | Monorepo Foundation Scaffold | Jan 26, 2026 | — | Nx + pnpm + Poetry hybrid workspace |
 | WP-002 | py-core Shared Library | Feb 6, 2026 | #35 | Pydantic config, structlog logging, custom exceptions, 13 tests |
 | WP-003 | CI Pipeline | Feb 9, 2026 | #36 | 4 parallel jobs: pytest, ruff, bandit, mypy |
+| WP-005 | Docker Base Images | Feb 10, 2026 | #47 | Python + Node multi-stage Dockerfiles, Compose, .dockerignore |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |
