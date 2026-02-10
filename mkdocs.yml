@@ -1,0 +1,58 @@
+site_name: AI Engineering Monorepo
+site_url: https://hcslomeu.github.io/ai-engineering-monorepo/
+repo_url: https://github.com/hcslomeu/ai-engineering-monorepo
+repo_name: hcslomeu/ai-engineering-monorepo
+
+theme:
+  name: material
+  custom_dir: overrides
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Development: getting-started/development.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Data Contracts: architecture/data-contracts.md
+      - Decisions: architecture/decisions.md
+  - Libraries:
+      - py-core: libraries/py-core.md
+  - Infrastructure:
+      - CI/CD: infrastructure/ci-cd.md
+      - Docker: infrastructure/docker.md
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true

@@ -1,0 +1,22 @@
+{% extends "main.html" %}
+
+{% block tabs %}
+  {{ super() }}
+
+  <section class="md-hero" data-md-color-scheme="slate">
+    <div class="md-hero__inner md-grid">
+      <div class="md-hero__content">
+        <h1>AI Engineering Monorepo</h1>
+        <p>Production-grade AI applications across finance, healthcare, and transportation — built with Python, TypeScript, and modern AI/ML tooling.</p>
+        <div class="md-hero__actions">
+          <a href="getting-started/installation/" class="md-button md-button--primary">Get Started</a>
+          <a href="architecture/overview/" class="md-button">Architecture</a>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block content %}
+  {{ super() }}
+{% endblock %}

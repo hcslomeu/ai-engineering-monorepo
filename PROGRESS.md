@@ -7,9 +7,9 @@
 
 ## Current Position
 
-- **Active Phase:** Phase 0 — Foundation
-- **Active WP:** None (WP-005 complete)
-- **Next WP:** WP-006 (MkDocs Documentation)
+- **Active Phase:** Phase 0 — Foundation (complete)
+- **Active WP:** None (WP-006 complete)
+- **Next WP:** WP-100 (LangChain Hello World)
 - **Blocker:** None
 
 ---
@@ -29,7 +29,7 @@
 | Docker multi-stage builds | ✅ Practised | WP-005 | 🟡 Needs more reps |
 | Docker Compose | ✅ Practised | WP-005 | 🟡 Needs more reps |
 | .dockerignore | ✅ Practised | WP-005 | 🟢 Comfortable |
-| MkDocs Material | ⬜ Not started | WP-006 | 🔴 |
+| MkDocs Material | ✅ Practised | WP-006 | 🟢 Comfortable |
 | LangChain @tool decorator | ⬜ Not started | WP-100 | 🔴 |
 | LangChain prompt templates | ⬜ Not started | WP-100 | 🔴 |
 | LangSmith tracing | ⬜ Not started | WP-106 | 🔴 |
@@ -59,6 +59,7 @@
 | WP-002 | py-core Shared Library | Feb 6, 2026 | #35 | Pydantic config, structlog logging, custom exceptions, 13 tests |
 | WP-003 | CI Pipeline | Feb 9, 2026 | #36 | 4 parallel jobs: pytest, ruff, bandit, mypy |
 | WP-005 | Docker Base Images | Feb 10, 2026 | #47 | Python + Node multi-stage Dockerfiles, Compose, .dockerignore |
+| WP-006 | MkDocs Documentation | Feb 10, 2026 | — | MkDocs Material site, 9 docs pages, deploy-docs workflow, Nx target |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |
