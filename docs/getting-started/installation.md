@@ -4,7 +4,7 @@
 
 | Tool | Required Version | Purpose |
 |------|-----------------|---------|
-| **Python** | 3.11+ | AI/ML libraries, data pipelines, API backends |
+| **Python** | 3.12+ | AI/ML libraries, data pipelines, API backends |
 | **Poetry** | 2.x | Python dependency management |
 | **Node.js** | 18+ | Nx orchestration, TypeScript frontend |
 | **pnpm** | 10+ | Node package management (via Corepack) |

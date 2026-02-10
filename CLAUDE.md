@@ -272,7 +272,7 @@ poetry run pytest --cov=libs --cov=apps --cov-report=html
 
 - Node.js 18+ (recommend using nvm)
 - pnpm 10+ (via Corepack: `corepack enable`)
-- Python 3.11+ (recommend using pyenv)
+- Python 3.12+ (recommend using pyenv)
 - Poetry 2.x
 - Docker Desktop
 
