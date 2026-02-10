@@ -1,5 +1,5 @@
 # ---- Stage 1: Dependencies ----
-FROM python:3.11-slim AS deps
+FROM python:3.12-slim AS deps
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/root/.cache/pypoetry \
 
 
 # ---- Stage 2: Runtime ----
-FROM python:3.11-slim AS runtime
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

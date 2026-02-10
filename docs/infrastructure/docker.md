@@ -15,7 +15,7 @@ Two-stage build: install dependencies in one stage, run application in another.
 ```text
 Stage 1: deps       Stage 2: runtime
 ┌─────────────┐     ┌─────────────────┐
-│ python:3.11  │     │ python:3.11-slim│
+│ python:3.12  │     │ python:3.12-slim│
 │ + Poetry     │     │ + .venv (copied)│
 │ + poetry.lock│────▶│ + app source    │
 │ + libs/      │     │ + appuser (1000)│
@@ -24,7 +24,7 @@ Stage 1: deps       Stage 2: runtime
 
 ### Key design decisions
 
-- **`python:3.11-slim`** as the runtime base — much smaller than the full image, excludes compilers and dev headers
+- **`python:3.12-slim`** as the runtime base — much smaller than the full image, excludes compilers and dev headers
 - **Cache mounts** (`--mount=type=cache`) on Poetry and pip caches — speeds up rebuilds by reusing downloaded packages across builds
 - **`POETRY_VIRTUALENVS_IN_PROJECT=true`** — puts `.venv` inside `/app` so it can be copied to the runtime stage with a simple `COPY --from=deps`
 - **`--no-root --only main`** — installs dependencies only, not the workspace root package or dev dependencies

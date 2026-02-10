@@ -43,7 +43,7 @@ poetry run ruff format --check .  # Formatting (without modifying files)
 Ruff configuration is in the root `pyproject.toml`:
 
 - **Line length:** 100 characters
-- **Target version:** Python 3.11
+- **Target version:** Python 3.12
 - **Enabled rule sets:** E (pycodestyle), W (warnings), F (Pyflakes), I (isort), B (bugbear), C4 (comprehensions), UP (pyupgrade)
 
 ### Security (bandit)
