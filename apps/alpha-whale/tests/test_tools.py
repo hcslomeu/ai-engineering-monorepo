@@ -60,6 +60,12 @@ class TestCalculateRsi:
         assert result["rsi"] < 30
         assert result["signal"] == "oversold"
 
+    def test_flat_prices_neutral_rsi(self):
+        prices = [100.0] * 20  # no movement
+        result = calculate_rsi.invoke({"prices": prices})
+        assert result["rsi"] == 50.0
+        assert result["signal"] == "neutral"
+
     def test_insufficient_data_returns_error(self):
         result = calculate_rsi.invoke({"prices": [1, 2, 3]})
         assert "error" in result

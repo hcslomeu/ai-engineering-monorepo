@@ -54,7 +54,9 @@ def calculate_rsi(prices: list[float], period: int = 14) -> dict:
     avg_gain = sum(gains) / period if gains else 0.0
     avg_loss = sum(losses) / period if losses else 0.0
 
-    if avg_loss == 0:
+    if avg_gain == 0 and avg_loss == 0:
+        rsi = 50.0
+    elif avg_loss == 0:
         rsi = 100.0
     else:
         rs = avg_gain / avg_loss
