@@ -42,7 +42,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run pytest
-        run: poetry run pytest --cov=libs --cov-report=term-missing  # TODO: Add --cov=apps and --cov=pipelines when created
+        run: poetry run pytest --cov=libs --cov=apps --cov-report=term-missing  # TODO: Add --cov=pipelines when created
 
   # Run ruff linter and formatter
   lint:
@@ -119,7 +119,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run bandit
-        run: poetry run bandit -r libs -ll  # TODO: Add apps and pipelines when created
+        run: poetry run bandit -r libs apps -ll  # TODO: Add pipelines when created
 
   # Run mypy type checker
   typecheck:
@@ -156,4 +156,4 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run mypy
-        run: poetry run mypy libs  # TODO: Add apps and pipelines when created
+        run: poetry run mypy libs apps  # TODO: Add pipelines when created

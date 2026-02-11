@@ -1,0 +1,30 @@
+{
+  "name": "alpha-whale",
+  "sourceRoot": "apps/alpha-whale/agent",
+  "projectType": "application",
+  "tags": ["scope:alpha-whale", "lang:python"],
+  "implicitDependencies": ["py-core"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run pytest apps/alpha-whale/tests -v",
+        "cwd": "."
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run ruff check apps/alpha-whale/agent",
+        "cwd": "."
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run mypy apps/alpha-whale/agent",
+        "cwd": "."
+      }
+    }
+  }
+}
