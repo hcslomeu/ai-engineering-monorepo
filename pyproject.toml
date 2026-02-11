@@ -16,6 +16,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.12"
 py-core = { path = "libs/py-core", develop = true }
+alpha-whale = { path = "apps/alpha-whale", develop = true }
 
 [tool.poetry.group.dev.dependencies]
 # Testing
@@ -53,13 +54,14 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["py_core", "py_agents", "py_retrieval", "py_streaming"]
+known-first-party = ["py_core", "py_agents", "py_retrieval", "py_streaming", "agent"]
 
 [tool.mypy]
 python_version = "3.12"
 warn_return_any = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
+exclude = ["tests/"]
 
 [tool.pytest.ini_options]
 testpaths = ["libs", "apps", "pipelines", "tests"]
