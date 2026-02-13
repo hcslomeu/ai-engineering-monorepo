@@ -354,6 +354,27 @@ Skills in `.claude/skills/` automate repeated workflows:
 
 - **`generate-linkedin-post`**: Generate LinkedIn post after WP completion. Invoke with `/generate-linkedin-post`.
 - **`claude-code-practices`**: Review advanced Claude Code feature adoption. Invoke with `/claude-code-practices`.
+- **`gemini-analysis`**: Delegate large codebase analysis to Gemini CLI. Invoke with `/gemini-analysis`. Uses `tools/gemini-analyze.sh` for token tracking.
+
+### Sub-Agent and Context Management Rules
+
+Claude Code sub-agents (Task tool) consume significant context. Follow these rules strictly:
+
+**When to use sub-agents:**
+- First time exploring an unknown module with 5+ files
+- Truly parallel, independent research tasks (e.g., two unrelated API lookups)
+
+**When NOT to use sub-agents:**
+- File paths are already known from the session handoff — use Read tool directly
+- Only 1-3 files need reading — Read them directly
+- Plan can be written from existing knowledge — do not launch Plan agents redundantly
+- File creation or writing is needed — sub-agents get write permissions denied
+
+**Context hygiene rules:**
+- NEVER read raw sub-agent JSON transcripts — only check the final result message
+- Before fetching MCP docs, confirm the current WP actually needs them (do not pre-fetch for future WPs)
+- Prefer `tools/gemini-analyze.sh` via Bash for pre-WP research before deploying Explore sub-agents
+- When Gemini is unavailable (429 errors), fall back to targeted Read tool calls, not broad Explore agents
 
 ---
 
