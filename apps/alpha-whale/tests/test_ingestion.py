@@ -47,7 +47,7 @@ def settings(monkeypatch: pytest.MonkeyPatch) -> IngestionSettings:
 class TestIngestionSettings:
     def test_loads_from_env(self, settings: IngestionSettings) -> None:
         assert settings.gcp_project_id == "test-project"
-        assert settings.alpha_vantage_api_key == "test-key"
+        assert settings.alpha_vantage_api_key.get_secret_value() == "test-key"
 
     def test_default_values(self, settings: IngestionSettings) -> None:
         assert settings.bq_dataset == "alpha_whale_bronze"
@@ -159,7 +159,7 @@ class TestFetchCryptoDaily:
 
         from ingestion.alpha_vantage import fetch_crypto_daily
 
-        with pytest.raises(ValueError, match="missing"):
+        with pytest.raises(ValueError, match="rate limit"):
             fetch_crypto_daily("BTC", settings)
 
     @patch("ingestion.alpha_vantage.requests.get")

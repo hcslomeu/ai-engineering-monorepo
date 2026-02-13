@@ -9,6 +9,11 @@ import requests
 from ingestion.config import IngestionSettings
 
 TIME_SERIES_KEY = "Time Series (Digital Currency Daily)"
+KEY_OPEN = "1. open"
+KEY_HIGH = "2. high"
+KEY_LOW = "3. low"
+KEY_CLOSE = "4. close"
+KEY_VOLUME = "5. volume"
 
 
 def fetch_crypto_daily(
@@ -34,12 +39,17 @@ def fetch_crypto_daily(
         "function": "DIGITAL_CURRENCY_DAILY",
         "symbol": symbol,
         "market": market,
-        "apikey": settings.alpha_vantage_api_key,
+        "apikey": settings.alpha_vantage_api_key.get_secret_value(),
     }
     response = requests.get(settings.alpha_vantage_base_url, params=params, timeout=30)
     response.raise_for_status()
 
     data = response.json()
+
+    if "Error Message" in data:
+        raise ValueError(f"Alpha Vantage API error: {data['Error Message']}")
+    if "Note" in data:
+        raise ValueError(f"Alpha Vantage rate limit: {data['Note']}")
 
     if TIME_SERIES_KEY not in data:
         raise ValueError(
@@ -56,11 +66,11 @@ def fetch_crypto_daily(
             {
                 "symbol": symbol,
                 "date": date_str,
-                "open": float(daily_data["1. open"]),
-                "high": float(daily_data["2. high"]),
-                "low": float(daily_data["3. low"]),
-                "close": float(daily_data["4. close"]),
-                "volume": float(daily_data["5. volume"]),
+                "open": float(daily_data[KEY_OPEN]),
+                "high": float(daily_data[KEY_HIGH]),
+                "low": float(daily_data[KEY_LOW]),
+                "close": float(daily_data[KEY_CLOSE]),
+                "volume": float(daily_data[KEY_VOLUME]),
                 "raw_response": json.dumps(daily_data),
                 "ingested_at": now,
                 "source": "alpha_vantage",

@@ -1,5 +1,6 @@
 """Configuration for AlphaWhale ingestion pipeline."""
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 
 
@@ -13,7 +14,7 @@ class IngestionSettings(BaseSettings):
     gcp_project_id: str
     bq_dataset: str = "alpha_whale_bronze"
     bq_table: str = "crypto_daily"
-    alpha_vantage_api_key: str
+    alpha_vantage_api_key: SecretStr
     alpha_vantage_base_url: str = "https://www.alphavantage.co/query"
 
     model_config = {"env_prefix": "INGESTION_"}

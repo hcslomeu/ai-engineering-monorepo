@@ -37,6 +37,9 @@ def load_rows(
     Returns:
         Number of rows loaded.
     """
+    if not rows:
+        return 0
+
     job_config = LoadJobConfig(
         schema=CRYPTO_DAILY_SCHEMA,
         source_format=SourceFormat.NEWLINE_DELIMITED_JSON,
@@ -44,7 +47,7 @@ def load_rows(
     )
     load_job = client.load_table_from_json(rows, table_id, job_config=job_config)
     load_job.result()  # blocks until the job completes
-    return int(load_job.output_rows)
+    return load_job.output_rows if load_job.output_rows is not None else len(rows)
 
 
 def ingest(symbol: str, settings: IngestionSettings) -> int:
