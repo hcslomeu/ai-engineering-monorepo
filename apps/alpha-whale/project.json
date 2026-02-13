@@ -15,14 +15,14 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "poetry run ruff check apps/alpha-whale/agent",
+        "command": "poetry run ruff check apps/alpha-whale/agent apps/alpha-whale/ingestion",
         "cwd": "."
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "poetry run mypy apps/alpha-whale/agent",
+        "command": "poetry run mypy apps/alpha-whale/agent apps/alpha-whale/ingestion",
         "cwd": "."
       }
     }

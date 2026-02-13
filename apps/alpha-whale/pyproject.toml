@@ -4,12 +4,15 @@ version = "0.1.0"
 description = "AlphaWhale — AI-powered finance agent"
 authors = []
 readme = "README.md"
-packages = [{ include = "agent" }]
+packages = [{ include = "agent" }, { include = "ingestion" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 langchain-core = "^0.3"
 langchain-openai = "^0.3"
+google-cloud-bigquery = "^3.25"
+pydantic-settings = "^2.0"
+requests = "^2.32"
 py-core = { path = "../../libs/py-core", develop = true }
 
 [build-system]
