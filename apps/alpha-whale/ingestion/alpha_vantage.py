@@ -52,17 +52,19 @@ def fetch_crypto_daily(
 
     rows: list[dict[str, Any]] = []
     for date_str, daily_data in time_series.items():
-        rows.append({
-            "symbol": symbol,
-            "date": date_str,
-            "open": float(daily_data["1. open"]),
-            "high": float(daily_data["2. high"]),
-            "low": float(daily_data["3. low"]),
-            "close": float(daily_data["4. close"]),
-            "volume": float(daily_data["5. volume"]),
-            "raw_response": json.dumps(daily_data),
-            "ingested_at": now,
-            "source": "alpha_vantage",
-        })
+        rows.append(
+            {
+                "symbol": symbol,
+                "date": date_str,
+                "open": float(daily_data["1. open"]),
+                "high": float(daily_data["2. high"]),
+                "low": float(daily_data["3. low"]),
+                "close": float(daily_data["4. close"]),
+                "volume": float(daily_data["5. volume"]),
+                "raw_response": json.dumps(daily_data),
+                "ingested_at": now,
+                "source": "alpha_vantage",
+            }
+        )
 
     return rows
