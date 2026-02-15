@@ -47,6 +47,8 @@ Thumbs.db
 .claude/learning-progress.md
 .claude/*.local.md
 .claude/linkedin-posts/
+.claude/specs/
+.claude/plans/
 
 # Gemini
 .gemini

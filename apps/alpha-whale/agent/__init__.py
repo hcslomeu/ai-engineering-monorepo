@@ -1,1 +1,1 @@
-"""AlphaWhale agent — AI-powered finance tools and chains."""
+"""AlphaWhale agent — AI-powered finance tools, chains, and graphs."""

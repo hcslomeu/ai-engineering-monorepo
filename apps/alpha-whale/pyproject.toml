@@ -10,6 +10,7 @@ packages = [{ include = "agent" }, { include = "ingestion" }]
 python = "^3.12"
 langchain-core = "^0.3"
 langchain-openai = "^0.3"
+langgraph = "^1.0"
 google-cloud-bigquery = "^3.25"
 pydantic-settings = "^2.0"
 requests = "^2.32"
