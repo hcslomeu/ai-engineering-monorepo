@@ -112,7 +112,7 @@ from langchain_core.tools import tool
 @tool
 def my_tool(param: str) -> str:
     """Clear docstring — this is the LLM's instruction for when to use the tool."""
-    return result
+    return f"result for {param}"
 ```
 
 Rules:

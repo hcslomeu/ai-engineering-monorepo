@@ -273,6 +273,8 @@ Skills in `.claude/skills/` automate repeated workflows:
 | **review-pr** | Fetch and summarize AI reviewer comments on PRs | `/review-pr [number]` |
 | **landing-page-copy-optimizer** | Analyze landing page copy using April Dunford methodology | `/landing-page-copy-optimizer` |
 | **landing-page-prompt-generator** | Generate Replit Design Mode prompts for landing pages | `/landing-page-prompt-generator` |
+| **scaffold-py-lib** | Scaffold new Python library with standard structure | `/scaffold-py-lib <name>` |
+| **agent-development** | LangGraph agent patterns reference (langgraph ^1.0) | `/agent-development` |
 
 ### Sub-Agent and Context Management Rules
 
