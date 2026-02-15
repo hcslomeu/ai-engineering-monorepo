@@ -1,14 +1,14 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-02-13
+> **Last Updated:** 2026-02-16
 
 ---
 
 ## Current Position
 
 - **Active Phase:** Phase 1 — LangChain/LangGraph
-- **Active WP:** None (WP-101 complete)
+- **Active WP:** WP-007 (Claude Code Best Practices)
 - **Next WP:** WP-106 (LangSmith Observability)
 - **Blocker:** None
 
@@ -32,8 +32,11 @@
 | MkDocs Material | ✅ Practised | WP-006 | 🟢 Comfortable |
 | LangChain @tool decorator | ✅ Practised | WP-100 | 🟢 Comfortable |
 | LangChain prompt templates | ✅ Practised | WP-100 | 🟢 Comfortable |
+| Claude Code skills authoring | ✅ Practised | WP-007 | 🟡 Needs more reps |
+| Claude Code hooks | ✅ Practised | WP-007 | 🟡 Needs more reps |
+| Claude Code commands (prompts) | ✅ Practised | WP-007 | 🟡 Needs more reps |
 | LangSmith tracing | ⬜ Not started | WP-106 | 🔴 |
-| LangGraph StateGraph | ⬜ Not started | WP-104 | 🔴 |
+| LangGraph StateGraph | ✅ Practised | WP-104 | 🟡 Needs more reps |
 | LangGraph human-in-loop | ⬜ Not started | WP-114 | 🔴 |
 | BigQuery Python client | ✅ Practised | WP-101 | 🟢 Comfortable |
 | Airflow DAGs | ⬜ Not started | WP-102 | 🔴 |
@@ -62,6 +65,7 @@
 | WP-006 | MkDocs Documentation | Feb 10, 2026 | #49 | MkDocs Material site, 9 docs pages, deploy-docs workflow, Nx target |
 | WP-100 | LangChain Hello World | Feb 11, 2026 | #52 | 3 finance tools, tool-calling chain, 16 tests, Pydantic auto-schema |
 | WP-101 | BigQuery Bronze Layer | Feb 13, 2026 | #53 | Alpha Vantage → BigQuery ingestion, SecretStr, 15 tests, Medallion Bronze |
+| WP-104 | LangGraph Hello World | Feb 15, 2026 | #54 | StateGraph, manual tools_node, conditional routing, langgraph 1.0, 13 tests |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

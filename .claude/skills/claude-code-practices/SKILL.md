@@ -41,10 +41,11 @@ Proactively identify opportunities to use advanced Claude Code features during d
 - IDE integration could improve the experience
 
 **Currently configured MCP servers:**
-- `doc-gen` - Documentation generation
 - `context7` - Library documentation lookup
-- `ide` - VS Code diagnostics and code execution
-- `claude.ai langchain` - LangChain docs search
+- `langchain (Docs by LangChain)` - LangChain/LangGraph API reference
+- `ide` - VS Code diagnostics and Jupyter kernel execution
+- `railway-mcp-server` - Railway deployment and environment management
+- `doc-gen` - Documentation generation (deprecated — will be archived)
 
 **Suggest new MCP servers when:**
 - A new external service is introduced (database, API, cloud provider)
