@@ -25,7 +25,7 @@ SYSTEM_PROMPT = (
 _model: Runnable | None = None
 
 
-def get_model(temperature: float = 0.0) -> Runnable:
+def get_model() -> Runnable:
     """Return a cached ChatOpenAI model with tools bound.
 
     Lazily creates the model on first call to avoid requiring an API key at
@@ -33,7 +33,7 @@ def get_model(temperature: float = 0.0) -> Runnable:
     """
     global _model  # noqa: PLW0603
     if _model is None:
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=temperature)
+        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
         _model = llm.bind_tools(TOOLS)
     return _model
 
@@ -52,8 +52,11 @@ def tools_node(state: MessagesState) -> dict:
         return {"messages": []}
     results = []
     for call in last_message.tool_calls:
-        tool = TOOLS_BY_NAME[call["name"]]
-        output = tool.invoke(call["args"])
+        tool = TOOLS_BY_NAME.get(call["name"])
+        if tool is None:
+            output = f"Error: unknown tool '{call['name']}'"
+        else:
+            output = tool.invoke(call["args"])
         results.append(ToolMessage(content=str(output), tool_call_id=call["id"]))
     return {"messages": results}
 

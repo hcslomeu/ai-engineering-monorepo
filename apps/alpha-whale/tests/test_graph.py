@@ -142,6 +142,17 @@ class TestToolsNode:
         assert isinstance(result["messages"][0], ToolMessage)
         assert result["messages"][0].tool_call_id == "call_3"
 
+    def test_handles_unknown_tool_name(self):
+        tool_call = {"name": "nonexistent_tool", "args": {}, "id": "call_x", "type": "tool_call"}
+        ai_msg = AIMessage(content="", tool_calls=[tool_call])
+        state = {"messages": [HumanMessage(content="test"), ai_msg]}
+
+        result = tools_node(state)
+
+        assert len(result["messages"]) == 1
+        assert "Error: unknown tool" in result["messages"][0].content
+        assert result["messages"][0].tool_call_id == "call_x"
+
     def test_tools_by_name_has_all_tools(self):
         assert set(TOOLS_BY_NAME.keys()) == {
             "fetch_btc_price",
