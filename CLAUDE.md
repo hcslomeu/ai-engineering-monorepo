@@ -32,92 +32,6 @@ cat .claude/learning-context.md    # Session preferences (private)
 
 ---
 
-## Repository Structure
-```
-ai-engineering-monorepo/
-├── libs/                    # Shared libraries
-│   ├── schemas/             # JSON Schema source of truth
-│   ├── py-core/             # Python: Core utilities, logging, config
-│   ├── py-agents/           # Python: LangChain/LangGraph base classes
-│   ├── py-retrieval/        # Python: LlamaIndex + Pinecone abstractions
-│   ├── py-streaming/        # Python: Kafka producers/consumers
-│   └── shared-schemas/      # TypeScript: Zod schemas (generated)
-│
-├── pipelines/               # Data Engineering
-│   ├── airflow-dags/        # Airflow DAG definitions
-│   └── databricks-jobs/     # Databricks notebooks + Delta jobs
-│
-├── apps/                    # Applications
-│   ├── alpha-whale/         # Finance: agent/, api/, web/
-│   ├── medi-guard/          # Healthcare: agent/, api/, web/
-│   └── rail-sense/          # Transportation: agent/, predictor/, api/, web/
-│
-├── tests/                   # Integration & E2E tests
-├── docs/                    # MkDocs Material documentation
-├── infra/                   # Terraform + Docker
-└── tools/                   # Scripts + Nx generators
-```
-
----
-
-## Commands
-
-### Nx (Monorepo Orchestration)
-```bash
-# Run a task on a specific project
-pnpm nx <target> <project-name>
-
-# Run tasks on all affected projects
-pnpm nx affected -t <target>
-
-# Run tasks on all projects
-pnpm nx run-many -t <target>
-
-# Visualise dependency graph
-pnpm nx graph
-
-# List all projects
-pnpm nx show projects
-```
-
-### Poetry (Python)
-```bash
-# Install all dependencies (from root)
-poetry install
-
-# Run a command in the virtual environment
-poetry run <command>
-
-# Add a dependency to a specific package
-cd libs/py-core && poetry add <package>
-
-# Run tests
-poetry run pytest
-
-# Run linting
-poetry run ruff check .
-
-# Run security scan
-poetry run bandit -r libs apps pipelines
-
-# Run type checking
-poetry run mypy libs apps pipelines
-```
-
-### pnpm (TypeScript)
-```bash
-# Install all dependencies
-pnpm install
-
-# Add a dependency to a specific package
-pnpm --filter <package-name> add <dependency>
-
-# Run a script in a specific package
-pnpm --filter <package-name> run <script>
-```
-
----
-
 ## Architecture Principles
 
 ### Medallion Architecture (Data)
@@ -145,6 +59,45 @@ All data pipelines follow Bronze → Silver → Gold:
 ---
 
 ## Development Workflow
+
+### Phase Approach (for non-trivial WPs)
+
+Follow three phases with `/clear` between each to manage context:
+
+**Phase 1 — Research** (read-only)
+- Explore codebase to understand what exists today
+- Use `tools/gemini-analyze.sh` or targeted Read calls
+- Document findings, don't suggest improvements
+- Output: write findings to `.claude/specs/WP-XXX-research.md`
+- Run `/clear` when done
+
+**Phase 2 — Plan** (interactive)
+- Read the research file from Phase 1
+- Write implementation plan with phased approach
+- Each phase must have success criteria (automated + manual)
+- Include a "What We're NOT Doing" section to prevent scope creep
+- Resolve ALL open questions before proceeding — if uncertain, ask
+- Get user confirmation before moving to implementation
+- Output: write plan to `.claude/specs/WP-XXX-plan.md`
+- Run `/clear` when done
+
+**Phase 3 — Implement** (code + verify)
+- Read the plan file from Phase 2
+- Follow the plan phase by phase
+- Run tests after each phase — don't proceed if tests fail
+- If reality doesn't match the plan, STOP and communicate:
+  "Expected: X. Found: Y. How should I proceed?"
+- In LEARNING mode: explain each file after creating it, wait for confirmation
+
+For trivial tasks (typo, single-file fix, config change): skip directly to implement.
+
+### Phase Output Files
+
+Each WP's research and plans are saved to `.claude/specs/`:
+- `.claude/specs/WP-XXX-research.md` — Research findings (Phase 1 output)
+- `.claude/specs/WP-XXX-plan.md` — Implementation plan (Phase 2 output)
+
+These files persist between `/clear` calls and across sessions.
 
 ### Before Committing
 
@@ -181,7 +134,30 @@ pnpm nx run-many -t test
 pnpm nx g @nx/js:lib libs/<package-name> --publishable --importPath=@ai-engineering-monorepo/<package-name>
 ```
 
-### Git Workflow
+### Anti-Patterns to Avoid
+
+- **Over-engineering**: Only build what's requested. Three similar lines > premature abstraction. Don't add features, refactor code, or make "improvements" beyond what was asked. Don't create helpers or abstractions for one-time operations. Don't design for hypothetical future requirements.
+- **Reinventing solutions**: Check for existing libraries/utilities before building from scratch
+- **Code duplication**: Search codebase for existing functions before creating new ones
+- **Mixed responsibilities**: One module, one purpose. Don't add unrelated code to a file
+- **Knowledge gaps**: Use context7/langchain MCP for current docs. Don't guess at APIs
+- **Scope creep**: If it's not in the plan, don't build it. Add it to a future WP instead
+
+### Verification
+
+- After implementing any code change, run the relevant test suite to verify
+- If no tests exist for the changed code, write them
+- Separate success criteria into automated (commands) and manual (human testing)
+
+### Context Hygiene
+
+- Run `/clear` between phases and between unrelated tasks
+- When compacting, preserve: modified file paths, current WP number, test commands
+- Discard exploration output and MCP lookup results during compaction
+
+---
+
+## Git Workflow
 
 ```bash
 # Create feature branch (use WP-XXX prefix)
@@ -253,76 +229,6 @@ poetry run pytest --cov=libs --cov=apps --cov-report=html
 
 ---
 
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `nx.json` | Nx workspace configuration |
-| `pnpm-workspace.yaml` | pnpm workspace packages |
-| `pyproject.toml` | Root Poetry configuration + tool settings |
-| `tsconfig.base.json` | Base TypeScript configuration |
-| `.claude/learning-progress.md` | Skills development tracker (private) |
-| `PROGRESS.md` | Work package completion log |
-
----
-
-## Environment Setup
-
-### Prerequisites
-
-- Node.js 18+ (recommend using nvm)
-- pnpm 10+ (via Corepack: `corepack enable`)
-- Python 3.12+ (recommend using pyenv)
-- Poetry 2.x
-- Docker Desktop
-
-### Initial Setup
-```bash
-# Clone the repository
-git clone <repo-url>
-cd ai-engineering-monorepo
-
-# Install TypeScript dependencies
-pnpm install
-
-# Install Python dependencies
-poetry install
-
-# Verify setup
-pnpm nx graph
-poetry run pytest --version
-```
-
----
-
-## CI/CD
-
-GitHub Actions workflows in `.github/workflows/`:
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `ci-python.yaml` | Push/PR | pytest, ruff, bandit, mypy |
-| `ci-typescript.yaml` | Push/PR | ESLint, Vitest |
-| `deploy-docs.yaml` | Push to main | Build & deploy MkDocs |
-
----
-
-## Troubleshooting
-
-### Poetry "No file/folder found for package"
-
-Ensure `package-mode = false` is set in the root `pyproject.toml`.
-
-### Nx can't find a project
-
-Run `pnpm nx reset` to clear the cache, then `pnpm nx graph` to verify.
-
-### pnpm workspace issues
-
-Check that `pnpm-workspace.yaml` includes the correct paths.
-
----
-
 ## Claude Code Configuration
 
 This project uses a `.claude/` folder for Claude Code configuration:
@@ -330,6 +236,7 @@ This project uses a `.claude/` folder for Claude Code configuration:
 ```
 .claude/
 ├── skills/               # Project-specific skills (committed)
+├── specs/                # WP research and plan files (committed)
 ├── learning-context.md   # Session preferences (gitignored)
 └── learning-progress.md  # Skills development tracker (gitignored)
 ```
@@ -399,42 +306,21 @@ All generated code must be production-quality and suitable for a professional po
 - Include step-by-step explanations of standard patterns
 - Over-comment obvious code
 
-#### Examples
+#### Example
 
 ```python
-# ❌ BAD - Teaching comment
+# BAD - Teaching comment
 class GitHubCLI:
     """
     Wrapper class for the GitHub CLI (`gh`) tool.
-    
+
     This is the ENCAPSULATION principle - hiding complexity behind
     a simple interface.
     """
 
-# ✅ GOOD - Professional docstring
+# GOOD - Professional docstring
 class GitHubCLI:
     """Wrapper for GitHub CLI operations."""
-```
-
-```python
-# ❌ BAD - Explaining basic concepts
-# The underscore prefix (_run) is a Python convention meaning
-# "this is an internal method, not part of the public API".
-def _run(self, args: list[str]) -> CommandResult:
-
-# ✅ GOOD - No comment needed, convention is self-evident
-def _run(self, args: list[str]) -> CommandResult:
-```
-
-```python
-# ❌ BAD - Over-explaining
-# Using a set here because sets automatically remove duplicates.
-# If WP-002 has ["python", "library"] and WP-003 has ["python", "testing"],
-# the set will contain {"python", "library", "testing"}.
-labels = set()
-
-# ✅ GOOD - Simple and clear
-labels: set[str] = set()
 ```
 
 ### Docstring Format
@@ -443,8 +329,7 @@ Use Google-style docstrings, kept minimal:
 
 ```python
 def create_issue(self, title: str, body: str) -> dict:
-    """
-    Create a new GitHub issue.
+    """Create a new GitHub issue.
 
     Args:
         title: Issue title
