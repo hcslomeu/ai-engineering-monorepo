@@ -134,14 +134,24 @@ pnpm nx run-many -t test
 pnpm nx g @nx/js:lib libs/<package-name> --publishable --importPath=@ai-engineering-monorepo/<package-name>
 ```
 
+### Engineering Principles
+
+These four principles guide all code decisions in this project:
+
+| Principle | Rule | In Practice |
+|-----------|------|-------------|
+| **DRY** | Don't Repeat Yourself | Search codebase for existing functions before creating new ones. Extract shared logic into `libs/` |
+| **KISS** | Keep It Simple | Prefer the simplest solution that works. Three similar lines > premature abstraction |
+| **YAGNI** | You Aren't Gonna Need It | Only build what's requested. Don't design for hypothetical future requirements |
+| **SoC** | Separation of Concerns | One module, one purpose. Keep data, logic, and presentation in distinct layers |
+
 ### Anti-Patterns to Avoid
 
-- **Over-engineering**: Only build what's requested. Three similar lines > premature abstraction. Don't add features, refactor code, or make "improvements" beyond what was asked. Don't create helpers or abstractions for one-time operations. Don't design for hypothetical future requirements.
-- **Reinventing solutions**: Check for existing libraries/utilities before building from scratch
-- **Code duplication**: Search codebase for existing functions before creating new ones
-- **Mixed responsibilities**: One module, one purpose. Don't add unrelated code to a file
+- **Violating DRY**: Check for existing libraries/utilities before building from scratch
+- **Violating KISS**: Don't add features, refactor code, or make "improvements" beyond what was asked. Don't create helpers or abstractions for one-time operations
+- **Violating YAGNI**: If it's not in the plan, don't build it. Add it to a future WP instead
+- **Violating SoC**: Don't add unrelated code to a file. Don't mix data access with business logic
 - **Knowledge gaps**: Use context7/langchain MCP for current docs. Don't guess at APIs
-- **Scope creep**: If it's not in the plan, don't build it. Add it to a future WP instead
 
 ### Verification
 
