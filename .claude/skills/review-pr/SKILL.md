@@ -70,3 +70,11 @@ If no argument is provided, detect the current branch and find the open PR for i
 - Cross-reference suggestions with the project's CLAUDE.md coding standards
 - If two reviewers flag the same issue, note the consensus
 - Flag any suggestions that contradict the project's established patterns
+
+### Handling Multi-Round Reviews
+
+When a PR has been reviewed multiple times (e.g., after pushing fixes):
+- Comments from earlier rounds may reference **code that no longer exists** (stale comments)
+- Check if a comment's file path and line still match the current code
+- Mark stale comments as "Already addressed" rather than re-flagging them
+- Focus the summary on **genuinely new** comments from the latest review round

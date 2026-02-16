@@ -77,13 +77,13 @@ Here's what I built:
 - "I just built a CI pipeline that runs 4 checks in parallel. Here's what broke along the way."
 - "Most people learn Python from tutorials. I'm building a production monorepo from scratch."
 - "13 linting errors. 3 type failures. 1 working pipeline."
-- "I decided to learn AI Engineering by building three real projects simultaneously."
+- "Building three production AI systems simultaneously. Here's what I'm learning about shared infrastructure."
 - "Setting up a Python + TypeScript monorepo taught me more than any course."
 
 ## Hashtag Pool
 
 Pick 3-5 from this baseline - identify skills/frameworks from the WP to add as well:
-#AIEngineering #Python #DataEngineering #LangChain #MachineLearning #DevOps #CICD #GitHubActions #OpenSource #LearningInPublic #BuildInPublic #SoftwareEngineering #MonorepoArchitecture #TypeScript #MLOps
+#AIEngineering #Python #DataEngineering #LangChain #LangGraph #MachineLearning #DevOps #CICD #GitHubActions #OpenSource #SoftwareEngineering #MonorepoArchitecture #TypeScript #MLOps #BigQuery #ClaudeCode
 
 ## Output Format
 

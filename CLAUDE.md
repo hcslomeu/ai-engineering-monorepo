@@ -235,11 +235,15 @@ This project uses a `.claude/` folder for Claude Code configuration:
 
 ```
 .claude/
-├── skills/               # Project-specific skills (committed)
+├── commands/             # Lightweight prompt templates → /project:name (committed)
+├── skills/               # Complex workflow skills (committed)
 ├── specs/                # WP research and plan files (committed)
+├── linkedin-posts/       # Generated LinkedIn posts (committed)
 ├── learning-context.md   # Session preferences (gitignored)
 └── learning-progress.md  # Skills development tracker (gitignored)
 ```
+
+**Commands vs Skills**: Commands in `.claude/commands/` are simple prompt templates (invokable as `/project:name`). When a command grows into a multi-step workflow, promote it to a full skill in `.claude/skills/`.
 
 Private files in `.claude/` are gitignored and contain personal learning context.
 
@@ -247,11 +251,13 @@ Private files in `.claude/` are gitignored and contain personal learning context
 
 The following MCP servers are configured and should be used in these scenarios:
 
-| Server | When to Use |
-|--------|-------------|
-| **context7** | Fetch up-to-date library docs (LangChain, FastAPI, pytest, MkDocs, etc.) before writing code that depends on external libraries |
-| **doc-gen** | Generate documentation structure for new libraries or complex modules |
-| **langchain (Docs by LangChain)** | LangChain/LangGraph-specific API reference and patterns when building agents in `libs/py-agents/` or `apps/*/agent/` |
+| Server | When to Use | Status |
+|--------|-------------|--------|
+| **context7** | Fetch up-to-date library docs (LangChain, FastAPI, pytest, etc.) | Active |
+| **langchain (Docs by LangChain)** | LangChain/LangGraph-specific API reference and patterns | Active |
+| **ide** | VS Code diagnostics (`getDiagnostics`) and Jupyter kernel execution | Active |
+| **railway-mcp-server** | Railway deployment, logs, environment management | Active |
+| **doc-gen** | Documentation structure generation | Deprecated (will be archived) |
 
 **Prefer MCP lookups over pasting docs** — use context7 or langchain to fetch reference material instead of copying documentation into the conversation. This keeps context clean and ensures up-to-date information.
 
@@ -259,9 +265,16 @@ The following MCP servers are configured and should be used in these scenarios:
 
 Skills in `.claude/skills/` automate repeated workflows:
 
-- **`generate-linkedin-post`**: Generate LinkedIn post after WP completion. Invoke with `/generate-linkedin-post`.
-- **`claude-code-practices`**: Review advanced Claude Code feature adoption. Invoke with `/claude-code-practices`.
-- **`gemini-analysis`**: Delegate large codebase analysis to Gemini CLI. Invoke with `/gemini-analysis`. Uses `tools/gemini-analyze.sh` for token tracking.
+| Skill | Purpose | Invoke |
+|-------|---------|--------|
+| **generate-linkedin-post** | LinkedIn post after WP completion | `/generate-linkedin-post` |
+| **claude-code-practices** | Review advanced Claude Code feature adoption | `/claude-code-practices` |
+| **gemini-analysis** | Delegate codebase analysis to Gemini CLI | `/gemini-analysis` |
+| **review-pr** | Fetch and summarize AI reviewer comments on PRs | `/review-pr [number]` |
+| **landing-page-copy-optimizer** | Analyze landing page copy using April Dunford methodology | `/landing-page-copy-optimizer` |
+| **landing-page-prompt-generator** | Generate Replit Design Mode prompts for landing pages | `/landing-page-prompt-generator` |
+| **scaffold-py-lib** | Scaffold new Python library with standard structure | `/scaffold-py-lib <name>` |
+| **agent-development** | LangGraph agent patterns reference (langgraph ^1.0) | `/agent-development` |
 
 ### Sub-Agent and Context Management Rules
 
