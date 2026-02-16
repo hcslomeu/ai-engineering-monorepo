@@ -1,6 +1,7 @@
 ---
 name: landing-page-prompt-generator
 description: Generate detailed prompts for Replit Design Mode to build beautiful landing pages. Guides users through a two-phase workflow - first extracting design tokens (colors, typography, spacing) from a reference screenshot, then generating section-by-section build prompts with animations and component-based UI mockups. Triggers on requests like "create landing page", "generate Replit prompt", "build landing page section", "design mode prompt", or when user wants to recreate a landing page design. Ensures UI mockups are built as real React components (not AI-generated images) for crisp, professional results.
+user-invocable: true
 ---
 
 # Landing Page Prompt Generator
