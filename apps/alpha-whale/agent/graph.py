@@ -5,7 +5,7 @@ START → agent_node → [has tool calls?] → tools_node → agent_node → ...
 """
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
-from langchain_core.runnables import Runnable
+from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, MessagesState, StateGraph
 
@@ -96,5 +96,9 @@ def run(user_input: str) -> str:
     Returns:
         The agent's final text response.
     """
-    result = app.invoke({"messages": [HumanMessage(content=user_input)]})  # type: ignore[arg-type]
+    config: RunnableConfig = {"run_name": "alpha-whale-agent", "tags": ["alpha-whale"]}
+    result = app.invoke(
+        {"messages": [HumanMessage(content=user_input)]},  # type: ignore[arg-type]
+        config=config,
+    )
     return str(result["messages"][-1].content)
