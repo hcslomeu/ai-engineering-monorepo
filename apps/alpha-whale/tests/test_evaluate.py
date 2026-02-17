@@ -217,3 +217,4 @@ class TestRunEvaluation:
         assert call_kwargs.kwargs["data"] == "test-eval"
         assert len(call_kwargs.kwargs["evaluators"]) == 2
         assert call_kwargs.kwargs["experiment_prefix"] == "alpha-whale-eval"
+        assert call_kwargs.kwargs["client"] is mock_client

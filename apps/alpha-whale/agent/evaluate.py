@@ -64,7 +64,7 @@ def correct_tool_used(run: Run, example: Example) -> dict[str, Any]:
     Inspects the run's child runs for tool invocations and compares
     against the expected_tools listed in the dataset example.
     """
-    expected = set(example.outputs.get("expected_tools", []))  # type: ignore[union-attr]
+    expected = set(example.outputs.get("expected_tools", [])) if example.outputs else set()
     actual_tools: set[str] = set()
 
     if hasattr(run, "child_runs") and run.child_runs:
@@ -120,7 +120,7 @@ def create_dataset(
     dataset_name: str = "alpha-whale-eval",
     description: str = "AlphaWhale agent evaluation dataset",
 ) -> Dataset:
-    """Create or update the evaluation dataset in LangSmith."""
+    """Create a new evaluation dataset in LangSmith."""
     dataset = client.create_dataset(
         dataset_name=dataset_name,
         description=description,
@@ -152,4 +152,5 @@ def run_evaluation(client: Client, dataset_name: str = "alpha-whale-eval") -> An
         evaluators=[correct_tool_used, response_quality],
         experiment_prefix="alpha-whale-eval",
         metadata={"agent_version": "0.1.0"},
+        client=client,
     )
