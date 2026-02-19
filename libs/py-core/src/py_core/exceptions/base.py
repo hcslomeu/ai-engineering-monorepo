@@ -16,3 +16,7 @@ class ConfigurationError(PyCorError):
 
 class ValidationError(PyCorError):
     """Raised when data validation fails."""
+
+
+class HTTPClientError(PyCorError):
+    """Raised when an HTTP request fails after retries."""

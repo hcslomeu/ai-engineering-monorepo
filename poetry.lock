@@ -1966,9 +1966,11 @@ files = []
 develop = true
 
 [package.dependencies]
+httpx = "^0.28"
 pydantic = "^2.0"
 pydantic-settings = "^2.0"
 structlog = "^24.0"
+tenacity = "^9.0"
 
 [package.source]
 type = "directory"
