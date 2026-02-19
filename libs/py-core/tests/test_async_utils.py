@@ -18,15 +18,8 @@ from py_core.exceptions import HTTPClientError
 
 
 def _mock_transport(handler):
-    """Create an async mock transport from a sync handler function.
-
-    The handler receives (request: httpx.Request) and returns httpx.Response.
-    """
-
-    async def _async_handler(request: httpx.Request) -> httpx.Response:
-        return handler(request)
-
-    return httpx.MockTransport(_async_handler)
+    """Create a mock transport from a handler function."""
+    return httpx.MockTransport(handler)
 
 
 # ---------------------------------------------------------------------------
@@ -159,7 +152,7 @@ class TestAsyncHTTPClient:
                 return httpx.Response(503)
             return httpx.Response(200, json={"ok": True})
 
-        transport = _mock_transport(lambda req: handler(req))
+        transport = _mock_transport(handler)
 
         async with AsyncHTTPClient(max_retries=3, transport=transport) as client:
             response = await client.get("http://test/api")
@@ -178,6 +171,7 @@ class TestAsyncHTTPClient:
         assert exc_info.value.details["status_code"] == 500
         assert exc_info.value.details["method"] == "GET"
         assert "url" in exc_info.value.details
+        assert "response_text" in exc_info.value.details
 
     async def test_context_manager_closes_client(self):
         """Client is properly closed after exiting context manager."""
@@ -256,6 +250,11 @@ class TestGatherWithConcurrency:
         """Returns empty list when no coroutines are provided."""
         results = await gather_with_concurrency(5)
         assert results == []
+
+    async def test_rejects_zero_limit(self):
+        """Raises ValueError when limit is zero or negative."""
+        with pytest.raises(ValueError, match="positive integer"):
+            await gather_with_concurrency(0)
 
 
 # ---------------------------------------------------------------------------

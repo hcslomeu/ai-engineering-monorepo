@@ -142,6 +142,7 @@ class AsyncHTTPClient:
                     "method": method,
                     "url": url,
                     "status_code": exc.response.status_code,
+                    "response_text": exc.response.text[:500],
                 },
             ) from exc
         except httpx.TransportError as exc:
@@ -176,6 +177,8 @@ async def gather_with_concurrency(
     Returns:
         List of results in the same order as the input coroutines.
     """
+    if limit <= 0:
+        raise ValueError(f"limit must be a positive integer, got {limit}")
     semaphore = asyncio.Semaphore(limit)
 
     async def _limited(coro: Coroutine[Any, Any, T]) -> T:
