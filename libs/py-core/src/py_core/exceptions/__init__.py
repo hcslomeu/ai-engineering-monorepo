@@ -2,6 +2,7 @@
 
 from py_core.exceptions.base import (
     ConfigurationError,
+    HTTPClientError,
     PyCorError,
     ValidationError,
 )
@@ -9,5 +10,6 @@ from py_core.exceptions.base import (
 __all__ = [
     "PyCorError",
     "ConfigurationError",
+    "HTTPClientError",
     "ValidationError",
 ]
