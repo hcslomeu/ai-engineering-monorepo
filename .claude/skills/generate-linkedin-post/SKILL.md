@@ -13,6 +13,10 @@ Generate a LinkedIn post about a completed work package from the AI Engineering 
 - After completing a work package (triggered by the WP Completion Checklist in CLAUDE.md)
 - When the user explicitly asks for a LinkedIn post about their progress or interesting concept to be shared
 
+## Posting Strategy
+
+Posts are **drafted and saved** during WP completion but **published after AlphaWhale is fully built and working**. This ensures the project is demonstrably complete before public sharing. Mark each saved post with `Status: DRAFT` until the user is ready to publish.
+
 ## Inputs
 
 Before generating, read:
@@ -45,7 +49,7 @@ Before generating, read:
 - The author is an experienced Python developer expanding into new tools and patterns
 - Be specific about technologies and what was built
 - Mention challenges faced and how they were overcome
-- Mention **Claude Code** as an agentic coding tool being used in the process and that I am better understanding advanced usage skills, like skills, mcps, prompt engineering, Programmatic Tool Calling (PTC) and Tool Search.
+- Do NOT mention Claude Code or AI tooling in individual WP posts — there will be a dedicated post about the AI-assisted development workflow later
 - Be transparent about "vibe coding" for TypeScript/UI parts (comfortable with Python, using AI to expand into TypeScript for more robust frontends than Streamlit)
 - Avoid buzzwords and generic statements
 - No AI-generated feel; write as if sharing with engineering peers
