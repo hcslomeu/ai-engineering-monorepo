@@ -1,15 +1,15 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-02-19
+> **Last Updated:** 2026-02-20
 
 ---
 
 ## Current Position
 
 - **Active Phase:** AlphaWhale Flagship Roadmap (9 phases, 12 WPs)
-- **Active WP:** WP-117 complete — async utilities in py-core
-- **Next WP:** WP-118 (FastAPI + SSE Streaming — Phase 2)
+- **Active WP:** WP-118 complete — FastAPI + SSE Streaming
+- **Next WP:** WP-004 (Chat UI — Next.js + shadcn/ui — Phase 3)
 - **Blocker:** None
 - **Flagship:** AlphaWhale — conversational trading assistant (React chat UI, SSE streaming, RAG, LangGraph agent)
 
@@ -43,7 +43,7 @@
 | Airflow DAGs | ⬜ Not started | WP-102 | 🔴 |
 | Technical indicators (RSI/MACD) | ⬜ Not started | WP-103 | 🔴 |
 | httpx + asyncio patterns | ✅ Practised | WP-117 | 🟡 Needs more reps |
-| FastAPI + SSE streaming | ⬜ Not started | WP-118 | 🔴 |
+| FastAPI + SSE streaming | ✅ Practised | WP-118 | 🟡 Needs more reps |
 | TypeScript basics | ⬜ Not started | WP-004 | 🔴 |
 | Next.js / React | ⬜ Not started | WP-004 | 🔴 |
 | shadcn/ui | ⬜ Not started | WP-004 | 🔴 |
@@ -85,6 +85,7 @@
 | WP-007 | Claude Code Best Practices | Feb 16, 2026 | #55 | 8 skills, 2 commands, hooks, CLAUDE.md audit, MCP audit |
 | WP-106 | LangSmith Observability | Feb 17, 2026 | #57 | AgentSettings, auto-tracing with RunnableConfig, evaluation dataset + 2 heuristic evaluators, 25 new tests (70 total) |
 | WP-117 | httpx + Async Patterns | Feb 19, 2026 | #125 | AsyncHTTPClient with Tenacity retry, gather_with_concurrency, HTTPClientError, 16 tests |
+| WP-118 | FastAPI + SSE Streaming | Feb 20, 2026 | #126 | FastAPI lifespan, SSE via sse-starlette, 3 endpoints (/chat/stream, /market/{asset}, /health), DI with Depends(), 13 tests (83 total) |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

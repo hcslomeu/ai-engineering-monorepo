@@ -8,22 +8,29 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "poetry run pytest apps/alpha-whale/tests -v",
+        "command": "poetry run pytest apps/alpha-whale/tests apps/alpha-whale/api/tests -v",
         "cwd": "."
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "poetry run ruff check apps/alpha-whale/agent apps/alpha-whale/ingestion",
+        "command": "poetry run ruff check apps/alpha-whale/agent apps/alpha-whale/ingestion apps/alpha-whale/api",
         "cwd": "."
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "poetry run mypy apps/alpha-whale/agent apps/alpha-whale/ingestion",
+        "command": "poetry run mypy apps/alpha-whale/agent apps/alpha-whale/ingestion apps/alpha-whale/api",
         "cwd": "."
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "poetry run uvicorn api.main:app --reload",
+        "cwd": "apps/alpha-whale"
       }
     }
   }

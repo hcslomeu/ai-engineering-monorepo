@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "AlphaWhale — AI-powered finance agent"
 authors = []
 readme = "README.md"
-packages = [{ include = "agent" }, { include = "ingestion" }]
+packages = [{ include = "agent" }, { include = "ingestion" }, { include = "api" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -16,6 +16,9 @@ langsmith = "^0.7"
 python-dotenv = "^1.0"
 pydantic-settings = "^2.0"
 requests = "^2.32"
+fastapi = ">=0.115,<1.0"
+uvicorn = {version = ">=0.34", extras = ["standard"]}
+sse-starlette = ">=2.0"
 py-core = { path = "../../libs/py-core", develop = true }
 
 [build-system]
