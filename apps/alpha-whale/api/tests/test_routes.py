@@ -53,14 +53,13 @@ async def test_market_returns_latest_date(client: AsyncClient, mock_http_client:
     assert data["date"] == "2026-02-19"  # First key = most recent
 
 
-async def test_market_handles_api_error_gracefully(
+async def test_market_returns_502_on_upstream_error(
     client: AsyncClient, mock_http_client_error: None
 ) -> None:
     response = await client.get("/market/INVALID")
-    assert response.status_code == 200
+    assert response.status_code == 502
     data = response.json()
-    assert data["date"] == "error"
-    assert data["close"] == 0.0
+    assert "detail" in data
 
 
 # --- /chat/stream endpoint ---

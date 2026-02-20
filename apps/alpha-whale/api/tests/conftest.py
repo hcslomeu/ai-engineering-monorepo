@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
+from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 from api.dependencies import get_graph, get_http_client
@@ -70,7 +71,7 @@ async def _fake_stream_events(
 
 
 @pytest.fixture
-def app():
+def app() -> FastAPI:
     """Create a fresh FastAPI app for each test."""
     return create_app()
 

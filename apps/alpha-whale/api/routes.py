@@ -3,11 +3,11 @@
 import json
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from langchain_core.messages import HumanMessage
 from sse_starlette import EventSourceResponse
 
-from api.dependencies import GraphDep, HTTPClientDep
+from api.dependencies import GraphDep, HTTPClientDep, SettingsDep
 from api.models import ChatRequest, HealthCheck, HealthResponse, MarketDataResponse
 from py_core import HTTPClientError, get_logger
 
@@ -23,16 +23,24 @@ async def _stream_agent(
     message: str,
 ) -> AsyncGenerator[dict[str, str], None]:
     """Yield SSE-formatted dicts from the LangGraph agent stream."""
-    async for event in graph.astream_events(
-        {"messages": [HumanMessage(content=message)]},
-        version="v2",
-    ):
-        if event["event"] == "on_chat_model_stream" and event["data"]["chunk"].content:
-            yield {
-                "event": "message",
-                "data": json.dumps({"token": event["data"]["chunk"].content}),
-            }
-    yield {"event": "message", "data": "[DONE]"}
+    try:
+        async for event in graph.astream_events(
+            {"messages": [HumanMessage(content=message)]},
+            version="v2",
+        ):
+            if event["event"] == "on_chat_model_stream" and event["data"]["chunk"].content:
+                yield {
+                    "event": "message",
+                    "data": json.dumps({"token": event["data"]["chunk"].content}),
+                }
+    except Exception as exc:
+        logger.error("stream_error", error=str(exc))
+        yield {
+            "event": "error",
+            "data": json.dumps({"error": str(exc)}),
+        }
+    finally:
+        yield {"event": "message", "data": "[DONE]"}
 
 
 @router.post("/chat/stream")
@@ -42,7 +50,9 @@ async def chat_stream(body: ChatRequest, graph: GraphDep) -> EventSourceResponse
 
 
 @router.get("/market/{asset}", response_model=MarketDataResponse)
-async def get_market_data(asset: str, client: HTTPClientDep) -> MarketDataResponse:
+async def get_market_data(
+    asset: str, client: HTTPClientDep, settings: SettingsDep
+) -> MarketDataResponse:
     """Fetch most recent daily OHLCV data for a crypto asset."""
     try:
         response = await client.get(
@@ -51,7 +61,7 @@ async def get_market_data(asset: str, client: HTTPClientDep) -> MarketDataRespon
                 "function": "DIGITAL_CURRENCY_DAILY",
                 "symbol": asset.upper(),
                 "market": "USD",
-                "apikey": "demo",
+                "apikey": settings.market_data_api_key,
             },
         )
         data = response.json()
@@ -79,15 +89,10 @@ async def get_market_data(asset: str, client: HTTPClientDep) -> MarketDataRespon
         )
     except (HTTPClientError, KeyError, ValueError) as exc:
         logger.error("market_data_error", asset=asset, error=str(exc))
-        return MarketDataResponse(
-            asset=asset.upper(),
-            date="error",
-            open=0.0,
-            high=0.0,
-            low=0.0,
-            close=0.0,
-            volume=0.0,
-        )
+        raise HTTPException(
+            status_code=502,
+            detail=f"Market data unavailable for {asset.upper()}",
+        ) from exc
 
 
 @router.get("/health", response_model=HealthResponse)

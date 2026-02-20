@@ -85,7 +85,7 @@
 | WP-007 | Claude Code Best Practices | Feb 16, 2026 | #55 | 8 skills, 2 commands, hooks, CLAUDE.md audit, MCP audit |
 | WP-106 | LangSmith Observability | Feb 17, 2026 | #57 | AgentSettings, auto-tracing with RunnableConfig, evaluation dataset + 2 heuristic evaluators, 25 new tests (70 total) |
 | WP-117 | httpx + Async Patterns | Feb 19, 2026 | #125 | AsyncHTTPClient with Tenacity retry, gather_with_concurrency, HTTPClientError, 16 tests |
-| WP-118 | FastAPI + SSE Streaming | Feb 20, 2026 | — | FastAPI lifespan, SSE via sse-starlette, 3 endpoints (/chat/stream, /market/{asset}, /health), DI with Depends(), 13 tests (83 total) |
+| WP-118 | FastAPI + SSE Streaming | Feb 20, 2026 | #126 | FastAPI lifespan, SSE via sse-starlette, 3 endpoints (/chat/stream, /market/{asset}, /health), DI with Depends(), 13 tests (83 total) |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

@@ -14,5 +14,6 @@ class APISettings(BaseSettings):
     debug: bool = False
     cors_origins: list[str] = ["http://localhost:3000"]
     market_data_base_url: str = "https://www.alphavantage.co/query"
+    market_data_api_key: str = "demo"
 
     model_config = {"env_prefix": "API_"}
