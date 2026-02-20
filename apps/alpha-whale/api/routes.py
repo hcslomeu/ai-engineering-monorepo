@@ -88,7 +88,10 @@ async def get_market_data(
             volume=float(day.get("5. volume", 0.0)),
         )
     except (HTTPClientError, KeyError, ValueError) as exc:
-        logger.error("market_data_error", asset=asset, error=str(exc))
+        try:
+            logger.error("market_data_error", asset=asset, error=str(exc))
+        except ValueError:
+            pass  # structlog may fail if IO is closed during test teardown
         raise HTTPException(
             status_code=502,
             detail=f"Market data unavailable for {asset.upper()}",
