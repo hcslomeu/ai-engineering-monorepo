@@ -7,14 +7,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Before Starting Any Task
 
 Always read these files first to understand current progress and context:
-
 ```bash
-cat PROGRESS.md                    # Current work package status
-cat .claude/learning-progress.md   # Skills development tracker (private)
-cat .claude/learning-context.md    # Session preferences (private)
+cat PROGRESS.md
+cat .claude/learning-progress.md
+cat .claude/learning-context.md
 ```
 
-**Check learning mode**: Read the `Learning Mode` section in `.claude/learning-context.md`. If set to `LEARNING`, follow all pacing rules and explain before/after code generation. If set to `PRODUCTION`, generate code efficiently.
+**Check learning mode**: Read the `Learning Mode` section in `.claude/learning-context.md`.
+
+- If set to `LEARNING`:
+  - ALWAYS use the file writing tool (`write_file`, `edit_file`) to create or modify files
+  - NEVER paste full file contents or code blocks into the chat — the diff view handles code display
+  - After writing each file (which triggers the VS Code diff view), provide a `## Code Walkthrough` in chat explaining purpose, key functions, idioms, and gotchas
+  - Use analogies for abstract concepts
+  - Wait for user confirmation before proceeding to the next file
+
+- If set to `PRODUCTION`: generate code efficiently without walkthroughs
 
 ---
 
@@ -83,13 +91,14 @@ Follow three phases with `/clear` between each to manage context:
 
 **Phase 3 — Implement** (code + verify)
 - Read the plan file from Phase 2
+- In LEARNING mode: ALWAYS USE DIFF VIEW and explain BLOCKS of code for each file before creating it, referencing by line numbers, wait for user confirmation before continue
 - Follow the plan phase by phase
 - Run tests after each phase — don't proceed if tests fail
 - If reality doesn't match the plan, STOP and communicate:
   "Expected: X. Found: Y. How should I proceed?"
-- In LEARNING mode: explain each file after creating it, wait for confirmation
+- AVOID to print large files in the chat, only print shorter bits of code, like functions
 
-For trivial tasks (typo, single-file fix, config change): skip directly to implement.
+<!-- For trivial tasks (typo, single-file fix, config change): skip directly to implement. -->
 
 ### Phase Output Files
 
@@ -189,6 +198,7 @@ When committing, staging, or pushing is necessary:
 - **Provide git commands as text** for the user to copy and run, rather than executing them directly. This saves tokens and gives the user control.
 - **No co-authorship**: Do not add `Co-Authored-By` lines to commit messages. The developer is the sole author.
 - **Conventional commits**: Always use the format `type(scope): description` as shown above.
+- Avoid line breakers on git add commands because this affects the format after pasting on terminal and fails when executed
 - Subject line under 72 characters, imperative mood.
 - Reference WP numbers when applicable.
 
