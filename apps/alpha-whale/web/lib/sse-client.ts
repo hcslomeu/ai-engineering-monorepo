@@ -19,8 +19,8 @@ export async function streamChat(
       signal,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Network error";
-    callbacks.onError(message);
+    const errorMessage = err instanceof Error ? err.message : "Network error";
+    callbacks.onError(errorMessage);
     callbacks.onDone();
     return;
   }
@@ -62,7 +62,6 @@ export async function streamChat(
         const data = line.slice(6);
 
         if (data === "[DONE]") {
-          callbacks.onDone();
           return;
         }
 
@@ -79,9 +78,11 @@ export async function streamChat(
         }
       }
     }
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Stream read error";
+    callbacks.onError(errorMessage);
   } finally {
     reader.releaseLock();
+    callbacks.onDone();
   }
-
-  callbacks.onDone();
 }

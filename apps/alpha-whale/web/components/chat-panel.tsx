@@ -30,6 +30,12 @@ export function ChatPanel() {
     scrollBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
@@ -170,6 +176,7 @@ export function ChatPanel() {
           />
           {isStreaming ? (
             <Button
+              aria-label="Stop streaming"
               onClick={handleStop}
               variant="destructive"
               size="icon"
@@ -179,6 +186,7 @@ export function ChatPanel() {
             </Button>
           ) : (
             <Button
+              aria-label="Send message"
               onClick={() => void handleSend()}
               size="icon"
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-8 w-8"
