@@ -1,15 +1,15 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-02-20
+> **Last Updated:** 2026-02-26
 
 ---
 
 ## Current Position
 
 - **Active Phase:** AlphaWhale Flagship Roadmap (9 phases, 12 WPs)
-- **Active WP:** WP-118 complete — FastAPI + SSE Streaming
-- **Next WP:** WP-004 (Chat UI — Next.js + shadcn/ui — Phase 3)
+- **Active WP:** WP-004 complete — Chat UI (Next.js + shadcn/ui)
+- **Next WP:** WP-119 (Redis Caching — Phase 4)
 - **Blocker:** None
 - **Flagship:** AlphaWhale — conversational trading assistant (React chat UI, SSE streaming, RAG, LangGraph agent)
 
@@ -44,9 +44,9 @@
 | Technical indicators (RSI/MACD) | ⬜ Not started | WP-103 | 🔴 |
 | httpx + asyncio patterns | ✅ Practised | WP-117 | 🟡 Needs more reps |
 | FastAPI + SSE streaming | ✅ Practised | WP-118 | 🟡 Needs more reps |
-| TypeScript basics | ⬜ Not started | WP-004 | 🔴 |
-| Next.js / React | ⬜ Not started | WP-004 | 🔴 |
-| shadcn/ui | ⬜ Not started | WP-004 | 🔴 |
+| TypeScript basics | ✅ Practised | WP-004 | 🟡 Needs more reps |
+| Next.js / React | ✅ Practised | WP-004 | 🟡 Needs more reps |
+| shadcn/ui | ✅ Practised | WP-004 | 🟡 Needs more reps |
 | Redis async + caching | ⬜ Not started | WP-119 | 🔴 |
 | Instructor (structured extraction) | ⬜ Not started | WP-120 | 🔴 |
 | LangGraph multi-tool agents | ⬜ Not started | WP-114 | 🔴 |
@@ -86,6 +86,7 @@
 | WP-106 | LangSmith Observability | Feb 17, 2026 | #57 | AgentSettings, auto-tracing with RunnableConfig, evaluation dataset + 2 heuristic evaluators, 25 new tests (70 total) |
 | WP-117 | httpx + Async Patterns | Feb 19, 2026 | #125 | AsyncHTTPClient with Tenacity retry, gather_with_concurrency, HTTPClientError, 16 tests |
 | WP-118 | FastAPI + SSE Streaming | Feb 20, 2026 | #126 | FastAPI lifespan, SSE via sse-starlette, 3 endpoints (/chat/stream, /market/{asset}, /health), DI with Depends(), 13 tests (83 total) |
+| WP-004 | Chat UI | Feb 26, 2026 | #160 | Next.js 15 + shadcn/ui + TradingView chart, SSE streaming client, Replit design integration rebranded to AlphaWhale |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |
