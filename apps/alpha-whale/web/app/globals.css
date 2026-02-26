@@ -34,48 +34,48 @@
 }
 
 :root {
-  --background: 60 5% 96%;
-  --foreground: 20 14% 4%;
+  --background: 0 0% 90%;
+  --foreground: 0 0% 0%;
   --card: 0 0% 100%;
-  --card-foreground: 20 14% 4%;
+  --card-foreground: 0 0% 0%;
   --popover: 0 0% 100%;
-  --popover-foreground: 20 14% 4%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --primary: 82 65% 27%;
+  --popover-foreground: 0 0% 0%;
+  --border: 0 0% 85%;
+  --input: 0 0% 85%;
+  --primary: 13 88% 54%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 60 5% 90%;
-  --secondary-foreground: 20 14% 4%;
-  --muted: 60 5% 90%;
-  --muted-foreground: 25 5% 45%;
-  --accent: 60 5% 90%;
-  --accent-foreground: 20 14% 4%;
+  --secondary: 0 0% 95%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 0 0% 95%;
+  --accent-foreground: 0 0% 0%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --radius: 1rem;
-  --ring: 82 65% 27%;
+  --ring: 13 88% 54%;
 }
 
 .dark {
-  --background: 24 10% 10%;
-  --foreground: 60 5% 96%;
-  --card: 24 10% 15%;
-  --card-foreground: 60 5% 96%;
-  --popover: 24 10% 15%;
-  --popover-foreground: 60 5% 96%;
-  --border: 24 10% 20%;
-  --input: 24 10% 20%;
-  --primary: 74 64% 42%;
-  --primary-foreground: 24 10% 10%;
-  --secondary: 24 10% 20%;
-  --secondary-foreground: 60 5% 96%;
-  --muted: 24 10% 20%;
-  --muted-foreground: 60 5% 70%;
-  --accent: 24 10% 20%;
-  --accent-foreground: 60 5% 96%;
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 5%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 5%;
+  --popover-foreground: 0 0% 100%;
+  --border: 0 0% 10%;
+  --input: 0 0% 10%;
+  --primary: 13 88% 54%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 0 0% 10%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 74 64% 42%;
+  --ring: 13 88% 54%;
 }
 
 @layer base {
@@ -86,11 +86,18 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
   ::selection {
-    background-color: #d9e8aa;
-    color: #1a1a1a;
+    background-color: hsl(var(--primary) / 0.3);
+    color: inherit;
   }
-  .dark ::selection {
-    background-color: #416b17;
-    color: #ffffff;
+}
+
+@layer components {
+  .btn-simple {
+    @apply rounded-full h-11 px-6 font-bold transition-all;
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+  .btn-simple:hover {
+    opacity: 0.9;
   }
 }

@@ -19,7 +19,20 @@ const WELCOME_MESSAGE: Message = {
   content: "Hello! The market is open. What would you like to know about today?",
 };
 
-export function ChatPanel() {
+const SYMBOL_PATTERN = /\b(?:show|chart|display|switch to|pull up)\s+([A-Z]{1,5}(?::[A-Z]{1,5})?)\b/i;
+
+function extractSymbol(text: string): string | null {
+  const match = text.match(SYMBOL_PATTERN);
+  if (!match) return null;
+  const raw = match[1].toUpperCase();
+  return raw.includes(":") ? raw : `NASDAQ:${raw}`;
+}
+
+interface ChatPanelProps {
+  onSymbolChange?: (symbol: string) => void;
+}
+
+export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -39,6 +52,11 @@ export function ChatPanel() {
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
+
+    const detected = extractSymbol(trimmed);
+    if (detected && onSymbolChange) {
+      onSymbolChange(detected);
+    }
 
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInput("");
@@ -143,8 +161,8 @@ export function ChatPanel() {
                   className={cn(
                     "rounded-2xl px-4 py-2 text-sm max-w-[80%]",
                     isUser
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/50 border",
+                      ? "bg-foreground text-background"
+                      : "bg-card border",
                   )}
                 >
                   {message.content}

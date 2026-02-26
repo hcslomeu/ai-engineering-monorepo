@@ -5,6 +5,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "AlphaWhale — AI Trading Assistant",
   description: "Conversational AI assistant for stock market analysis",
+  icons: {
+    icon: "/logan_logo_white_bg.svg",
+  },
 };
 
 export default function RootLayout({
