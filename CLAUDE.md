@@ -154,6 +154,43 @@ These four principles guide all code decisions in this project:
 | **YAGNI** | You Aren't Gonna Need It | Only build what's requested. Don't design for hypothetical future requirements |
 | **SoC** | Separation of Concerns | One module, one purpose. Keep data, logic, and presentation in distinct layers |
 
+### Security-First Engineering
+
+Security is a design constraint, not an afterthought. Apply these rules during code generation:
+
+**Zero-Trust Logic:**
+- Never trust client-side data. Re-validate prices, quantities, permissions on the backend (FastAPI endpoint level)
+- Authorization must check resource ownership (`user_id`), not just authentication status
+- Use parameterized queries for all database operations (SQLAlchemy/BigQuery). Never interpolate user input into queries
+- Sanitize frontend inputs with appropriate escaping (DOMPurify for HTML, Zod schemas for form data)
+
+**Secret Management:**
+- Never hardcode API keys, tokens, or credentials. Use `SecretStr` (Pydantic) and environment variables
+- Verify `.env`, `.pem`, credentials files are in `.gitignore` before committing
+- If generated code contains a hardcoded secret, stop and refactor to use env vars immediately
+
+**Secure Defaults:**
+- CORS: use explicit origin allowlists, never wildcard `*` in production configs
+- Use HTTPS URLs for all external API calls
+- Implement rate limiting on public-facing endpoints
+
+**Dependency Hygiene:**
+- Before adding a new library, verify it exists on PyPI/npm and check its maintenance status
+- Prefer established libraries with security track records (e.g., argon2-cffi over hashlib for passwords)
+- Pin dependency versions in lockfiles
+
+**Frontend & Design System Protection:**
+- Enforce security headers in Next.js config (`next.config.ts`): `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
+- Implement Content Security Policy (CSP) using nonce-based script allowlisting — never `unsafe-inline` or `unsafe-eval`
+- Protect design system assets: use Subresource Integrity (SRI) hashes for any CDN-loaded fonts, icons, or scripts
+- Prevent CSS injection: never interpolate user input into `style` attributes or CSS custom properties
+- Disable source maps in production builds (`productionBrowserSourceMaps: false` in Next.js config)
+- Protect against clickjacking: use `X-Frame-Options` and CSP `frame-ancestors` to block embedding in unauthorized origins
+
+**Post-Generation Security Review:**
+- After writing auth, payment, or data-handling code, perform a "Bug Hunter" pass: "How would a malicious user bypass this or access another user's data?"
+- Ensure structured logs (structlog) never include raw secrets, tokens, or PII — use redaction
+
 ### Anti-Patterns to Avoid
 
 - **Violating DRY**: Check for existing libraries/utilities before building from scratch
@@ -161,6 +198,7 @@ These four principles guide all code decisions in this project:
 - **Violating YAGNI**: If it's not in the plan, don't build it. Add it to a future WP instead
 - **Violating SoC**: Don't add unrelated code to a file. Don't mix data access with business logic
 - **Knowledge gaps**: Use context7/langchain MCP for current docs. Don't guess at APIs
+- **Security shortcuts**: Don't disable CORS, skip input validation, or use `verify=False` on HTTP requests to "make it work"
 
 ### Verification
 

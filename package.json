@@ -4,7 +4,6 @@
   "license": "MIT",
   "scripts": {},
   "private": true,
-  "dependencies": {},
   "devDependencies": {
     "@nx/js": "22.4.1",
     "@swc-node/register": "~1.9.1",
@@ -12,6 +11,7 @@
     "@swc/helpers": "~0.5.11",
     "nx": "22.4.1",
     "prettier": "~3.6.2",
+    "shadcn": "^3.8.5",
     "tslib": "^2.3.0",
     "typescript": "~5.9.2"
   }

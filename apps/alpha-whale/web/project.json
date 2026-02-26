@@ -1,0 +1,17 @@
+{
+  "name": "alpha-whale-web",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/alpha-whale/web",
+  "targets": {
+    "dev": {
+      "command": "pnpm --filter alpha-whale-web dev"
+    },
+    "build": {
+      "command": "pnpm --filter alpha-whale-web build"
+    },
+    "lint": {
+      "command": "pnpm --filter alpha-whale-web lint"
+    }
+  }
+}

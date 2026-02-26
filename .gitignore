@@ -4,6 +4,7 @@
 dist
 tmp
 out-tsc
+.next
 
 # dependencies
 node_modules
@@ -79,3 +80,4 @@ site/
 
 # Temp files folder - used by me
 /uploaded-files
+.worktrees/
