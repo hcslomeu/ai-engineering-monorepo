@@ -4,7 +4,7 @@ FROM python:3.12-slim AS deps
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /uvx /bin/
 
 WORKDIR /app
 
@@ -16,9 +16,9 @@ COPY libs/py-core/ libs/py-core/
 # COPY libs/py-retrieval/ libs/py-retrieval/
 # COPY libs/py-streaming/ libs/py-streaming/
 
-# Install dependencies only (--no-install-workspace skips installing workspace packages)
+# Install dependencies and workspace packages
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --all-packages --no-install-workspace --frozen
+    uv sync --all-packages --frozen
 
 # ---- Stage 2: Runtime ----
 FROM python:3.12-slim AS runtime

@@ -26,7 +26,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --all-packages
+        run: uv sync --all-packages --locked
 
       - name: Run pytest
         run: uv run pytest --cov=libs --cov=apps --cov-report=term-missing  # TODO: Add --cov=pipelines when created
@@ -50,7 +50,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --all-packages
+        run: uv sync --all-packages --locked
 
       - name: Run ruff check
         run: uv run ruff check .
@@ -77,7 +77,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --all-packages
+        run: uv sync --all-packages --locked
 
       - name: Run bandit
         run: uv run bandit -r libs apps -ll  # TODO: Add pipelines when created
@@ -101,7 +101,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --all-packages
+        run: uv sync --all-packages --locked
 
       - name: Run mypy
         run: uv run mypy libs apps  # TODO: Add pipelines when created
