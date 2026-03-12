@@ -98,7 +98,7 @@ def run(user_input: str) -> str:
     """
     config: RunnableConfig = {"run_name": "alpha-whale-agent", "tags": ["alpha-whale"]}
     result = app.invoke(
-        {"messages": [HumanMessage(content=user_input)]},  # type: ignore[arg-type]
+        {"messages": [HumanMessage(content=user_input)]},  # type: ignore[call-overload]
         config=config,
     )
     return str(result["messages"][-1].content)

@@ -3,37 +3,29 @@ name = "ai-engineering-monorepo"
 version = "0.1.0"
 description = "Enterprise-grade AI Engineering Monorepo"
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.12"
 
-[tool.poetry]
-name = "ai-engineering-monorepo"
-version = "0.1.0"
-description = "Enterprise-grade AI Engineering Monorepo"
-authors = ["Humberto Lomeu <hcslomeu@gmail.com>"]
-readme = "README.md"
-package-mode = false
+[tool.uv]
+package = false
 
-[tool.poetry.dependencies]
-python = "^3.12"
-py-core = { path = "libs/py-core", develop = true }
-alpha-whale = { path = "apps/alpha-whale", develop = true }
+[tool.uv.workspace]
+members = ["libs/*", "apps/*"]
 
-[tool.poetry.group.dev.dependencies]
-# Testing
-pytest = "^8.0"
-pytest-cov = "^4.1"
-pytest-asyncio = "^0.23"
-
-# Linting & Formatting
-ruff = "^0.4"
-mypy = "^1.10"
-
-# Security scanning
-bandit = "^1.7"
-
-# Documentation
-mkdocs-material = "^9.5"
-types-requests = "^2.32.4.20260107"
+[dependency-groups]
+dev = [
+    # Testing
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "pytest-asyncio>=0.23",
+    # Linting & Formatting
+    "ruff>=0.4",
+    "mypy>=1.10",
+    # Security scanning
+    "bandit>=1.7",
+    # Documentation
+    "mkdocs-material>=9.5",
+    "types-requests>=2.32",
+]
 
 [tool.ruff]
 target-version = "py312"
@@ -52,6 +44,7 @@ select = [
 ]
 ignore = [
     "E501",   # line too long (handled by formatter)
+    "UP047",  # use PEP 695 type params (TODO: refactor when ready)
 ]
 
 [tool.ruff.lint.isort]
@@ -73,7 +66,3 @@ asyncio_mode = "auto"
 [tool.bandit]
 exclude_dirs = ["tests", "node_modules", ".venv"]
 skips = ["B101"]  # Allow assert statements in tests
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
