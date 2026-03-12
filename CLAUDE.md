@@ -113,11 +113,11 @@ These files persist between `/clear` calls and across sessions.
 Always run the quality checks:
 ```bash
 # Python quality checks
-poetry run ruff check .                    # Linting
-poetry run ruff format --check .           # Format check
-poetry run mypy libs apps pipelines        # Type checking
-poetry run bandit -r libs apps pipelines   # Security scan
-poetry run pytest                          # Tests
+uv run ruff check .                    # Linting
+uv run ruff format --check .           # Format check
+uv run mypy libs apps pipelines        # Type checking
+uv run bandit -r libs apps pipelines   # Security scan
+uv run pytest                          # Tests
 
 # TypeScript quality checks (when applicable)
 pnpm nx run-many -t lint
@@ -276,13 +276,13 @@ When a work package is marked as completed:
 Run specific test categories:
 ```bash
 # Unit tests only
-poetry run pytest libs apps pipelines
+uv run pytest libs apps pipelines
 
 # Integration tests only
-poetry run pytest tests/integration
+uv run pytest tests/integration
 
 # All tests with coverage
-poetry run pytest --cov=libs --cov=apps --cov-report=html
+uv run pytest --cov=libs --cov=apps --cov-report=html
 ```
 
 ---

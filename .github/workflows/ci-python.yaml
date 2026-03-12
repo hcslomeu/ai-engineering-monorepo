@@ -15,34 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | POETRY_VERSION=2.2.1 python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure Poetry
-        run: poetry config virtualenvs.in-project true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .venv
-            ~/.cache/pypoetry
-          key: poetry-${{ runner.os }}-py3.12-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-py3.12-
-
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: uv sync --all-packages
 
       - name: Run pytest
-        run: poetry run pytest --cov=libs --cov=apps --cov-report=term-missing  # TODO: Add --cov=pipelines when created
+        run: uv run pytest --cov=libs --cov=apps --cov-report=term-missing  # TODO: Add --cov=pipelines when created
 
   # Run ruff linter and formatter
   lint:
@@ -52,37 +39,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | POETRY_VERSION=2.2.1 python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure Poetry
-        run: poetry config virtualenvs.in-project true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .venv
-            ~/.cache/pypoetry
-          key: poetry-${{ runner.os }}-py3.12-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-py3.12-
-
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: uv sync --all-packages
 
       - name: Run ruff check
-        run: poetry run ruff check .
+        run: uv run ruff check .
 
       - name: Run ruff format check
-        run: poetry run ruff format --check .
+        run: uv run ruff format --check .
 
   # Run bandit security scanner
   security:
@@ -92,34 +66,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | POETRY_VERSION=2.2.1 python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure Poetry
-        run: poetry config virtualenvs.in-project true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .venv
-            ~/.cache/pypoetry
-          key: poetry-${{ runner.os }}-py3.12-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-py3.12-
-
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: uv sync --all-packages
 
       - name: Run bandit
-        run: poetry run bandit -r libs apps -ll  # TODO: Add pipelines when created
+        run: uv run bandit -r libs apps -ll  # TODO: Add pipelines when created
 
   # Run mypy type checker
   typecheck:
@@ -129,31 +90,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | POETRY_VERSION=2.2.1 python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure Poetry
-        run: poetry config virtualenvs.in-project true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            .venv
-            ~/.cache/pypoetry
-          key: poetry-${{ runner.os }}-py3.12-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-py3.12-
-
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: uv sync --all-packages
 
       - name: Run mypy
-        run: poetry run mypy libs apps  # TODO: Add pipelines when created
+        run: uv run mypy libs apps  # TODO: Add pipelines when created
