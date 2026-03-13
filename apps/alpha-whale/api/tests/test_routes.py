@@ -1,5 +1,7 @@
 """Integration tests for AlphaWhale API routes."""
 
+from unittest.mock import MagicMock
+
 from httpx import AsyncClient
 
 # --- /health endpoint ---
@@ -30,36 +32,59 @@ async def test_health_checks_are_stubs(client: AsyncClient) -> None:
 # --- /market/{asset} endpoint ---
 
 
-async def test_market_returns_ohlcv_data(client: AsyncClient, mock_http_client: None) -> None:
-    response = await client.get("/market/BTC")
+async def test_market_returns_ohlcv_data(
+    client: AsyncClient, mock_supabase: MagicMock
+) -> None:
+    response = await client.get("/market/AAPL")
     assert response.status_code == 200
     data = response.json()
-    assert data["asset"] == "BTC"
-    assert data["date"] == "2026-02-19"
-    assert data["close"] == 50000.0
-    assert data["volume"] == 12345.67
-    assert data["source"] == "alpha_vantage"
+    assert len(data) == 2
+    assert data[0]["ticker"] == "AAPL"
+    assert data[0]["date"] == "2026-03-12"
 
 
-async def test_market_uppercases_asset(client: AsyncClient, mock_http_client: None) -> None:
-    response = await client.get("/market/btc")
-    data = response.json()
-    assert data["asset"] == "BTC"
-
-
-async def test_market_returns_latest_date(client: AsyncClient, mock_http_client: None) -> None:
-    response = await client.get("/market/BTC")
-    data = response.json()
-    assert data["date"] == "2026-02-19"  # First key = most recent
-
-
-async def test_market_returns_502_on_upstream_error(
-    client: AsyncClient, mock_http_client_error: None
+async def test_market_response_contains_ohlcv_fields(
+    client: AsyncClient, mock_supabase: MagicMock
 ) -> None:
-    response = await client.get("/market/INVALID")
-    assert response.status_code == 502
-    data = response.json()
-    assert "detail" in data
+    response = await client.get("/market/AAPL")
+    row = response.json()[0]
+    for field in ("ticker", "date", "open", "high", "low", "close", "volume"):
+        assert field in row, f"Missing field: {field}"
+
+
+async def test_market_uppercases_ticker(
+    client: AsyncClient, mock_supabase: MagicMock
+) -> None:
+    await client.get("/market/aapl")
+    mock_supabase.table.return_value.select.return_value.eq.assert_called_with(
+        "ticker", "AAPL"
+    )
+
+
+async def test_market_default_days_limit(
+    client: AsyncClient, mock_supabase: MagicMock
+) -> None:
+    await client.get("/market/AAPL")
+    mock_supabase.table.return_value.select.return_value.eq.return_value.order.return_value.limit.assert_called_with(
+        30
+    )
+
+
+async def test_market_custom_days_param(
+    client: AsyncClient, mock_supabase: MagicMock
+) -> None:
+    await client.get("/market/AAPL?days=5")
+    mock_supabase.table.return_value.select.return_value.eq.return_value.order.return_value.limit.assert_called_with(
+        5
+    )
+
+
+async def test_market_empty_result_returns_empty_list(
+    client: AsyncClient, mock_supabase_empty: MagicMock
+) -> None:
+    response = await client.get("/market/UNKNOWN")
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 # --- /chat/stream endpoint ---

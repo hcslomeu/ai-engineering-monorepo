@@ -4,53 +4,50 @@ from collections.abc import AsyncGenerator
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
-import httpx
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
-from api.dependencies import get_graph, get_http_client
+from api.dependencies import get_graph, get_supabase
 from api.main import create_app
 
-FAKE_ALPHA_VANTAGE_RESPONSE: dict[str, Any] = {
-    "Meta Data": {"1. Information": "Daily Prices (Digital Currency)"},
-    "Time Series (Digital Currency Daily)": {
-        "2026-02-19": {
-            "1. open": "48000.00",
-            "2. high": "51000.00",
-            "3. low": "47500.00",
-            "4. close": "50000.00",
-            "5. volume": "12345.67",
-        },
-        "2026-02-18": {
-            "1. open": "47000.00",
-            "2. high": "49000.00",
-            "3. low": "46500.00",
-            "4. close": "48000.00",
-            "5. volume": "11234.56",
-        },
+SAMPLE_MARKET_ROWS = [
+    {
+        "ticker": "AAPL",
+        "date": "2026-03-12",
+        "open": 178.50,
+        "high": 180.25,
+        "low": 177.80,
+        "close": 179.90,
+        "volume": 52_000_000,
     },
-}
-
-FAKE_ALPHA_VANTAGE_ERROR: dict[str, str] = {
-    "Error Message": "Invalid API call. Please check the symbol.",
-}
-
-
-def _make_mock_response(data: dict[str, Any], status_code: int = 200) -> httpx.Response:
-    """Build a fake httpx.Response with JSON body."""
-    return httpx.Response(
-        status_code=status_code,
-        json=data,
-        request=httpx.Request("GET", "http://test"),
-    )
+    {
+        "ticker": "AAPL",
+        "date": "2026-03-11",
+        "open": 176.00,
+        "high": 179.10,
+        "low": 175.50,
+        "close": 178.50,
+        "volume": 48_000_000,
+    },
+]
 
 
-def _build_mock_http_client(response_data: dict[str, Any]) -> AsyncMock:
-    """Create a mock AsyncHTTPClient that returns pre-canned data."""
-    mock_client = AsyncMock()
-    mock_client.get = AsyncMock(return_value=_make_mock_response(response_data))
-    return mock_client
+def _build_supabase_mock(rows: list[dict[str, Any]]) -> MagicMock:
+    """Build a mock Supabase client that returns given rows for any query."""
+    result = MagicMock()
+    result.data = rows
+
+    builder = MagicMock()
+    builder.select.return_value = builder
+    builder.eq.return_value = builder
+    builder.order.return_value = builder
+    builder.limit.return_value = builder
+    builder.execute = AsyncMock(return_value=result)
+
+    client = MagicMock()
+    client.table.return_value = builder
+    return client
 
 
 async def _fake_stream_events(
@@ -85,22 +82,24 @@ async def client(app: Any) -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def mock_http_client(app: Any) -> None:
-    """Override HTTP client dependency with a fake Alpha Vantage success response."""
-    mock = _build_mock_http_client(FAKE_ALPHA_VANTAGE_RESPONSE)
-    app.dependency_overrides[get_http_client] = lambda: mock
-
-
-@pytest.fixture
-def mock_http_client_error(app: Any) -> None:
-    """Override HTTP client dependency with a fake Alpha Vantage error response."""
-    mock = _build_mock_http_client(FAKE_ALPHA_VANTAGE_ERROR)
-    app.dependency_overrides[get_http_client] = lambda: mock
-
-
-@pytest.fixture
 def mock_graph(app: Any) -> None:
     """Override graph dependency with a fake streaming graph."""
     mock = MagicMock()
     mock.astream_events = _fake_stream_events
     app.dependency_overrides[get_graph] = lambda: mock
+
+
+@pytest.fixture
+def mock_supabase(app: Any) -> MagicMock:
+    """Override Supabase dependency with a mock returning sample data."""
+    mock = _build_supabase_mock(SAMPLE_MARKET_ROWS)
+    app.dependency_overrides[get_supabase] = lambda: mock
+    return mock
+
+
+@pytest.fixture
+def mock_supabase_empty(app: Any) -> MagicMock:
+    """Override Supabase dependency with a mock returning no data."""
+    mock = _build_supabase_mock([])
+    app.dependency_overrides[get_supabase] = lambda: mock
+    return mock

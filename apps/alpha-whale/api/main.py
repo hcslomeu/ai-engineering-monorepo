@@ -7,7 +7,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import APISettings
-from py_core import AsyncHTTPClient, get_logger
+from ingestion.supabase_client import create_supabase_client
+from py_core import get_logger
 
 logger = get_logger("api")
 
@@ -16,14 +17,12 @@ logger = get_logger("api")
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Manage shared resources across the app lifetime."""
     settings: APISettings = app.state.settings
-    client = AsyncHTTPClient(
-        base_url=settings.market_data_base_url,
-        timeout=15.0,
+    app.state.supabase = await create_supabase_client(
+        url=settings.supabase_url,
+        key=settings.supabase_key.get_secret_value(),
     )
-    async with client:
-        app.state.http_client = client
-        logger.info("api_started", app_name=settings.app_name)
-        yield
+    logger.info("api_started", app_name=settings.app_name)
+    yield
     logger.info("api_shutdown")
 
 

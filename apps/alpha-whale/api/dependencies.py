@@ -4,14 +4,14 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 from langgraph.graph.state import CompiledStateGraph
+from supabase import AsyncClient
 
 from api.config import APISettings
-from py_core import AsyncHTTPClient
 
 
-def get_http_client(request: Request) -> AsyncHTTPClient:
-    """Retrieve the shared AsyncHTTPClient from app state."""
-    client: AsyncHTTPClient = request.app.state.http_client
+def get_supabase(request: Request) -> AsyncClient:
+    """Retrieve the shared Supabase client from app state."""
+    client: AsyncClient = request.app.state.supabase
     return client
 
 
@@ -30,6 +30,6 @@ def get_graph() -> CompiledStateGraph:
 
 
 # Type aliases for cleaner route signatures
-HTTPClientDep = Annotated[AsyncHTTPClient, Depends(get_http_client)]
+SupabaseDep = Annotated[AsyncClient, Depends(get_supabase)]
 GraphDep = Annotated[CompiledStateGraph, Depends(get_graph)]
 SettingsDep = Annotated[APISettings, Depends(get_settings)]

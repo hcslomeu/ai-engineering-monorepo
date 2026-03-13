@@ -5,16 +5,15 @@ from pydantic_settings import BaseSettings
 
 
 class IngestionSettings(BaseSettings):
-    """Environment-based settings for BigQuery ingestion.
+    """Environment-based settings for the Massive API + Supabase pipeline.
 
-    All fields map to environment variables with the given prefix.
-    Example: ``INGESTION_GCP_PROJECT_ID=my-project`` sets ``gcp_project_id``.
+    All fields map to environment variables with the ``INGESTION_`` prefix.
+    Example: ``INGESTION_SUPABASE_URL=https://xxx.supabase.co`` sets ``supabase_url``.
     """
 
-    gcp_project_id: str
-    bq_dataset: str = "alpha_whale_bronze"
-    bq_table: str = "crypto_daily"
-    alpha_vantage_api_key: SecretStr
-    alpha_vantage_base_url: str = "https://www.alphavantage.co/query"
+    supabase_url: str
+    supabase_key: SecretStr
+    massive_api_key: SecretStr
+    massive_base_url: str = "https://api.polygon.io"
 
     model_config = {"env_prefix": "INGESTION_"}
