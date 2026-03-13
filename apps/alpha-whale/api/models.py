@@ -17,16 +17,15 @@ class ChatStreamEvent(BaseModel):
 
 
 class MarketDataResponse(BaseModel):
-    """Most recent daily OHLCV data for a crypto asset."""
+    """Daily OHLCV data for a ticker (stock or crypto)."""
 
-    asset: str
+    ticker: str
     date: str
     open: float
     high: float
     low: float
     close: float
-    volume: float
-    source: str = "alpha_vantage"
+    volume: int
 
 
 class HealthCheck(BaseModel):
