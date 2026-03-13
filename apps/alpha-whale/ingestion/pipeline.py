@@ -6,15 +6,15 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from py_core.async_utils import AsyncHTTPClient
-from py_core.logging import get_logger
 from supabase import AsyncClient
 
 from ingestion.bronze import upsert_indicators, upsert_market_data
 from ingestion.config import IngestionSettings
 from ingestion.massive import MassiveClient
-from ingestion.schemas import IndicatorRow
+from ingestion.schemas import IndicatorRow, IndicatorValue, MACDValue
 from ingestion.stochastic import compute_stochastic
+from py_core.async_utils import AsyncHTTPClient
+from py_core.logging import get_logger
 
 logger = get_logger("ingestion.pipeline")
 
@@ -83,9 +83,7 @@ async def _ingest_ticker(
         stoch = compute_stochastic(bars)
 
         # Step 4: merge indicators into rows keyed by date
-        indicator_rows = _merge_indicators(
-            ticker, sma_200, ema_8, ema_80, macd, rsi, stoch
-        )
+        indicator_rows = _merge_indicators(ticker, sma_200, ema_8, ema_80, macd, rsi, stoch)
         result.indicator_rows = await upsert_indicators(supabase, indicator_rows)
         logger.info("indicators_upserted", ticker=ticker, rows=result.indicator_rows)
 
@@ -98,11 +96,11 @@ async def _ingest_ticker(
 
 def _merge_indicators(
     ticker: str,
-    sma_200: list,
-    ema_8: list,
-    ema_80: list,
-    macd: list,
-    rsi: list,
+    sma_200: list[IndicatorValue],
+    ema_8: list[IndicatorValue],
+    ema_80: list[IndicatorValue],
+    macd: list[MACDValue],
+    rsi: list[IndicatorValue],
     stoch: dict[date, tuple[Decimal, Decimal | None]],
 ) -> list[IndicatorRow]:
     """Merge all indicator sources into IndicatorRow objects keyed by date."""
@@ -117,11 +115,11 @@ def _merge_indicators(
     for v in ema_80:
         data.setdefault(v.timestamp, {})["ema_80"] = v.value
 
-    for v in macd:
-        entry = data.setdefault(v.timestamp, {})
-        entry["macd_value"] = v.value
-        entry["macd_signal"] = v.signal
-        entry["macd_histogram"] = v.histogram
+    for m in macd:
+        entry = data.setdefault(m.timestamp, {})
+        entry["macd_value"] = m.value
+        entry["macd_signal"] = m.signal
+        entry["macd_histogram"] = m.histogram
 
     for v in rsi:
         data.setdefault(v.timestamp, {})["rsi_14"] = v.value
@@ -131,9 +129,7 @@ def _merge_indicators(
         entry["stoch_k"] = k
         entry["stoch_d"] = d
 
-    return [
-        IndicatorRow(ticker=ticker, date=dt, **fields) for dt, fields in data.items()
-    ]
+    return [IndicatorRow(ticker=ticker, date=dt, **fields) for dt, fields in data.items()]
 
 
 async def run_pipeline(
@@ -176,9 +172,7 @@ async def run_pipeline(
 
         for ticker in tickers:
             logger.info("ingesting_ticker", ticker=ticker)
-            result = await _ingest_ticker(
-                ticker, massive, supabase, from_date, to_date
-            )
+            result = await _ingest_ticker(ticker, massive, supabase, from_date, to_date)
             report.results.append(result)
 
     report.finished_at = datetime.now(UTC)

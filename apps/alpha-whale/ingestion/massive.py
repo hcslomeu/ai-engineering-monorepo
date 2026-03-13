@@ -6,9 +6,8 @@ import asyncio
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from py_core.async_utils import AsyncHTTPClient
-
 from ingestion.schemas import IndicatorValue, MACDValue, OHLCVBar
+from py_core.async_utils import AsyncHTTPClient
 
 
 def _ts_to_date(ms: int) -> date:
@@ -60,10 +59,7 @@ class MassiveClient:
         Returns:
             List of ``OHLCVBar`` sorted by date ascending.
         """
-        url = (
-            f"/v2/aggs/ticker/{ticker}/range/1/day"
-            f"/{from_date.isoformat()}/{to_date.isoformat()}"
-        )
+        url = f"/v2/aggs/ticker/{ticker}/range/1/day/{from_date.isoformat()}/{to_date.isoformat()}"
         params = self._params({"adjusted": "true", "limit": 50000, "sort": "asc"})
 
         bars: list[OHLCVBar] = []
@@ -166,14 +162,16 @@ class MassiveClient:
     ) -> list[MACDValue]:
         """Fetch MACD indicator values with pagination."""
         url = f"/v1/indicators/macd/{ticker}"
-        params = self._params({
-            "timespan": "day",
-            "short_window": short_window,
-            "long_window": long_window,
-            "signal_window": signal_window,
-            "series_type": "close",
-            "limit": 5000,
-        })
+        params = self._params(
+            {
+                "timespan": "day",
+                "short_window": short_window,
+                "long_window": long_window,
+                "signal_window": signal_window,
+                "series_type": "close",
+                "limit": 5000,
+            }
+        )
 
         all_values: list[MACDValue] = []
         next_url: str | None = url
@@ -198,7 +196,7 @@ class MassiveClient:
         return all_values
 
     # ------------------------------------------------------------------
-    # All indicators (concurrent)
+    # All indicators (fetched sequentially with rate-limit delays)
     # ------------------------------------------------------------------
 
     async def fetch_all_indicators(
@@ -209,7 +207,7 @@ class MassiveClient:
         list[IndicatorValue],  # sma_200
         list[IndicatorValue],  # ema_8
         list[IndicatorValue],  # ema_80
-        list[MACDValue],       # macd
+        list[MACDValue],  # macd
         list[IndicatorValue],  # rsi_14
     ]:
         """Fetch all five indicators sequentially with rate-limit delay.

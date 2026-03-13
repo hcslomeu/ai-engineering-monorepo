@@ -24,11 +24,7 @@ async def upsert_market_data(
         return 0
 
     rows = [bar.model_dump(mode="json") for bar in bars]
-    await (
-        client.table("market_data_daily")
-        .upsert(rows, on_conflict="ticker,date")
-        .execute()
-    )
+    await client.table("market_data_daily").upsert(rows, on_conflict="ticker,date").execute()
     return len(rows)
 
 
@@ -52,8 +48,6 @@ async def upsert_indicators(
 
     rows = [row.model_dump(mode="json") for row in indicators]
     await (
-        client.table("technical_indicators_daily")
-        .upsert(rows, on_conflict="ticker,date")
-        .execute()
+        client.table("technical_indicators_daily").upsert(rows, on_conflict="ticker,date").execute()
     )
     return len(rows)

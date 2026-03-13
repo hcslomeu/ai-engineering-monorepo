@@ -16,7 +16,6 @@ from ingestion.pipeline import (
 )
 from ingestion.schemas import IndicatorRow, IndicatorValue, MACDValue, OHLCVBar
 
-
 # --- Fixtures ---
 
 
@@ -58,11 +57,13 @@ class TestTickerResult:
 
 class TestIngestionReport:
     def test_succeeded_and_failed_counts(self) -> None:
-        report = IngestionReport(results=[
-            TickerResult(ticker="AAPL", ohlcv_rows=100),
-            TickerResult(ticker="MSFT", error="failed"),
-            TickerResult(ticker="GOOGL", ohlcv_rows=50),
-        ])
+        report = IngestionReport(
+            results=[
+                TickerResult(ticker="AAPL", ohlcv_rows=100),
+                TickerResult(ticker="MSFT", error="failed"),
+                TickerResult(ticker="GOOGL", ohlcv_rows=50),
+            ]
+        )
         assert report.succeeded == 2
         assert report.failed == 1
 
@@ -132,7 +133,11 @@ class TestMergeIndicators:
         sma = [IndicatorValue(timestamp=dt, value=Decimal("145"))]
         ema_8 = [IndicatorValue(timestamp=dt, value=Decimal("152"))]
         ema_80 = [IndicatorValue(timestamp=dt, value=Decimal("148"))]
-        macd = [MACDValue(timestamp=dt, value=Decimal("2"), signal=Decimal("1.5"), histogram=Decimal("0.5"))]
+        macd = [
+            MACDValue(
+                timestamp=dt, value=Decimal("2"), signal=Decimal("1.5"), histogram=Decimal("0.5")
+            )
+        ]
         rsi = [IndicatorValue(timestamp=dt, value=Decimal("65"))]
         stoch = {dt: (Decimal("75"), Decimal("70"))}
 
@@ -201,14 +206,22 @@ class TestRunPipeline:
         # MACD response
         macd_resp = MagicMock()
         macd_resp.json.return_value = {
-            "results": {"values": [{"timestamp": 1768435200000, "value": 1.0, "signal": 0.5, "histogram": 0.5}]},
+            "results": {
+                "values": [
+                    {"timestamp": 1768435200000, "value": 1.0, "signal": 0.5, "histogram": 0.5}
+                ]
+            },
         }
 
         # Order: ohlcv, then sma, ema_8, ema_80, macd, rsi
         mock_http.get.side_effect = [ohlcv_resp, ind_resp, ind_resp, ind_resp, macd_resp, ind_resp]
 
         with (
-            patch("ingestion.supabase_client.create_supabase_client", new_callable=AsyncMock, return_value=mock_supabase),
+            patch(
+                "ingestion.supabase_client.create_supabase_client",
+                new_callable=AsyncMock,
+                return_value=mock_supabase,
+            ),
             patch("ingestion.pipeline.AsyncHTTPClient") as MockHTTP,
         ):
             MockHTTP.return_value.__aenter__ = AsyncMock(return_value=mock_http)

@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from ingestion.config import IngestionSettings
 from ingestion.schemas import IndicatorRow, MACDValue, OHLCVBar
 
-
 # --- Fixtures ---
 
 

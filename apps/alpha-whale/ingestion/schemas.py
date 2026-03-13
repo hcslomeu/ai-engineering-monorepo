@@ -63,9 +63,15 @@ class IndicatorRow(BaseModel):
     def _round_decimals(self) -> "IndicatorRow":
         precision = Decimal("0.0001")
         for field_name in (
-            "ema_8", "ema_80", "sma_200",
-            "macd_value", "macd_signal", "macd_histogram",
-            "rsi_14", "stoch_k", "stoch_d",
+            "ema_8",
+            "ema_80",
+            "sma_200",
+            "macd_value",
+            "macd_signal",
+            "macd_histogram",
+            "rsi_14",
+            "stoch_k",
+            "stoch_d",
         ):
             value = getattr(self, field_name)
             if value is not None:

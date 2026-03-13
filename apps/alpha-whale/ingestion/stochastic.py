@@ -52,7 +52,7 @@ def compute_stochastic(
             result[dt] = (k, None)
         else:
             d_window = [k_values[j][1] for j in range(idx - D_PERIOD + 1, idx + 1)]
-            d = sum(d_window) / D_PERIOD
+            d = sum(d_window, start=Decimal("0")) / Decimal(D_PERIOD)
             result[dt] = (k, d)
 
     return result

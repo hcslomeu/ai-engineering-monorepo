@@ -9,7 +9,6 @@ import pytest
 
 from ingestion.massive import MassiveClient, _asset_type, _ts_to_date
 
-
 # --- Helpers ---
 
 # Unix ms for 2026-01-15
@@ -55,23 +54,23 @@ class TestHelpers:
 
 class TestFetchOHLCV:
     @pytest.mark.asyncio()
-    async def test_returns_parsed_bars(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": [
-                {
-                    "t": TS_JAN_15,
-                    "o": 150.0,
-                    "h": 155.0,
-                    "l": 149.0,
-                    "c": 154.0,
-                    "v": 1000000,
-                    "vw": 152.5,
-                    "n": 5000,
-                },
-            ],
-        })
+    async def test_returns_parsed_bars(self, client: MassiveClient, mock_http: AsyncMock) -> None:
+        mock_http.get.return_value = _json_response(
+            {
+                "results": [
+                    {
+                        "t": TS_JAN_15,
+                        "o": 150.0,
+                        "h": 155.0,
+                        "l": 149.0,
+                        "c": 154.0,
+                        "v": 1000000,
+                        "vw": 152.5,
+                        "n": 5000,
+                    },
+                ],
+            }
+        )
 
         bars = await client.fetch_ohlcv("AAPL", date(2026, 1, 1), date(2026, 1, 31))
 
@@ -85,16 +84,18 @@ class TestFetchOHLCV:
         assert bar.num_transactions == 5000
 
     @pytest.mark.asyncio()
-    async def test_handles_pagination(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
-        page_1 = _json_response({
-            "results": [{"t": TS_JAN_15, "o": 150, "h": 155, "l": 149, "c": 154, "v": 100}],
-            "next_url": "/v2/aggs/next-page",
-        })
-        page_2 = _json_response({
-            "results": [{"t": TS_JAN_16, "o": 154, "h": 158, "l": 153, "c": 157, "v": 200}],
-        })
+    async def test_handles_pagination(self, client: MassiveClient, mock_http: AsyncMock) -> None:
+        page_1 = _json_response(
+            {
+                "results": [{"t": TS_JAN_15, "o": 150, "h": 155, "l": 149, "c": 154, "v": 100}],
+                "next_url": "/v2/aggs/next-page",
+            }
+        )
+        page_2 = _json_response(
+            {
+                "results": [{"t": TS_JAN_16, "o": 154, "h": 158, "l": 153, "c": 157, "v": 200}],
+            }
+        )
         mock_http.get.side_effect = [page_1, page_2]
 
         bars = await client.fetch_ohlcv("AAPL", date(2026, 1, 1), date(2026, 1, 31))
@@ -105,9 +106,7 @@ class TestFetchOHLCV:
         assert mock_http.get.call_count == 2
 
     @pytest.mark.asyncio()
-    async def test_empty_results(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
+    async def test_empty_results(self, client: MassiveClient, mock_http: AsyncMock) -> None:
         mock_http.get.return_value = _json_response({"results": []})
 
         bars = await client.fetch_ohlcv("AAPL", date(2026, 1, 1), date(2026, 1, 31))
@@ -117,21 +116,25 @@ class TestFetchOHLCV:
     async def test_optional_fields_missing(
         self, client: MassiveClient, mock_http: AsyncMock
     ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": [{"t": TS_JAN_15, "o": 150, "h": 155, "l": 149, "c": 154, "v": 100}],
-        })
+        mock_http.get.return_value = _json_response(
+            {
+                "results": [{"t": TS_JAN_15, "o": 150, "h": 155, "l": 149, "c": 154, "v": 100}],
+            }
+        )
 
         bars = await client.fetch_ohlcv("AAPL", date(2026, 1, 1), date(2026, 1, 31))
         assert bars[0].vwap is None
         assert bars[0].num_transactions is None
 
     @pytest.mark.asyncio()
-    async def test_crypto_ticker(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": [{"t": TS_JAN_15, "o": 97000, "h": 98000, "l": 96000, "c": 97500, "v": 500}],
-        })
+    async def test_crypto_ticker(self, client: MassiveClient, mock_http: AsyncMock) -> None:
+        mock_http.get.return_value = _json_response(
+            {
+                "results": [
+                    {"t": TS_JAN_15, "o": 97000, "h": 98000, "l": 96000, "c": 97500, "v": 500}
+                ],
+            }
+        )
 
         bars = await client.fetch_ohlcv("X:BTCUSD", date(2026, 1, 1), date(2026, 1, 31))
         assert bars[0].asset_type == "crypto"
@@ -143,17 +146,17 @@ class TestFetchOHLCV:
 
 class TestSingleIndicators:
     @pytest.mark.asyncio()
-    async def test_fetch_sma(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": {
-                "values": [
-                    {"timestamp": TS_JAN_15, "value": 145.25},
-                    {"timestamp": TS_JAN_16, "value": 145.50},
-                ],
-            },
-        })
+    async def test_fetch_sma(self, client: MassiveClient, mock_http: AsyncMock) -> None:
+        mock_http.get.return_value = _json_response(
+            {
+                "results": {
+                    "values": [
+                        {"timestamp": TS_JAN_15, "value": 145.25},
+                        {"timestamp": TS_JAN_16, "value": 145.50},
+                    ],
+                },
+            }
+        )
 
         values = await client.fetch_sma("AAPL", window=200)
 
@@ -162,12 +165,12 @@ class TestSingleIndicators:
         assert values[0].value == Decimal("145.25")
 
     @pytest.mark.asyncio()
-    async def test_fetch_ema(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": {"values": [{"timestamp": TS_JAN_15, "value": 152.80}]},
-        })
+    async def test_fetch_ema(self, client: MassiveClient, mock_http: AsyncMock) -> None:
+        mock_http.get.return_value = _json_response(
+            {
+                "results": {"values": [{"timestamp": TS_JAN_15, "value": 152.80}]},
+            }
+        )
 
         values = await client.fetch_ema("AAPL", window=8)
 
@@ -175,12 +178,12 @@ class TestSingleIndicators:
         assert values[0].value == Decimal("152.80")
 
     @pytest.mark.asyncio()
-    async def test_fetch_rsi(
-        self, client: MassiveClient, mock_http: AsyncMock
-    ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": {"values": [{"timestamp": TS_JAN_15, "value": 65.4}]},
-        })
+    async def test_fetch_rsi(self, client: MassiveClient, mock_http: AsyncMock) -> None:
+        mock_http.get.return_value = _json_response(
+            {
+                "results": {"values": [{"timestamp": TS_JAN_15, "value": 65.4}]},
+            }
+        )
 
         values = await client.fetch_rsi("AAPL", window=14)
 
@@ -205,18 +208,20 @@ class TestFetchMACD:
     async def test_returns_three_components(
         self, client: MassiveClient, mock_http: AsyncMock
     ) -> None:
-        mock_http.get.return_value = _json_response({
-            "results": {
-                "values": [
-                    {
-                        "timestamp": TS_JAN_15,
-                        "value": 2.35,
-                        "signal": 1.80,
-                        "histogram": 0.55,
-                    },
-                ],
-            },
-        })
+        mock_http.get.return_value = _json_response(
+            {
+                "results": {
+                    "values": [
+                        {
+                            "timestamp": TS_JAN_15,
+                            "value": 2.35,
+                            "signal": 1.80,
+                            "histogram": 0.55,
+                        },
+                    ],
+                },
+            }
+        )
 
         values = await client.fetch_macd("AAPL")
 
@@ -234,16 +239,20 @@ class TestFetchAllIndicators:
     async def test_returns_five_result_lists(
         self, client: MassiveClient, mock_http: AsyncMock
     ) -> None:
-        single_resp = _json_response({
-            "results": {"values": [{"timestamp": TS_JAN_15, "value": 100.0}]},
-        })
-        macd_resp = _json_response({
-            "results": {
-                "values": [
-                    {"timestamp": TS_JAN_15, "value": 1.0, "signal": 0.5, "histogram": 0.5},
-                ],
-            },
-        })
+        single_resp = _json_response(
+            {
+                "results": {"values": [{"timestamp": TS_JAN_15, "value": 100.0}]},
+            }
+        )
+        macd_resp = _json_response(
+            {
+                "results": {
+                    "values": [
+                        {"timestamp": TS_JAN_15, "value": 1.0, "signal": 0.5, "histogram": 0.5},
+                    ],
+                },
+            }
+        )
         # Order: sma, ema_8, ema_80, macd, rsi
         mock_http.get.side_effect = [single_resp, single_resp, single_resp, macd_resp, single_resp]
 

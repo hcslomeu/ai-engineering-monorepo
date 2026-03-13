@@ -3,7 +3,7 @@
 import json
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from langchain_core.messages import HumanMessage
 from sse_starlette import EventSourceResponse
 
@@ -51,18 +51,23 @@ async def chat_stream(body: ChatRequest, graph: GraphDep) -> EventSourceResponse
 async def get_market_data(
     asset: str,
     supabase: SupabaseDep,
-    days: int = 30,
+    days: int = Query(default=30, ge=1, le=3650),
 ) -> list[MarketDataResponse]:
     """Return recent daily OHLCV data for a ticker from Supabase."""
     ticker = asset.upper()
-    result = await supabase.table("market_data_daily").select(
-        "ticker, date, open, high, low, close, volume"
-    ).eq("ticker", ticker).order("date", desc=True).limit(days).execute()
+    result = (
+        await supabase.table("market_data_daily")
+        .select("ticker, date, open, high, low, close, volume")
+        .eq("ticker", ticker)
+        .order("date", desc=True)
+        .limit(days)
+        .execute()
+    )
 
     if not result.data:
         return []
 
-    return [MarketDataResponse(**row) for row in result.data]
+    return [MarketDataResponse(**row) for row in result.data]  # type: ignore[arg-type]
 
 
 @router.get("/health", response_model=HealthResponse)
