@@ -26,16 +26,39 @@ def _make_supabase_mock(rows: list[dict[str, Any]]) -> MagicMock:
 
 
 SAMPLE_PRICE_ROWS = [
-    {"date": "2026-03-12", "ticker": "AAPL", "open": 178.5, "high": 180.2, "low": 177.8, "close": 179.9, "volume": 52_000_000},
-    {"date": "2026-03-11", "ticker": "AAPL", "open": 176.0, "high": 179.1, "low": 175.5, "close": 178.5, "volume": 48_000_000},
+    {
+        "date": "2026-03-12",
+        "ticker": "AAPL",
+        "open": 178.5,
+        "high": 180.2,
+        "low": 177.8,
+        "close": 179.9,
+        "volume": 52_000_000,
+    },
+    {
+        "date": "2026-03-11",
+        "ticker": "AAPL",
+        "open": 176.0,
+        "high": 179.1,
+        "low": 175.5,
+        "close": 178.5,
+        "volume": 48_000_000,
+    },
 ]
 
 SAMPLE_INDICATOR_ROWS = [
     {
-        "date": "2026-03-12", "ticker": "AAPL",
-        "ema_8": 178.12, "ema_80": 172.45, "sma_200": 165.30,
-        "macd_value": 2.15, "macd_signal": 1.87, "macd_histogram": 0.28,
-        "rsi_14": 62.4, "stoch_k": 71.2, "stoch_d": 68.5,
+        "date": "2026-03-12",
+        "ticker": "AAPL",
+        "ema_8": 178.12,
+        "ema_80": 172.45,
+        "sma_200": 165.30,
+        "macd_value": 2.15,
+        "macd_signal": 1.87,
+        "macd_histogram": 0.28,
+        "rsi_14": 62.4,
+        "stoch_k": 71.2,
+        "stoch_d": 68.5,
     },
 ]
 
@@ -55,17 +78,13 @@ class TestGetStockPrice:
         mock = _make_supabase_mock([])
         with patch("agent.tools._get_supabase", return_value=mock):
             get_stock_price.invoke({"ticker": "BTC"})
-        mock.table.return_value.select.return_value.eq.assert_called_with(
-            "ticker", "X:BTCUSD"
-        )
+        mock.table.return_value.select.return_value.eq.assert_called_with("ticker", "X:BTCUSD")
 
     def test_uppercases_ticker(self):
         mock = _make_supabase_mock([])
         with patch("agent.tools._get_supabase", return_value=mock):
             get_stock_price.invoke({"ticker": "aapl"})
-        mock.table.return_value.select.return_value.eq.assert_called_with(
-            "ticker", "AAPL"
-        )
+        mock.table.return_value.select.return_value.eq.assert_called_with("ticker", "AAPL")
 
     def test_empty_result_returns_error(self):
         mock = _make_supabase_mock([])
@@ -81,7 +100,9 @@ class TestGetStockPrice:
         mock = _make_supabase_mock(SAMPLE_PRICE_ROWS)
         with patch("agent.tools._get_supabase", return_value=mock):
             get_stock_price.invoke({"ticker": "AAPL", "days": 10})
-        mock.table.return_value.select.return_value.eq.return_value.order.return_value.limit.assert_called_with(10)
+        mock.table.return_value.select.return_value.eq.return_value.order.return_value.limit.assert_called_with(
+            10
+        )
 
 
 # --- get_technical_indicators ---
@@ -107,9 +128,7 @@ class TestGetTechnicalIndicators:
         mock = _make_supabase_mock([])
         with patch("agent.tools._get_supabase", return_value=mock):
             get_technical_indicators.invoke({"ticker": "ETH"})
-        mock.table.return_value.select.return_value.eq.assert_called_with(
-            "ticker", "X:ETHUSD"
-        )
+        mock.table.return_value.select.return_value.eq.assert_called_with("ticker", "X:ETHUSD")
 
     def test_empty_result_returns_error(self):
         mock = _make_supabase_mock([])
@@ -150,12 +169,15 @@ class TestCompareAssets:
         assert compare_assets.name == "compare_assets"
         assert "compare" in compare_assets.description.lower()
 
-    @pytest.mark.parametrize("ticker,expected", [
-        ("BTC", "X:BTCUSD"),
-        ("ETH", "X:ETHUSD"),
-        ("SOL", "X:SOLUSD"),
-        ("AAPL", "AAPL"),
-    ])
+    @pytest.mark.parametrize(
+        "ticker,expected",
+        [
+            ("BTC", "X:BTCUSD"),
+            ("ETH", "X:ETHUSD"),
+            ("SOL", "X:SOLUSD"),
+            ("AAPL", "AAPL"),
+        ],
+    )
     def test_ticker_mapping(self, ticker: str, expected: str):
         mock = _make_supabase_mock([])
         with patch("agent.tools._get_supabase", return_value=mock):

@@ -12,7 +12,7 @@ from ingestion.pipeline import run_pipeline
 def main() -> None:
     """Run the ingestion pipeline with settings from environment variables."""
     load_dotenv()
-    settings = IngestionSettings()  # type: ignore[call-arg]
+    settings = IngestionSettings()
     report = asyncio.run(run_pipeline(settings))
 
     for r in report.results:

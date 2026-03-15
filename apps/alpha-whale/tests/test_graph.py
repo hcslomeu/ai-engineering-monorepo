@@ -42,7 +42,12 @@ class TestShouldContinue:
         ai_msg = AIMessage(
             content="",
             tool_calls=[
-                {"name": "get_stock_price", "args": {"ticker": "BTC"}, "id": "call_1", "type": "tool_call"}
+                {
+                    "name": "get_stock_price",
+                    "args": {"ticker": "BTC"},
+                    "id": "call_1",
+                    "type": "tool_call",
+                }
             ],
         )
         state = {"messages": [HumanMessage(content="hi"), ai_msg]}
@@ -104,7 +109,12 @@ class TestToolsNode:
         mock_client = MagicMock()
         mock_client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
 
-        tool_call = {"name": "get_stock_price", "args": {"ticker": "AAPL"}, "id": "call_1", "type": "tool_call"}
+        tool_call = {
+            "name": "get_stock_price",
+            "args": {"ticker": "AAPL"},
+            "id": "call_1",
+            "type": "tool_call",
+        }
         ai_msg = AIMessage(content="", tool_calls=[tool_call])
         state = {"messages": [HumanMessage(content="price?"), ai_msg]}
 
@@ -122,7 +132,12 @@ class TestToolsNode:
         mock_client = MagicMock()
         mock_client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
 
-        tool_call = {"name": "get_technical_indicators", "args": {"ticker": "NVDA"}, "id": "call_2", "type": "tool_call"}
+        tool_call = {
+            "name": "get_technical_indicators",
+            "args": {"ticker": "NVDA"},
+            "id": "call_2",
+            "type": "tool_call",
+        }
         ai_msg = AIMessage(content="", tool_calls=[tool_call])
         state = {"messages": [HumanMessage(content="indicators?"), ai_msg]}
 
@@ -138,7 +153,12 @@ class TestToolsNode:
         mock_client = MagicMock()
         mock_client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
 
-        tool_call = {"name": "compare_assets", "args": {"tickers": ["AAPL", "MSFT"]}, "id": "call_3", "type": "tool_call"}
+        tool_call = {
+            "name": "compare_assets",
+            "args": {"tickers": ["AAPL", "MSFT"]},
+            "id": "call_3",
+            "type": "tool_call",
+        }
         ai_msg = AIMessage(content="", tool_calls=[tool_call])
         state = {"messages": [HumanMessage(content="compare?"), ai_msg]}
 
@@ -193,7 +213,12 @@ class TestRunFunction:
         tool_call_response = AIMessage(
             content="",
             tool_calls=[
-                {"name": "get_stock_price", "args": {"ticker": "BTC"}, "id": "call_1", "type": "tool_call"}
+                {
+                    "name": "get_stock_price",
+                    "args": {"ticker": "BTC"},
+                    "id": "call_1",
+                    "type": "tool_call",
+                }
             ],
         )
         final_response = AIMessage(content="Bitcoin is currently at $55,000.")

@@ -98,8 +98,10 @@ async def _fake_stream_events(
 
 
 @pytest.fixture
-def app() -> FastAPI:
+def app(monkeypatch: pytest.MonkeyPatch) -> FastAPI:
     """Create a fresh FastAPI app for each test."""
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
     return create_app()
 
 

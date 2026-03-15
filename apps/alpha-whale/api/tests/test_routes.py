@@ -97,9 +97,17 @@ async def test_indicators_response_contains_all_fields(
     response = await client.get("/market/AAPL/indicators")
     row = response.json()[0]
     for field in (
-        "ticker", "date", "ema_8", "ema_80", "sma_200",
-        "macd_value", "macd_signal", "macd_histogram",
-        "rsi_14", "stoch_k", "stoch_d",
+        "ticker",
+        "date",
+        "ema_8",
+        "ema_80",
+        "sma_200",
+        "macd_value",
+        "macd_signal",
+        "macd_histogram",
+        "rsi_14",
+        "stoch_k",
+        "stoch_d",
     ):
         assert field in row, f"Missing field: {field}"
 

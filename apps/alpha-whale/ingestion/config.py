@@ -14,6 +14,8 @@ class IngestionSettings(BaseSettings):
     supabase_url: str = Field(validation_alias="SUPABASE_URL")
     supabase_key: SecretStr = Field(validation_alias="SUPABASE_KEY")
     massive_api_key: SecretStr = Field(validation_alias="INGESTION_MASSIVE_API_KEY")
-    massive_base_url: str = Field(default="https://api.polygon.io", validation_alias="INGESTION_MASSIVE_BASE_URL")
+    massive_base_url: str = Field(
+        default="https://api.polygon.io", validation_alias="INGESTION_MASSIVE_BASE_URL"
+    )
 
     model_config = {"env_prefix": "INGESTION_", "populate_by_name": True}
