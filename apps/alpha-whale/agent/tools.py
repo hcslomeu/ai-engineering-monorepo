@@ -1,92 +1,135 @@
-"""Finance tools for the AlphaWhale agent.
+"""Finance tools for the AlphaWhale agent backed by Supabase."""
 
-Each function decorated with @tool becomes discoverable by the LLM.
-The LLM uses the function name, docstring, and type hints to decide
-when and how to call each tool.
-"""
-
-import random
+import os
 
 from langchain_core.tools import tool
+from supabase import Client, create_client
+
+# Maps user-friendly ticker symbols to Polygon.io format stored in Supabase
+TICKER_MAP: dict[str, str] = {
+    "BTC": "X:BTCUSD",
+    "ETH": "X:ETHUSD",
+    "SOL": "X:SOLUSD",
+}
+
+_client: Client | None = None
 
 
-@tool
-def fetch_btc_price() -> dict:
-    """Fetch the current Bitcoin (BTC) price in USD.
+def _get_supabase() -> Client:
+    """Return a cached synchronous Supabase client.
 
-    Returns the latest price, 24h change percentage, and 24h volume.
-    Use this tool when the user asks about Bitcoin's current price or market data.
+    Lazily initialised on first call so that tests can patch os.environ
+    before the client is created.
     """
-    price = round(random.uniform(40_000, 70_000), 2)
-    change = round(random.uniform(-5.0, 5.0), 2)
-    volume = round(random.uniform(15e9, 40e9), 0)
+    global _client  # noqa: PLW0603
+    if _client is None:
+        _client = create_client(
+            os.environ["SUPABASE_URL"],
+            os.environ["SUPABASE_KEY"],
+        )
+    return _client
 
-    return {
-        "symbol": "BTC",
-        "price_usd": price,
-        "change_24h_pct": change,
-        "volume_24h_usd": volume,
-    }
+
+def _resolve_ticker(ticker: str) -> str:
+    """Normalise a ticker to its Supabase-stored format (uppercase, crypto mapped)."""
+    upper = ticker.upper()
+    return TICKER_MAP.get(upper, upper)
 
 
 @tool
-def calculate_rsi(prices: list[float], period: int = 14) -> dict:
-    """Calculate the Relative Strength Index (RSI) for a list of prices.
+def get_stock_price(ticker: str, days: int = 5) -> dict:
+    """Fetch recent daily OHLCV price data for a stock or crypto asset.
 
-    RSI measures momentum on a scale of 0-100:
-    - Above 70: overbought (potential sell signal)
-    - Below 30: oversold (potential buy signal)
-    - Between 30-70: neutral
+    Returns the latest N days of open, high, low, close, and volume data.
+
+    Supported tickers: AAPL, MSFT, GOOGL, AMZN, NVDA, META, TSLA, BTC, ETH, SOL.
 
     Args:
-        prices: Historical closing prices (most recent last). Minimum length: period + 1.
-        period: RSI lookback period. Default is 14.
+        ticker: Asset symbol (e.g. "AAPL", "BTC").
+        days: Number of recent trading days to return. Default is 5.
     """
-    if len(prices) < period + 1:
-        return {"error": f"Need at least {period + 1} prices, got {len(prices)}"}
+    resolved = _resolve_ticker(ticker)
+    result = (
+        _get_supabase()
+        .table("market_data_daily")
+        .select("ticker, date, open, high, low, close, volume")
+        .eq("ticker", resolved)
+        .order("date", desc=True)
+        .limit(days)
+        .execute()
+    )
 
-    deltas = [prices[i] - prices[i - 1] for i in range(1, len(prices))]
-    recent = deltas[-period:]
+    if not result.data:
+        return {"error": f"No price data found for {ticker}"}
 
-    gains = [d for d in recent if d > 0]
-    losses = [-d for d in recent if d < 0]
-
-    avg_gain = sum(gains) / period if gains else 0.0
-    avg_loss = sum(losses) / period if losses else 0.0
-
-    if avg_gain == 0 and avg_loss == 0:
-        rsi = 50.0
-    elif avg_loss == 0:
-        rsi = 100.0
-    else:
-        rs = avg_gain / avg_loss
-        rsi = 100.0 - (100.0 / (1.0 + rs))
-
-    return {
-        "rsi": round(rsi, 2),
-        "period": period,
-        "signal": "overbought" if rsi > 70 else "oversold" if rsi < 30 else "neutral",
-    }
+    return {"ticker": ticker.upper(), "rows": result.data}
 
 
 @tool
-def get_market_summary() -> dict:
-    """Get a summary of the current cryptocurrency market conditions.
+def get_technical_indicators(ticker: str, days: int = 5) -> dict:
+    """Fetch recent daily technical indicators for a stock or crypto asset.
 
-    Returns overall market sentiment, total market cap, BTC dominance,
-    and top movers. Use this when the user asks about general market conditions
-    or wants a broad overview.
+    Returns EMA (8, 80), SMA (200), MACD (value, signal, histogram),
+    RSI (14), and Stochastic (K, D) for the latest N days.
+
+    Supported tickers: AAPL, MSFT, GOOGL, AMZN, NVDA, META, TSLA, BTC, ETH, SOL.
+
+    Args:
+        ticker: Asset symbol (e.g. "NVDA", "ETH").
+        days: Number of recent trading days to return. Default is 5.
     """
-    sentiments = ["bullish", "bearish", "neutral"]
-    top_movers = [
-        {"symbol": "BTC", "change_pct": round(random.uniform(-5, 5), 2)},
-        {"symbol": "ETH", "change_pct": round(random.uniform(-8, 8), 2)},
-        {"symbol": "SOL", "change_pct": round(random.uniform(-12, 12), 2)},
-    ]
+    resolved = _resolve_ticker(ticker)
+    result = (
+        _get_supabase()
+        .table("technical_indicators_daily")
+        .select(
+            "ticker, date, ema_8, ema_80, sma_200, "
+            "macd_value, macd_signal, macd_histogram, "
+            "rsi_14, stoch_k, stoch_d"
+        )
+        .eq("ticker", resolved)
+        .order("date", desc=True)
+        .limit(days)
+        .execute()
+    )
 
-    return {
-        "sentiment": random.choice(sentiments),
-        "total_market_cap_usd": round(random.uniform(1.5e12, 3.0e12), 0),
-        "btc_dominance_pct": round(random.uniform(40, 60), 1),
-        "top_movers": top_movers,
-    }
+    if not result.data:
+        return {"error": f"No indicator data found for {ticker}"}
+
+    return {"ticker": ticker.upper(), "rows": result.data}
+
+
+@tool
+def compare_assets(tickers: list[str], metric: str = "close", days: int = 5) -> dict:
+    """Compare a metric across multiple assets for recent trading days.
+
+    Returns side-by-side values for each ticker, useful for questions like
+    "Compare NVDA vs TSLA volume last 5 days".
+
+    Supported tickers: AAPL, MSFT, GOOGL, AMZN, NVDA, META, TSLA, BTC, ETH, SOL.
+    Supported metrics: open, high, low, close, volume.
+
+    Args:
+        tickers: List of asset symbols to compare (e.g. ["NVDA", "TSLA"]).
+        metric: OHLCV field to compare. Default is "close".
+        days: Number of recent trading days to return. Default is 5.
+    """
+    valid_metrics = {"open", "high", "low", "close", "volume"}
+    if metric not in valid_metrics:
+        return {"error": f"Invalid metric '{metric}'. Choose from: {sorted(valid_metrics)}"}
+
+    comparison: dict[str, list] = {}
+    for ticker in tickers:
+        resolved = _resolve_ticker(ticker)
+        result = (
+            _get_supabase()
+            .table("market_data_daily")
+            .select(f"date, {metric}")
+            .eq("ticker", resolved)
+            .order("date", desc=True)
+            .limit(days)
+            .execute()
+        )
+        comparison[ticker.upper()] = result.data if result.data else []
+
+    return {"metric": metric, "days": days, "data": comparison}

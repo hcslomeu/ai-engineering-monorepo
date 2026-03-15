@@ -8,7 +8,13 @@ from langchain_core.messages import HumanMessage
 from sse_starlette import EventSourceResponse
 
 from api.dependencies import GraphDep, SupabaseDep
-from api.models import ChatRequest, HealthCheck, HealthResponse, MarketDataResponse
+from api.models import (
+    ChatRequest,
+    HealthCheck,
+    HealthResponse,
+    IndicatorDataResponse,
+    MarketDataResponse,
+)
 from py_core import get_logger
 
 logger = get_logger("api.routes")
@@ -68,6 +74,33 @@ async def get_market_data(
         return []
 
     return [MarketDataResponse(**row) for row in result.data]  # type: ignore[arg-type]
+
+
+@router.get("/market/{asset}/indicators", response_model=list[IndicatorDataResponse])
+async def get_indicator_data(
+    asset: str,
+    supabase: SupabaseDep,
+    days: int = Query(default=30, ge=1, le=3650),
+) -> list[IndicatorDataResponse]:
+    """Return recent daily technical indicators for a ticker from Supabase."""
+    ticker = asset.upper()
+    result = (
+        await supabase.table("technical_indicators_daily")
+        .select(
+            "ticker, date, ema_8, ema_80, sma_200, "
+            "macd_value, macd_signal, macd_histogram, "
+            "rsi_14, stoch_k, stoch_d"
+        )
+        .eq("ticker", ticker)
+        .order("date", desc=True)
+        .limit(days)
+        .execute()
+    )
+
+    if not result.data:
+        return []
+
+    return [IndicatorDataResponse(**row) for row in result.data]  # type: ignore[arg-type]
 
 
 @router.get("/health", response_model=HealthResponse)

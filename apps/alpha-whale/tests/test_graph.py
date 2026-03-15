@@ -42,7 +42,7 @@ class TestShouldContinue:
         ai_msg = AIMessage(
             content="",
             tool_calls=[
-                {"name": "fetch_btc_price", "args": {}, "id": "call_1", "type": "tool_call"}
+                {"name": "get_stock_price", "args": {"ticker": "BTC"}, "id": "call_1", "type": "tool_call"}
             ],
         )
         state = {"messages": [HumanMessage(content="hi"), ai_msg]}
@@ -98,45 +98,52 @@ class TestAgentNode:
 
 
 class TestToolsNode:
-    def test_executes_fetch_btc_price(self):
-        tool_call = {"name": "fetch_btc_price", "args": {}, "id": "call_1", "type": "tool_call"}
+    def test_executes_get_stock_price(self):
+        from unittest.mock import MagicMock, patch
+
+        mock_client = MagicMock()
+        mock_client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
+
+        tool_call = {"name": "get_stock_price", "args": {"ticker": "AAPL"}, "id": "call_1", "type": "tool_call"}
         ai_msg = AIMessage(content="", tool_calls=[tool_call])
         state = {"messages": [HumanMessage(content="price?"), ai_msg]}
 
-        result = tools_node(state)
+        with patch("agent.tools._get_supabase", return_value=mock_client):
+            result = tools_node(state)
 
         assert "messages" in result
         assert len(result["messages"]) == 1
         assert isinstance(result["messages"][0], ToolMessage)
         assert result["messages"][0].tool_call_id == "call_1"
 
-    def test_executes_calculate_rsi(self):
-        prices = [100 + i for i in range(20)]
-        tool_call = {
-            "name": "calculate_rsi",
-            "args": {"prices": prices},
-            "id": "call_2",
-            "type": "tool_call",
-        }
-        ai_msg = AIMessage(content="", tool_calls=[tool_call])
-        state = {"messages": [HumanMessage(content="rsi?"), ai_msg]}
+    def test_executes_get_technical_indicators(self):
+        from unittest.mock import MagicMock, patch
 
-        result = tools_node(state)
+        mock_client = MagicMock()
+        mock_client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
+
+        tool_call = {"name": "get_technical_indicators", "args": {"ticker": "NVDA"}, "id": "call_2", "type": "tool_call"}
+        ai_msg = AIMessage(content="", tool_calls=[tool_call])
+        state = {"messages": [HumanMessage(content="indicators?"), ai_msg]}
+
+        with patch("agent.tools._get_supabase", return_value=mock_client):
+            result = tools_node(state)
 
         assert len(result["messages"]) == 1
         assert result["messages"][0].tool_call_id == "call_2"
 
-    def test_executes_get_market_summary(self):
-        tool_call = {
-            "name": "get_market_summary",
-            "args": {},
-            "id": "call_3",
-            "type": "tool_call",
-        }
-        ai_msg = AIMessage(content="", tool_calls=[tool_call])
-        state = {"messages": [HumanMessage(content="market?"), ai_msg]}
+    def test_executes_compare_assets(self):
+        from unittest.mock import MagicMock, patch
 
-        result = tools_node(state)
+        mock_client = MagicMock()
+        mock_client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
+
+        tool_call = {"name": "compare_assets", "args": {"tickers": ["AAPL", "MSFT"]}, "id": "call_3", "type": "tool_call"}
+        ai_msg = AIMessage(content="", tool_calls=[tool_call])
+        state = {"messages": [HumanMessage(content="compare?"), ai_msg]}
+
+        with patch("agent.tools._get_supabase", return_value=mock_client):
+            result = tools_node(state)
 
         assert len(result["messages"]) == 1
         assert isinstance(result["messages"][0], ToolMessage)
@@ -155,9 +162,9 @@ class TestToolsNode:
 
     def test_tools_by_name_has_all_tools(self):
         assert set(TOOLS_BY_NAME.keys()) == {
-            "fetch_btc_price",
-            "calculate_rsi",
-            "get_market_summary",
+            "get_stock_price",
+            "get_technical_indicators",
+            "compare_assets",
         }
         assert len(TOOLS_BY_NAME) == len(TOOLS)
 
@@ -178,10 +185,15 @@ class TestRunFunction:
     @patch("agent.graph.get_model")
     def test_run_with_tool_call_loop(self, mock_get_model: MagicMock):
         """Simulate: LLM requests tool -> tool runs -> LLM gives final answer."""
+        from unittest.mock import patch as inner_patch
+
+        mock_supabase = MagicMock()
+        mock_supabase.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = []
+
         tool_call_response = AIMessage(
             content="",
             tool_calls=[
-                {"name": "fetch_btc_price", "args": {}, "id": "call_1", "type": "tool_call"}
+                {"name": "get_stock_price", "args": {"ticker": "BTC"}, "id": "call_1", "type": "tool_call"}
             ],
         )
         final_response = AIMessage(content="Bitcoin is currently at $55,000.")
@@ -190,6 +202,7 @@ class TestRunFunction:
         mock_llm.invoke.side_effect = [tool_call_response, final_response]
         mock_get_model.return_value = mock_llm
 
-        result = run("What is Bitcoin's price?")
+        with inner_patch("agent.tools._get_supabase", return_value=mock_supabase):
+            result = run("What is Bitcoin's price?")
         assert result == "Bitcoin is currently at $55,000."
         assert mock_llm.invoke.call_count == 2

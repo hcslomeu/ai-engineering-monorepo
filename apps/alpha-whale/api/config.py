@@ -1,20 +1,20 @@
 """Configuration for AlphaWhale API service."""
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings
 
 
 class APISettings(BaseSettings):
     """Environment-based settings for the FastAPI service.
 
-    All fields map to environment variables with the ``API_`` prefix.
-    Example: ``API_DEBUG=true`` sets ``debug``.
+    Supabase credentials use bare names (SUPABASE_URL, SUPABASE_KEY) shared
+    across services. API-specific settings use the API_ prefix.
     """
 
     app_name: str = "AlphaWhale API"
     debug: bool = False
     cors_origins: list[str] = ["http://localhost:3000"]
-    supabase_url: str = ""
-    supabase_key: SecretStr = SecretStr("")
+    supabase_url: str = Field(validation_alias="SUPABASE_URL")
+    supabase_key: SecretStr = Field(validation_alias="SUPABASE_KEY")
 
-    model_config = {"env_prefix": "API_"}
+    model_config = {"env_prefix": "API_", "populate_by_name": True}

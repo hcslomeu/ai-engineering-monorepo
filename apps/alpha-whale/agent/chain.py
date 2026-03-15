@@ -10,9 +10,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
 
-from agent.tools import calculate_rsi, fetch_btc_price, get_market_summary
+from agent.tools import compare_assets, get_stock_price, get_technical_indicators
 
-TOOLS = [fetch_btc_price, calculate_rsi, get_market_summary]
+TOOLS = [get_stock_price, get_technical_indicators, compare_assets]
 TOOLS_BY_NAME = {tool.name: tool for tool in TOOLS}
 
 PROMPT = ChatPromptTemplate.from_messages(
