@@ -8,7 +8,7 @@
 ## Current Position
 
 - **Active Phase:** AlphaWhale Flagship Roadmap (9 phases, 12 WPs)
-- **Active WP:** WP-004 complete — Chat UI (Next.js + shadcn/ui)
+- **Active WP:** WP-116 complete — Massive API + Supabase migration
 - **Next WP:** WP-119 (Redis Caching — Phase 4)
 - **Blocker:** None
 - **Flagship:** AlphaWhale — conversational trading assistant (React chat UI, SSE streaming, RAG, LangGraph agent)
@@ -41,7 +41,12 @@
 | LangGraph human-in-loop | ⬜ Not started | WP-114 | 🔴 |
 | BigQuery Python client | ✅ Practised | WP-101 | 🟢 Comfortable |
 | Airflow DAGs | ⬜ Not started | WP-102 | 🔴 |
-| Technical indicators (RSI/MACD) | ⬜ Not started | WP-103 | 🔴 |
+| Technical indicators (RSI/MACD) | ✅ Practised | WP-116 | 🟢 Comfortable |
+| Supabase async client | ✅ Practised | WP-116 | 🟡 Needs more reps |
+| Polygon.io (Massive API) | ✅ Practised | WP-116 | 🟡 Needs more reps |
+| Pydantic model_validator | ✅ Practised | WP-116 | 🟡 Needs more reps |
+| AsyncMock (async testing) | ✅ Practised | WP-116 | 🟡 Needs more reps |
+| uv (dependency management) | ✅ Practised | WP-126 | 🟡 Needs more reps |
 | httpx + asyncio patterns | ✅ Practised | WP-117 | 🟡 Needs more reps |
 | FastAPI + SSE streaming | ✅ Practised | WP-118 | 🟡 Needs more reps |
 | TypeScript basics | ✅ Practised | WP-004 | 🟡 Needs more reps |
@@ -87,6 +92,8 @@
 | WP-117 | httpx + Async Patterns | Feb 19, 2026 | #125 | AsyncHTTPClient with Tenacity retry, gather_with_concurrency, HTTPClientError, 16 tests |
 | WP-118 | FastAPI + SSE Streaming | Feb 20, 2026 | #126 | FastAPI lifespan, SSE via sse-starlette, 3 endpoints (/chat/stream, /market/{asset}, /health), DI with Depends(), 13 tests (83 total) |
 | WP-004 | Chat UI | Feb 26, 2026 | #160 | Next.js 15 + shadcn/ui + TradingView chart, SSE streaming client, Replit design integration rebranded to AlphaWhale |
+| WP-116 | Massive API + Supabase Migration | Mar 13, 2026 | #162 | Migrated from Alpha Vantage + BigQuery to Polygon.io (Massive API) + Supabase. New ingestion pipeline: OHLCV + 5 technical indicators + stochastic oscillator. API reads from Supabase, no live API calls in request path. 10 tickers backfilled (MAG 7 + BTC/ETH/SOL), ~5 years of data. 118 tests, all CI checks passing |
+| WP-126 | Poetry to uv Migration | Mar 13, 2026 | #161 | Migrated dependency management from Poetry to uv across entire monorepo |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

@@ -91,6 +91,16 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer components {
   .btn-simple {
     @apply rounded-full h-11 px-6 font-bold transition-all;

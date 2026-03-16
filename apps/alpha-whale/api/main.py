@@ -3,12 +3,15 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import APISettings
 from ingestion.supabase_client import create_supabase_client
 from py_core import get_logger
+
+load_dotenv()
 
 logger = get_logger("api")
 
@@ -47,6 +50,3 @@ def create_app() -> FastAPI:
     app.include_router(router)
 
     return app
-
-
-app = create_app()

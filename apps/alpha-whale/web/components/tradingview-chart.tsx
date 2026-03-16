@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { StudyConfig } from "@/components/chat-panel";
 
 interface TradingViewChartProps {
   symbol?: string;
   interval?: string;
+  studies?: StudyConfig[];
 }
 
 export function TradingViewChart({
   symbol = "NASDAQ:NVDA",
   interval = "D",
+  studies = ["STD;Stochastic"],
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +51,7 @@ export function TradingViewChart({
       save_image: false,
       calendar: false,
       support_host: "https://www.tradingview.com",
-      studies: ["STD;Stochastic_RSI"],
+      studies,
       width: "100%",
       height: "100%",
     });
@@ -60,7 +63,7 @@ export function TradingViewChart({
         container.removeChild(container.firstChild);
       }
     };
-  }, [symbol, interval]);
+  }, [symbol, interval, studies]);
 
   return (
     <div

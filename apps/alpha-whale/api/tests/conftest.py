@@ -33,6 +33,36 @@ SAMPLE_MARKET_ROWS = [
 ]
 
 
+SAMPLE_INDICATOR_ROWS = [
+    {
+        "ticker": "AAPL",
+        "date": "2026-03-12",
+        "ema_8": 178.12,
+        "ema_80": 172.45,
+        "sma_200": 165.30,
+        "macd_value": 2.15,
+        "macd_signal": 1.87,
+        "macd_histogram": 0.28,
+        "rsi_14": 62.4,
+        "stoch_k": 71.2,
+        "stoch_d": 68.5,
+    },
+    {
+        "ticker": "AAPL",
+        "date": "2026-03-11",
+        "ema_8": 177.80,
+        "ema_80": 172.20,
+        "sma_200": 165.20,
+        "macd_value": 1.95,
+        "macd_signal": 1.75,
+        "macd_histogram": 0.20,
+        "rsi_14": 60.1,
+        "stoch_k": 68.3,
+        "stoch_d": 65.9,
+    },
+]
+
+
 def _build_supabase_mock(rows: list[dict[str, Any]]) -> MagicMock:
     """Build a mock Supabase client that returns given rows for any query."""
     result = MagicMock()
@@ -68,8 +98,10 @@ async def _fake_stream_events(
 
 
 @pytest.fixture
-def app() -> FastAPI:
+def app(monkeypatch: pytest.MonkeyPatch) -> FastAPI:
     """Create a fresh FastAPI app for each test."""
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
     return create_app()
 
 
@@ -93,6 +125,14 @@ def mock_graph(app: Any) -> None:
 def mock_supabase(app: Any) -> MagicMock:
     """Override Supabase dependency with a mock returning sample data."""
     mock = _build_supabase_mock(SAMPLE_MARKET_ROWS)
+    app.dependency_overrides[get_supabase] = lambda: mock
+    return mock
+
+
+@pytest.fixture
+def mock_supabase_indicators(app: Any) -> MagicMock:
+    """Override Supabase dependency with a mock returning sample indicator data."""
+    mock = _build_supabase_mock(SAMPLE_INDICATOR_ROWS)
     app.dependency_overrides[get_supabase] = lambda: mock
     return mock
 

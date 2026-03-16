@@ -14,8 +14,8 @@ from ingestion.schemas import IndicatorRow, MACDValue, OHLCVBar
 
 @pytest.fixture()
 def settings(monkeypatch: pytest.MonkeyPatch) -> IngestionSettings:
-    monkeypatch.setenv("INGESTION_SUPABASE_URL", "https://test.supabase.co")
-    monkeypatch.setenv("INGESTION_SUPABASE_KEY", "test-supabase-key")
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
     monkeypatch.setenv("INGESTION_MASSIVE_API_KEY", "test-massive-key")
     return IngestionSettings()
 
@@ -33,8 +33,8 @@ class TestIngestionSettings:
         assert settings.massive_base_url == "https://api.polygon.io"
 
     def test_missing_required_field_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.delenv("INGESTION_SUPABASE_URL", raising=False)
-        monkeypatch.delenv("INGESTION_SUPABASE_KEY", raising=False)
+        monkeypatch.delenv("SUPABASE_URL", raising=False)
+        monkeypatch.delenv("SUPABASE_KEY", raising=False)
         monkeypatch.delenv("INGESTION_MASSIVE_API_KEY", raising=False)
         with pytest.raises(ValidationError):
             IngestionSettings()

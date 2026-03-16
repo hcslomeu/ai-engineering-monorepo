@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Send, Square, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { streamChat } from "@/lib/sse-client";
 import { cn } from "@/lib/utils";
 
@@ -19,25 +18,132 @@ const WELCOME_MESSAGE: Message = {
   content: "Hello! The market is open. What would you like to know about today?",
 };
 
-const SYMBOL_PATTERN = /\b(?:show|chart|display|switch to|pull up)\s+([A-Z]{1,5}(?::[A-Z]{1,5})?)\b/i;
+// Company name → ticker (checked before raw ticker symbols)
+const COMPANY_NAME_MAP: Record<string, string> = {
+  APPLE: "AAPL",
+  MICROSOFT: "MSFT",
+  GOOGLE: "GOOGL",
+  ALPHABET: "GOOGL",
+  AMAZON: "AMZN",
+  NVIDIA: "NVDA",
+  FACEBOOK: "META",
+  TESLA: "TSLA",
+  BITCOIN: "BTC",
+  ETHEREUM: "ETH",
+  SOLANA: "SOL",
+};
+
+const STOCK_TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA"];
+const CRYPTO_TICKER_MAP: Record<string, string> = {
+  BTC: "COINBASE:BTCUSD",
+  ETH: "COINBASE:ETHUSD",
+  SOL: "COINBASE:SOLUSD",
+};
+
+// "add RSI", "show RSI", "show me the MACD"
+// Indicator group captures EMA/SMA with optional period: "EMA 8", "ema80", "SMA 200"
+const IND = "(rsi|macd|stochastic|ema(?:\\s*\\d+)?|sma(?:\\s*\\d+)?)";
+
+const STUDY_ADD_PATTERN = new RegExp(
+  `\\b(?:add|show|enable|put|display)\\s+(?:(?:me|us)\\s+)?(?:the\\s+)?${IND}\\b`,
+  "i",
+);
+// "RSI added to the chart" — passive confirmation from agent
+const STUDY_ADDED_PATTERN = new RegExp(
+  `\\b${IND}\\b.{0,25}\\badded\\b`,
+  "i",
+);
+// "change/switch/replace … to/with RSI" — no `s` flag needed (single-line messages)
+const STUDY_SWITCH_PATTERN = new RegExp(
+  `\\b(?:change|switch|replac)\\w*\\b.{0,60}\\b(?:to|with)\\s+(?:the\\s+)?${IND}\\b`,
+  "i",
+);
+const STUDY_REMOVE_PATTERN = new RegExp(
+  `\\b(?:remove|hide|disable|take off|clear)\\s+(?:the\\s+)?${IND}\\b`,
+  "i",
+);
+
+export type StudyConfig = string | { id: string; inputs: Record<string, number> };
+
+// Normalize "EMA8" / "EMA 8" / "ema  8" → "ema 8" for consistent map lookup
+function normalizeIndicator(raw: string): string {
+  return raw.toLowerCase().trim().replace(/\s+/g, " ").replace(/([a-z])(\d)/, "$1 $2");
+}
+
+function indicatorToStudyConfig(raw: string): StudyConfig | null {
+  const normalized = normalizeIndicator(raw);
+  if (normalized === "rsi") return "STD;RSI";
+  if (normalized === "macd") return "STD;MACD";
+  if (normalized === "stochastic") return "STD;Stochastic";
+
+  const maMatch = normalized.match(/^(ema|sma)(?: (\d+))?$/);
+  if (!maMatch) return null;
+
+  const [, kind, length] = maMatch;
+  const id = kind === "ema" ? "STD;EMA" : "STD;SMA";
+  return length ? { id, inputs: { length: Number(length) } } : id;
+}
+
+function resolveToTradingViewSymbol(ticker: string): string {
+  return CRYPTO_TICKER_MAP[ticker] ?? `NASDAQ:${ticker}`;
+}
 
 function extractSymbol(text: string): string | null {
-  const match = text.match(SYMBOL_PATTERN);
-  if (!match) return null;
-  const raw = match[1].toUpperCase();
-  return raw.includes(":") ? raw : `NASDAQ:${raw}`;
+  const upper = text.toUpperCase();
+
+  // Company names take priority (e.g. "Apple" before ticker "AAPL")
+  for (const [name, ticker] of Object.entries(COMPANY_NAME_MAP)) {
+    if (new RegExp(`\\b${name}\\b`).test(upper)) {
+      return resolveToTradingViewSymbol(ticker);
+    }
+  }
+
+  // Raw crypto tickers
+  for (const [ticker, symbol] of Object.entries(CRYPTO_TICKER_MAP)) {
+    if (new RegExp(`\\b${ticker}\\b`).test(upper)) return symbol;
+  }
+
+  // Raw stock tickers
+  for (const ticker of STOCK_TICKERS) {
+    if (new RegExp(`\\b${ticker}\\b`).test(upper)) return `NASDAQ:${ticker}`;
+  }
+
+  return null;
+}
+
+function extractStudyCommand(text: string): { action: "add" | "remove"; studyConfig: StudyConfig } | null {
+  // Check remove first — most explicit intent
+  const removeMatch = text.match(STUDY_REMOVE_PATTERN);
+  if (removeMatch) {
+    const studyConfig = indicatorToStudyConfig(removeMatch[1]);
+    return studyConfig ? { action: "remove", studyConfig } : null;
+  }
+
+  // Check add patterns in order of specificity; all capture the indicator in group 1
+  const addMatch =
+    text.match(STUDY_ADD_PATTERN) ??
+    text.match(STUDY_ADDED_PATTERN) ??
+    text.match(STUDY_SWITCH_PATTERN);
+  if (addMatch) {
+    const studyConfig = indicatorToStudyConfig(addMatch[1] ?? "");
+    return studyConfig ? { action: "add", studyConfig } : null;
+  }
+
+  return null;
 }
 
 interface ChatPanelProps {
   onSymbolChange?: (symbol: string) => void;
+  onStudyToggle?: (action: "add" | "remove", studyConfig: StudyConfig) => void;
 }
 
-export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
+export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const scrollBottomRef = useRef<HTMLDivElement>(null);
+  const streamingContentRef = useRef("");
 
   useEffect(() => {
     scrollBottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,10 +164,16 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
       onSymbolChange(detected);
     }
 
+    const studyCmd = extractStudyCommand(trimmed);
+    if (studyCmd && onStudyToggle) {
+      onStudyToggle(studyCmd.action, studyCmd.studyConfig);
+    }
+
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInput("");
     setIsStreaming(true);
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    streamingContentRef.current = "";
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -71,6 +183,7 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
         trimmed,
         {
           onToken: (token) => {
+            streamingContentRef.current += token;
             setMessages((prev) => {
               const updated = [...prev];
               updated[updated.length - 1] = {
@@ -91,6 +204,17 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
             });
           },
           onDone: () => {
+            // Only parse agent response for chart commands when it contains an
+            // explicit chart-confirmation phrase — avoids jumping the chart on
+            // incidental ticker mentions in data answers (e.g. "NVDA's RSI is 62").
+            const responseText = streamingContentRef.current;
+            const isChartConfirmation = /\bhere is\b|\bchart\b/i.test(responseText);
+            if (isChartConfirmation) {
+              const responseSymbol = extractSymbol(responseText);
+              if (responseSymbol && onSymbolChange) onSymbolChange(responseSymbol);
+            }
+            const responseStudy = extractStudyCommand(responseText);
+            if (responseStudy && onStudyToggle) onStudyToggle(responseStudy.action, responseStudy.studyConfig);
             setIsStreaming(false);
             abortRef.current = null;
           },
@@ -128,15 +252,17 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto w-full flex flex-col h-full justify-end pb-4">
-      <ScrollArea className="flex-1 px-4 mb-4">
+    <div className="max-w-3xl mx-auto w-full flex flex-col h-full pb-4 min-h-0">
+      {/* min-h-0 on both the flex container and this div are required for
+          overflow-y-auto to activate — flex children default to min-height: auto
+          which prevents them from shrinking below their content height */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 mb-4 scrollbar-hidden">
         <div className="flex flex-col gap-4 py-4">
           {messages.map((message, index) => {
             const isUser = message.role === "user";
-            const isLastAssistant =
-              !isUser &&
-              index === messages.length - 1 &&
-              isStreaming;
+            const isLastAssistant = !isUser && index === messages.length - 1 && isStreaming;
+            const isThinking = isLastAssistant && message.content === "";
+            const isTyping = isLastAssistant && message.content !== "";
 
             return (
               <div
@@ -146,15 +272,22 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
                   isUser ? "flex-row-reverse" : "flex-row",
                 )}
               >
-                <Avatar className="h-8 w-8 shrink-0">
+                <Avatar className={cn("h-8 w-8 shrink-0", !isUser && "bg-primary")}>
                   {isUser ? (
                     <AvatarFallback>
                       <User className="h-4 w-4" />
                     </AvatarFallback>
                   ) : (
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      AI
-                    </AvatarFallback>
+                    <>
+                      <AvatarImage
+                        src="/logan_logo.svg"
+                        alt="AlphaWhale"
+                        className="object-contain p-1"
+                      />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        AW
+                      </AvatarFallback>
+                    </>
                   )}
                 </Avatar>
                 <div
@@ -165,9 +298,19 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
                       : "bg-card border",
                   )}
                 >
-                  {message.content}
-                  {isLastAssistant && (
-                    <span className="inline-block w-1.5 h-4 bg-foreground/50 ml-0.5 animate-pulse" />
+                  {isThinking ? (
+                    <span className="flex gap-1 items-center py-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:0ms]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:150ms]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:300ms]" />
+                    </span>
+                  ) : (
+                    <>
+                      {message.content}
+                      {isTyping && (
+                        <span className="inline-block w-1.5 h-4 bg-foreground/50 ml-0.5 animate-pulse" />
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -175,7 +318,7 @@ export function ChatPanel({ onSymbolChange }: ChatPanelProps) {
           })}
           <div ref={scrollBottomRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="px-4">
         <div className="relative">

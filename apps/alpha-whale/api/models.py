@@ -28,6 +28,22 @@ class MarketDataResponse(BaseModel):
     volume: int
 
 
+class IndicatorDataResponse(BaseModel):
+    """Daily technical indicators for a ticker."""
+
+    ticker: str
+    date: str
+    ema_8: float | None = None
+    ema_80: float | None = None
+    sma_200: float | None = None
+    macd_value: float | None = None
+    macd_signal: float | None = None
+    macd_histogram: float | None = None
+    rsi_14: float | None = None
+    stoch_k: float | None = None
+    stoch_d: float | None = None
+
+
 class HealthCheck(BaseModel):
     """Individual service check result."""
 
