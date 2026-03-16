@@ -12,6 +12,9 @@ TICKER_MAP: dict[str, str] = {
     "SOL": "X:SOLUSD",
 }
 
+_MAX_DAYS = 30
+_MAX_TICKERS = 5
+
 _client: Client | None = None
 
 
@@ -28,6 +31,12 @@ def _get_supabase() -> Client:
             os.environ["SUPABASE_KEY"],
         )
     return _client
+
+
+def _validate_days(days: int) -> dict[str, str] | None:
+    if not 1 <= days <= _MAX_DAYS:
+        return {"error": f"days must be between 1 and {_MAX_DAYS}"}
+    return None
 
 
 def _resolve_ticker(ticker: str) -> str:
@@ -48,6 +57,8 @@ def get_stock_price(ticker: str, days: int = 5) -> dict:
         ticker: Asset symbol (e.g. "AAPL", "BTC").
         days: Number of recent trading days to return. Default is 5.
     """
+    if error := _validate_days(days):
+        return error
     resolved = _resolve_ticker(ticker)
     result = (
         _get_supabase()
@@ -78,6 +89,8 @@ def get_technical_indicators(ticker: str, days: int = 5) -> dict:
         ticker: Asset symbol (e.g. "NVDA", "ETH").
         days: Number of recent trading days to return. Default is 5.
     """
+    if error := _validate_days(days):
+        return error
     resolved = _resolve_ticker(ticker)
     result = (
         _get_supabase()
@@ -114,6 +127,10 @@ def compare_assets(tickers: list[str], metric: str = "close", days: int = 5) -> 
         metric: OHLCV field to compare. Default is "close".
         days: Number of recent trading days to return. Default is 5.
     """
+    if error := _validate_days(days):
+        return error
+    if not 1 <= len(tickers) <= _MAX_TICKERS:
+        return {"error": f"Choose between 1 and {_MAX_TICKERS} tickers"}
     valid_metrics = {"open", "high", "low", "close", "volume"}
     if metric not in valid_metrics:
         return {"error": f"Invalid metric '{metric}'. Choose from: {sorted(valid_metrics)}"}

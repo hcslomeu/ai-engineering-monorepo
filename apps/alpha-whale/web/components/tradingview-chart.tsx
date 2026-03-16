@@ -12,7 +12,7 @@ interface TradingViewChartProps {
 export function TradingViewChart({
   symbol = "NASDAQ:NVDA",
   interval = "D",
-  studies = ["STD;Stochastic_RSI"],
+  studies = ["STD;Stochastic"],
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 

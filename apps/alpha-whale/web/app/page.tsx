@@ -45,7 +45,16 @@ export default function Home() {
 
   const handleStudyToggle = (action: "add" | "remove", studyConfig: StudyConfig) => {
     if (action === "remove") {
-      setStudies((prev) => prev.filter((s) => studyKey(s) !== studyKey(studyConfig)));
+      setStudies((prev) =>
+        prev.filter((s) => {
+          // A generic string ID (e.g. "STD;EMA") should also remove period-specific
+          // object configs with the same base ID (e.g. { id: "STD;EMA", inputs: {...} })
+          if (typeof studyConfig === "string") {
+            return typeof s === "string" ? s !== studyConfig : s.id !== studyConfig;
+          }
+          return studyKey(s) !== studyKey(studyConfig);
+        }),
+      );
       return;
     }
     if (isOscillator(studyConfig)) {

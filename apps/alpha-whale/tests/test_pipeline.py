@@ -179,8 +179,8 @@ class TestMergeIndicators:
 class TestRunPipeline:
     @pytest.mark.asyncio()
     async def test_runs_for_single_ticker(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setenv("INGESTION_SUPABASE_URL", "https://test.supabase.co")
-        monkeypatch.setenv("INGESTION_SUPABASE_KEY", "test-key")
+        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+        monkeypatch.setenv("SUPABASE_KEY", "test-key")
         monkeypatch.setenv("INGESTION_MASSIVE_API_KEY", "test-key")
 
         mock_supabase = MagicMock()

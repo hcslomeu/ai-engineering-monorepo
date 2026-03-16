@@ -70,16 +70,19 @@ function normalizeIndicator(raw: string): string {
   return raw.toLowerCase().trim().replace(/\s+/g, " ").replace(/([a-z])(\d)/, "$1 $2");
 }
 
-const STUDY_ID_MAP: Record<string, StudyConfig> = {
-  rsi: "STD;RSI",
-  macd: "STD;MACD",
-  stochastic: "STD;Stochastic",
-  ema: "STD;EMA",
-  "ema 8": { id: "STD;EMA", inputs: { length: 8 } },
-  "ema 80": { id: "STD;EMA", inputs: { length: 80 } },
-  sma: "STD;SMA",
-  "sma 200": { id: "STD;SMA", inputs: { length: 200 } },
-};
+function indicatorToStudyConfig(raw: string): StudyConfig | null {
+  const normalized = normalizeIndicator(raw);
+  if (normalized === "rsi") return "STD;RSI";
+  if (normalized === "macd") return "STD;MACD";
+  if (normalized === "stochastic") return "STD;Stochastic";
+
+  const maMatch = normalized.match(/^(ema|sma)(?: (\d+))?$/);
+  if (!maMatch) return null;
+
+  const [, kind, length] = maMatch;
+  const id = kind === "ema" ? "STD;EMA" : "STD;SMA";
+  return length ? { id, inputs: { length: Number(length) } } : id;
+}
 
 function resolveToTradingViewSymbol(ticker: string): string {
   return CRYPTO_TICKER_MAP[ticker] ?? `NASDAQ:${ticker}`;
@@ -112,7 +115,7 @@ function extractStudyCommand(text: string): { action: "add" | "remove"; studyCon
   // Check remove first — most explicit intent
   const removeMatch = text.match(STUDY_REMOVE_PATTERN);
   if (removeMatch) {
-    const studyConfig = STUDY_ID_MAP[normalizeIndicator(removeMatch[1])];
+    const studyConfig = indicatorToStudyConfig(removeMatch[1]);
     return studyConfig ? { action: "remove", studyConfig } : null;
   }
 
@@ -122,7 +125,7 @@ function extractStudyCommand(text: string): { action: "add" | "remove"; studyCon
     text.match(STUDY_ADDED_PATTERN) ??
     text.match(STUDY_SWITCH_PATTERN);
   if (addMatch) {
-    const studyConfig = STUDY_ID_MAP[normalizeIndicator(addMatch[1] ?? "")];
+    const studyConfig = indicatorToStudyConfig(addMatch[1] ?? "");
     return studyConfig ? { action: "add", studyConfig } : null;
   }
 
@@ -201,11 +204,15 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
             });
           },
           onDone: () => {
-            // Parse agent response for chart commands in case client-side
-            // extraction from user input didn't fire (e.g. implicit symbol mention)
+            // Only parse agent response for chart commands when it contains an
+            // explicit chart-confirmation phrase — avoids jumping the chart on
+            // incidental ticker mentions in data answers (e.g. "NVDA's RSI is 62").
             const responseText = streamingContentRef.current;
-            const responseSymbol = extractSymbol(responseText);
-            if (responseSymbol && onSymbolChange) onSymbolChange(responseSymbol);
+            const isChartConfirmation = /\bhere is\b|\bchart\b/i.test(responseText);
+            if (isChartConfirmation) {
+              const responseSymbol = extractSymbol(responseText);
+              if (responseSymbol && onSymbolChange) onSymbolChange(responseSymbol);
+            }
             const responseStudy = extractStudyCommand(responseText);
             if (responseStudy && onStudyToggle) onStudyToggle(responseStudy.action, responseStudy.studyConfig);
             setIsStreaming(false);
