@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeftRight,
-  ChartCandlestick,
+  BitcoinCircle,
   ChartLine,
-  DollarSign,
+  Dollar,
+  TrendingUp,
+  ChartCandlestick,
+} from "@mynaui/icons-react";
+import {
   Send,
   Square,
-  TrendingUp,
   User,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -162,12 +165,8 @@ function renderMessageContent(content: string, isStreaming: boolean) {
     if (!hasRequiredFields(raw)) return <>{content}</>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validated above, catch handles malformed data
     const parsed = raw as any;
-    const textBefore = content.slice(0, match.index).trim();
-    const textAfter = content.slice((match.index ?? 0) + match[0].length).trim();
-
     return (
-      <div className="flex flex-col gap-2">
-        {textBefore && <span>{textBefore}</span>}
+      <>
         {parsed.type === "stock" && (
           <StockDataCard
             ticker={String(parsed.ticker ?? "")}
@@ -190,8 +189,7 @@ function renderMessageContent(content: string, isStreaming: boolean) {
             summary={String(parsed.summary ?? "")}
           />
         )}
-        {textAfter && <span>{textAfter}</span>}
-      </div>
+      </>
     );
   } catch {
     return <>{content}</>;
@@ -199,11 +197,10 @@ function renderMessageContent(content: string, isStreaming: boolean) {
 }
 
 const SUGGESTION_CHIPS = [
-  { icon: DollarSign, label: "Get stock price", prompt: "How is NVDA performing this week?" },
+  { icon: ChartCandlestick, label: "Get stock price", prompt: "How is NVDA performing this week?" },
   { icon: ArrowLeftRight, label: "Compare assets", prompt: "Compare AAPL vs MSFT over the last 7 days" },
   { icon: ChartLine, label: "Add indicator", prompt: "Add RSI to the chart" },
-  { icon: TrendingUp, label: "Technical analysis", prompt: "What are the key technical indicators for TSLA?" },
-  { icon: ChartCandlestick, label: "Crypto check", prompt: "How is Bitcoin doing today?" },
+  { icon: BitcoinCircle, label: "Crypto check", prompt: "How is Bitcoin doing today?" },
 ] as const;
 
 interface ChatPanelProps {
@@ -211,10 +208,19 @@ interface ChatPanelProps {
   onStudyToggle?: (action: "add" | "remove", studyConfig: StudyConfig) => void;
 }
 
+const THINKING_PHRASES = [
+  "Thinking...",
+  "Investigating...",
+  "Gathering data...",
+  "Analyzing...",
+  "Crunching numbers...",
+];
+
 export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [thinkingIndex, setThinkingIndex] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollBottomRef = useRef<HTMLDivElement>(null);
   const streamingContentRef = useRef("");
@@ -228,6 +234,23 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
       abortRef.current?.abort();
     };
   }, []);
+
+  const isThinkingPhase =
+    isStreaming &&
+    messages.length > 0 &&
+    messages[messages.length - 1].role === "assistant" &&
+    messages[messages.length - 1].content === "";
+
+  useEffect(() => {
+    if (!isThinkingPhase) {
+      setThinkingIndex(0);
+      return;
+    }
+    const id = setInterval(() => {
+      setThinkingIndex((prev) => (prev + 1) % THINKING_PHRASES.length);
+    }, 2000);
+    return () => clearInterval(id);
+  }, [isThinkingPhase]);
 
   const handleSend = async () => {
     const trimmed = input.trim();
@@ -382,9 +405,11 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
                   )}
                 >
                   {isThinking ? (
-                    <span className="flex gap-1.5 items-center py-0.5">
-                      <Spinner className="size-4 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">Thinking...</span>
+                    <span className="flex gap-1.5 items-center py-0.5 w-40">
+                      <Spinner className="size-4 text-muted-foreground shrink-0" />
+                      <span key={thinkingIndex} className="text-xs text-muted-foreground animate-fade-in">
+                        {THINKING_PHRASES[thinkingIndex]}
+                      </span>
                     </span>
                   ) : (
                     <>
@@ -440,14 +465,14 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
         </div>
 
         {isInitialState && (
-          <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-hidden pb-1">
+          <div className="flex justify-center gap-2 mt-2 flex-wrap pb-1">
             {SUGGESTION_CHIPS.map((chip) => (
               <Button
                 key={chip.label}
                 variant="outline"
                 size="sm"
                 onClick={() => handleChipClick(chip.prompt)}
-                className="rounded-full text-muted-foreground hover:text-foreground"
+                className="rounded-full bg-card text-muted-foreground hover:text-foreground shadow-sm"
               >
                 <chip.icon />
                 {chip.label}

@@ -1,5 +1,4 @@
 import { ArrowLeftRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface ComparisonCardProps {
   metric: string;
@@ -42,20 +42,21 @@ export function ComparisonCard({
 }: ComparisonCardProps) {
   if (tickers.length === 0) return null;
 
-  const dates = data[tickers[0]]?.map((d) => d.date) ?? [];
+  const rows = (data[tickers[0]] ?? []).slice(0, 5);
+  const dates = rows.map((d) => d.date);
 
   return (
-    <Card className="w-full bg-card/60 backdrop-blur-sm border-primary/10 overflow-hidden">
-      <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-1.5 pt-2.5 px-3">
-        <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
-        <CardTitle className="text-xs font-bold tracking-wide">
+    <div className="w-fit rounded-lg border border-primary/10 bg-card/60 backdrop-blur-sm overflow-hidden">
+      <div className="flex items-center gap-2 px-2.5 py-1.5 border-b border-primary/10">
+        <ArrowLeftRight className="h-3 w-3 text-primary" />
+        <span className="text-[11px] font-bold tracking-wide">
           {tickers.join(" vs ")}{" "}
           <span className="font-normal text-muted-foreground capitalize">
             ({metric})
           </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-3 pb-2.5 pt-0">
+        </span>
+      </div>
+      <div className="px-1.5 pb-1.5">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-primary/10">
@@ -81,26 +82,43 @@ export function ComparisonCard({
                 <TableCell className="text-[11px] font-medium">
                   {formatDate(date)}
                 </TableCell>
-                {tickers.map((t) => (
-                  <TableCell
-                    key={t}
-                    className="text-[11px] text-right font-mono"
-                  >
-                    {data[t]?.[i]
-                      ? formatValue(data[t][i].value, metric)
-                      : "—"}
-                  </TableCell>
-                ))}
+                {tickers.map((t) => {
+                  const entries = data[t];
+                  const current = entries?.[i]?.value;
+                  const previous = entries?.[i + 1]?.value;
+                  if (current == null) return <TableCell key={t} className="text-[11px] text-right font-mono">—</TableCell>;
+
+                  const hasPrev = previous != null && previous !== 0;
+                  const pct = hasPrev ? ((current - previous) / previous) * 100 : null;
+                  const isUp = pct != null && pct >= 0;
+
+                  return (
+                    <TableCell
+                      key={t}
+                      className="text-[11px] text-right font-mono"
+                    >
+                      {formatValue(current, metric)}
+                      {pct != null && (
+                        <>
+                          {" "}
+                          <span className={cn(isUp ? "text-emerald-500" : "text-red-500")}>
+                            ({isUp ? "+" : ""}{pct.toFixed(2)}%)
+                          </span>
+                        </>
+                      )}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {summary && (
-          <p className="mt-1.5 text-[11px] text-muted-foreground italic border-t border-primary/5 pt-1.5">
+          <p className="mt-1 text-[11px] text-muted-foreground italic border-t border-primary/5 pt-1">
             {summary}
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

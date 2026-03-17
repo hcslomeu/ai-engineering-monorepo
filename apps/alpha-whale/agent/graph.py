@@ -67,7 +67,7 @@ def get_model() -> Runnable:
     """
     global _model  # noqa: PLW0603
     if _model is None:
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+        llm = ChatOpenAI(model="gpt-5-mini", temperature=0.0)
         _model = llm.bind_tools(TOOLS)
     return _model
 

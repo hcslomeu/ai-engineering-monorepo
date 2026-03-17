@@ -1,6 +1,4 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -41,25 +39,21 @@ function formatPrice(value: number): string {
 export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
   if (data.length === 0) return null;
 
-  const latest = data[0];
-  const oldest = data[data.length - 1];
+  const rows = data.slice(0, 5);
+  const latest = rows[0];
+  const oldest = rows[rows.length - 1];
   const periodChange = latest.close - oldest.open;
   const periodPct = oldest.open !== 0 ? (periodChange / oldest.open) * 100 : 0;
   const isPositive = periodChange >= 0;
 
   return (
-    <Card className="w-full bg-card/60 backdrop-blur-sm border-primary/10 overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 pt-2.5 px-3">
-        <CardTitle className="text-xs font-bold tracking-wide">
-          {ticker}
-        </CardTitle>
-        <Badge
-          variant="outline"
+    <div className="w-fit rounded-lg border border-primary/10 bg-card/60 backdrop-blur-sm overflow-hidden">
+      <div className="flex items-center gap-2 px-2.5 py-1.5 border-b border-primary/10">
+        <span className="text-[11px] font-bold tracking-wide">{ticker}</span>
+        <span
           className={cn(
-            "font-mono text-[11px] gap-1 px-1.5 py-0",
-            isPositive
-              ? "text-emerald-500 border-emerald-500/30"
-              : "text-red-500 border-red-500/30",
+            "inline-flex items-center gap-1 font-mono text-[11px]",
+            isPositive ? "text-emerald-500" : "text-red-500",
           )}
         >
           {isPositive ? (
@@ -69,9 +63,9 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
           )}
           {isPositive ? "+" : ""}
           {periodChange.toFixed(2)} ({periodPct.toFixed(2)}%)
-        </Badge>
-      </CardHeader>
-      <CardContent className="px-3 pb-2.5 pt-0">
+        </span>
+      </div>
+      <div className="px-1.5 pb-1.5">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-primary/10">
@@ -87,8 +81,9 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => {
+            {rows.map((row) => {
               const dailyChange = row.close - row.open;
+              const dailyPct = row.open !== 0 ? (dailyChange / row.open) * 100 : 0;
               const dailyUp = dailyChange >= 0;
               return (
                 <TableRow
@@ -108,7 +103,7 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
                     )}
                   >
                     {dailyUp ? "+" : ""}
-                    {dailyChange.toFixed(2)}
+                    {dailyChange.toFixed(2)} ({dailyPct.toFixed(2)}%)
                   </TableCell>
                 </TableRow>
               );
@@ -116,11 +111,11 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
           </TableBody>
         </Table>
         {summary && (
-          <p className="mt-1.5 text-[11px] text-muted-foreground italic border-t border-primary/5 pt-1.5">
+          <p className="mt-1 text-[11px] text-muted-foreground italic border-t border-primary/5 pt-1">
             {summary}
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
