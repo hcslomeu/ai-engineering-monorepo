@@ -262,7 +262,10 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
     }
   };
 
-  const isInitialState = messages.length === 1 && messages[0] === WELCOME_MESSAGE;
+  const isInitialState =
+    messages.length === 1 &&
+    messages[0]?.role === "assistant" &&
+    messages[0]?.content === WELCOME_MESSAGE.content;
 
   const handleChipClick = (prompt: string) => {
     setInput(prompt);
@@ -383,14 +386,16 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
         {isInitialState && (
           <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-hidden pb-1">
             {SUGGESTION_CHIPS.map((chip) => (
-              <button
+              <Button
                 key={chip.label}
+                variant="outline"
+                size="sm"
                 onClick={() => handleChipClick(chip.prompt)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-card hover:bg-accent text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap shrink-0"
+                className="rounded-full text-muted-foreground hover:text-foreground"
               >
-                <chip.icon className="h-4 w-4" />
-                <span>{chip.label}</span>
-              </button>
+                <chip.icon />
+                {chip.label}
+              </Button>
             ))}
           </div>
         )}
