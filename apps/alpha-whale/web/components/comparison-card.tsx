@@ -46,26 +46,26 @@ export function ComparisonCard({
 
   return (
     <Card className="w-full bg-card/60 backdrop-blur-sm border-primary/10 overflow-hidden">
-      <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-2 pt-3 px-4">
-        <ArrowLeftRight className="h-4 w-4 text-primary" />
-        <CardTitle className="text-sm font-bold tracking-wide">
+      <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-1.5 pt-2.5 px-3">
+        <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
+        <CardTitle className="text-xs font-bold tracking-wide">
           {tickers.join(" vs ")}{" "}
           <span className="font-normal text-muted-foreground capitalize">
             ({metric})
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="px-4 pb-3 pt-0">
+      <CardContent className="px-3 pb-2.5 pt-0">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-primary/10">
-              <TableHead className="h-8 text-xs text-muted-foreground">
+              <TableHead className="text-[11px] text-muted-foreground">
                 Date
               </TableHead>
               {tickers.map((t) => (
                 <TableHead
                   key={t}
-                  className="h-8 text-xs text-muted-foreground text-right"
+                  className="text-[11px] text-muted-foreground text-right"
                 >
                   {t}
                 </TableHead>
@@ -78,13 +78,13 @@ export function ComparisonCard({
                 key={date}
                 className="hover:bg-muted/30 border-primary/5"
               >
-                <TableCell className="text-xs py-1.5 font-medium">
+                <TableCell className="text-[11px] font-medium">
                   {formatDate(date)}
                 </TableCell>
                 {tickers.map((t) => (
                   <TableCell
                     key={t}
-                    className="text-xs py-1.5 text-right font-mono"
+                    className="text-[11px] text-right font-mono"
                   >
                     {data[t]?.[i]
                       ? formatValue(data[t][i].value, metric)
@@ -96,7 +96,7 @@ export function ComparisonCard({
           </TableBody>
         </Table>
         {summary && (
-          <p className="mt-2 text-xs text-muted-foreground italic border-t border-primary/5 pt-2">
+          <p className="mt-1.5 text-[11px] text-muted-foreground italic border-t border-primary/5 pt-1.5">
             {summary}
           </p>
         )}

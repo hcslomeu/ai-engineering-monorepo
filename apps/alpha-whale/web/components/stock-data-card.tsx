@@ -44,19 +44,19 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
   const latest = data[0];
   const oldest = data[data.length - 1];
   const periodChange = latest.close - oldest.open;
-  const periodPct = (periodChange / oldest.open) * 100;
+  const periodPct = oldest.open !== 0 ? (periodChange / oldest.open) * 100 : 0;
   const isPositive = periodChange >= 0;
 
   return (
     <Card className="w-full bg-card/60 backdrop-blur-sm border-primary/10 overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-3 px-4">
-        <CardTitle className="text-sm font-bold tracking-wide">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1.5 pt-2.5 px-3">
+        <CardTitle className="text-xs font-bold tracking-wide">
           {ticker}
         </CardTitle>
         <Badge
           variant="outline"
           className={cn(
-            "font-mono text-xs gap-1",
+            "font-mono text-[11px] gap-1 px-1.5 py-0",
             isPositive
               ? "text-emerald-500 border-emerald-500/30"
               : "text-red-500 border-red-500/30",
@@ -71,17 +71,17 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
           {periodChange.toFixed(2)} ({periodPct.toFixed(2)}%)
         </Badge>
       </CardHeader>
-      <CardContent className="px-4 pb-3 pt-0">
+      <CardContent className="px-3 pb-2.5 pt-0">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-primary/10">
-              <TableHead className="h-8 text-xs text-muted-foreground">
+              <TableHead className="text-[11px] text-muted-foreground">
                 Date
               </TableHead>
-              <TableHead className="h-8 text-xs text-muted-foreground text-right">
+              <TableHead className="text-[11px] text-muted-foreground text-right">
                 Close
               </TableHead>
-              <TableHead className="h-8 text-xs text-muted-foreground text-right">
+              <TableHead className="text-[11px] text-muted-foreground text-right">
                 Change
               </TableHead>
             </TableRow>
@@ -95,15 +95,15 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
                   key={row.date}
                   className="hover:bg-muted/30 border-primary/5"
                 >
-                  <TableCell className="text-xs py-1.5 font-medium">
+                  <TableCell className="text-[11px] font-medium">
                     {formatDate(row.date)}
                   </TableCell>
-                  <TableCell className="text-xs py-1.5 text-right font-mono">
+                  <TableCell className="text-[11px] text-right font-mono">
                     {formatPrice(row.close)}
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "text-xs py-1.5 text-right font-mono",
+                      "text-[11px] text-right font-mono",
                       dailyUp ? "text-emerald-500" : "text-red-500",
                     )}
                   >
@@ -116,7 +116,7 @@ export function StockDataCard({ ticker, data, summary }: StockDataCardProps) {
           </TableBody>
         </Table>
         {summary && (
-          <p className="mt-2 text-xs text-muted-foreground italic border-t border-primary/5 pt-2">
+          <p className="mt-1.5 text-[11px] text-muted-foreground italic border-t border-primary/5 pt-1.5">
             {summary}
           </p>
         )}

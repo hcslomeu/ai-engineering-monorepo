@@ -145,7 +145,11 @@ function extractStudyCommand(text: string): { action: "add" | "remove"; studyCon
   return null;
 }
 
-const FINANCIAL_DATA_REGEX = /```financial-data\n([\s\S]*?)\n```/;
+const FINANCIAL_DATA_REGEX = /```financial-data\r?\n([\s\S]*?)\r?\n```/;
+
+function hasRequiredFields(data: unknown): boolean {
+  return typeof data === "object" && data !== null && "type" in data && "data" in data;
+}
 
 function renderMessageContent(content: string, isStreaming: boolean) {
   if (isStreaming) return <>{content}</>;
@@ -154,7 +158,10 @@ function renderMessageContent(content: string, isStreaming: boolean) {
   if (!match) return <>{content}</>;
 
   try {
-    const parsed = JSON.parse(match[1]);
+    const raw = JSON.parse(match[1]);
+    if (!hasRequiredFields(raw)) return <>{content}</>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validated above, catch handles malformed data
+    const parsed = raw as any;
     const textBefore = content.slice(0, match.index).trim();
     const textAfter = content.slice((match.index ?? 0) + match[0].length).trim();
 
@@ -163,24 +170,24 @@ function renderMessageContent(content: string, isStreaming: boolean) {
         {textBefore && <span>{textBefore}</span>}
         {parsed.type === "stock" && (
           <StockDataCard
-            ticker={parsed.ticker}
-            data={parsed.data}
-            summary={parsed.summary}
+            ticker={String(parsed.ticker ?? "")}
+            data={Array.isArray(parsed.data) ? parsed.data : []}
+            summary={String(parsed.summary ?? "")}
           />
         )}
         {parsed.type === "indicators" && (
           <IndicatorsCard
-            ticker={parsed.ticker}
-            data={parsed.data}
-            summary={parsed.summary}
+            ticker={String(parsed.ticker ?? "")}
+            data={Array.isArray(parsed.data) ? parsed.data : []}
+            summary={String(parsed.summary ?? "")}
           />
         )}
         {parsed.type === "comparison" && (
           <ComparisonCard
-            metric={parsed.metric}
-            tickers={parsed.tickers}
-            data={parsed.data}
-            summary={parsed.summary}
+            metric={String(parsed.metric ?? "close")}
+            tickers={Array.isArray(parsed.tickers) ? parsed.tickers : []}
+            data={parsed.data ?? {}}
+            summary={String(parsed.summary ?? "")}
           />
         )}
         {textAfter && <span>{textAfter}</span>}
