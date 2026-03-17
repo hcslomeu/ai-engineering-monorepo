@@ -64,7 +64,7 @@ importers:
         version: 0.545.0(react@19.2.4)
       next:
         specifier: ^15.5.12
-        version: 15.5.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 15.5.12(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -77,9 +77,6 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.2.4(react@19.2.4)
-      react-ts-tradingview-widgets:
-        specifier: ^1.2.8
-        version: 1.2.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.5.0
@@ -4182,12 +4179,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  react-ts-tradingview-widgets@1.2.8:
-    resolution: {integrity: sha512-ozJwn+0x+Kp2DcqoB9LTDWQHyv3JCdfShb8ooHo+ZB9xjKAXW0irD/gK1deWv4oaAnTxmzKLfmr1QNfAhv+MJw==}
-    peerDependencies:
-      react: ^17.0.2 || ^18.1.0 || ^19.0.0
-      react-dom: ^17.0.2 || ^18.1.0 || ^19.0.0
 
   react@19.2.4:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
@@ -8764,7 +8755,7 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  next@15.5.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@15.5.12(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 15.5.12
       '@swc/helpers': 0.5.15
@@ -8772,7 +8763,7 @@ snapshots:
       postcss: 8.4.31
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      styled-jsx: 5.1.6(react@19.2.4)
+      styled-jsx: 5.1.6(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@19.2.4)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.5.12
       '@next/swc-darwin-x64': 15.5.12
@@ -9205,11 +9196,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  react-ts-tradingview-widgets@1.2.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-
   react@19.2.4: {}
 
   readable-stream@3.6.2:
@@ -9633,10 +9619,13 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  styled-jsx@5.1.6(react@19.2.4):
+  styled-jsx@5.1.6(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@19.2.4):
     dependencies:
       client-only: 0.0.1
       react: 19.2.4
+    optionalDependencies:
+      '@babel/core': 7.28.6
+      babel-plugin-macros: 3.1.0
 
   supports-color@7.2.0:
     dependencies:

@@ -14,6 +14,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { StockDataCard } from "@/components/stock-data-card";
+import { IndicatorsCard } from "@/components/indicators-card";
+import { ComparisonCard } from "@/components/comparison-card";
 import { streamChat } from "@/lib/sse-client";
 import { cn } from "@/lib/utils";
 
@@ -139,6 +143,52 @@ function extractStudyCommand(text: string): { action: "add" | "remove"; studyCon
   }
 
   return null;
+}
+
+const FINANCIAL_DATA_REGEX = /```financial-data\n([\s\S]*?)\n```/;
+
+function renderMessageContent(content: string, isStreaming: boolean) {
+  if (isStreaming) return <>{content}</>;
+
+  const match = content.match(FINANCIAL_DATA_REGEX);
+  if (!match) return <>{content}</>;
+
+  try {
+    const parsed = JSON.parse(match[1]);
+    const textBefore = content.slice(0, match.index).trim();
+    const textAfter = content.slice((match.index ?? 0) + match[0].length).trim();
+
+    return (
+      <div className="flex flex-col gap-2">
+        {textBefore && <span>{textBefore}</span>}
+        {parsed.type === "stock" && (
+          <StockDataCard
+            ticker={parsed.ticker}
+            data={parsed.data}
+            summary={parsed.summary}
+          />
+        )}
+        {parsed.type === "indicators" && (
+          <IndicatorsCard
+            ticker={parsed.ticker}
+            data={parsed.data}
+            summary={parsed.summary}
+          />
+        )}
+        {parsed.type === "comparison" && (
+          <ComparisonCard
+            metric={parsed.metric}
+            tickers={parsed.tickers}
+            data={parsed.data}
+            summary={parsed.summary}
+          />
+        )}
+        {textAfter && <span>{textAfter}</span>}
+      </div>
+    );
+  } catch {
+    return <>{content}</>;
+  }
 }
 
 const SUGGESTION_CHIPS = [
@@ -325,14 +375,13 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
                   )}
                 >
                   {isThinking ? (
-                    <span className="flex gap-1 items-center py-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:0ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:300ms]" />
+                    <span className="flex gap-1.5 items-center py-0.5">
+                      <Spinner className="size-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Thinking...</span>
                     </span>
                   ) : (
                     <>
-                      {message.content}
+                      {renderMessageContent(message.content, isTyping)}
                       {isTyping && (
                         <span className="inline-block w-1.5 h-4 bg-foreground/50 ml-0.5 animate-pulse" />
                       )}
