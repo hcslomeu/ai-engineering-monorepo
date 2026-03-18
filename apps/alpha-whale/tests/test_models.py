@@ -5,7 +5,6 @@ from pydantic import ValidationError
 
 from agent.models import AssetMention, IndicatorRequest, TradeSignal, UserIntent
 
-
 # ---------------------------------------------------------------------------
 # TestAssetMention
 # ---------------------------------------------------------------------------
@@ -91,6 +90,17 @@ class TestTradeSignal:
                 ticker="AAPL",
                 signal="neutral",
                 confidence=-0.1,
+                reasoning="test",
+                indicators_used=[],
+            )
+
+    def test_rejects_confidence_above_one(self):
+        """Rejects confidence greater than 1.0."""
+        with pytest.raises(ValidationError):
+            TradeSignal(
+                ticker="AAPL",
+                signal="neutral",
+                confidence=1.1,
                 reasoning="test",
                 indicators_used=[],
             )

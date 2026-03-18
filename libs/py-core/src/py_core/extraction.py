@@ -6,6 +6,7 @@ returning validated Pydantic models from natural-language text.
 
 from __future__ import annotations
 
+import threading
 from typing import TypeVar
 
 import instructor
@@ -17,6 +18,7 @@ from py_core.exceptions import ExtractionError
 T = TypeVar("T", bound=BaseModel)
 
 _client: instructor.Instructor | None = None
+_client_lock = threading.Lock()
 
 
 def create_instructor_client(
@@ -43,7 +45,9 @@ def _get_client() -> instructor.Instructor:
     """Return a cached Instructor client, creating it on first call."""
     global _client  # noqa: PLW0603
     if _client is None:
-        _client = create_instructor_client()
+        with _client_lock:
+            if _client is None:
+                _client = create_instructor_client()
     return _client
 
 

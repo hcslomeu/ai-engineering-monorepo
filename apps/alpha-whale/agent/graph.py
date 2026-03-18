@@ -111,7 +111,7 @@ def extract_user_intent(text: str) -> UserIntent | None:
         )
         return intent
     except ExtractionError:
-        logger.debug("user_intent_extraction_skipped", reason="extraction_failed")
+        logger.debug("user_intent_extraction_skipped", reason="extraction_failed", exc_info=True)
         return None
 
 

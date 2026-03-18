@@ -9,11 +9,13 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AssetMention(BaseModel):
     """A financial asset detected in user text."""
+
+    model_config = ConfigDict(extra="forbid")
 
     ticker: str = Field(description="Canonical ticker symbol (e.g. AAPL, BTC, NVDA)")
     asset_type: Literal["stock", "crypto"] = Field(
@@ -29,6 +31,8 @@ class AssetMention(BaseModel):
 class IndicatorRequest(BaseModel):
     """A technical indicator action parsed from user input."""
 
+    model_config = ConfigDict(extra="forbid")
+
     indicator: Literal["ema_8", "ema_80", "sma_200", "rsi_14", "macd", "stochastic"] = Field(
         description="Technical indicator identifier"
     )
@@ -39,6 +43,8 @@ class IndicatorRequest(BaseModel):
 
 class TradeSignal(BaseModel):
     """A trading signal extracted from agent analysis."""
+
+    model_config = ConfigDict(extra="forbid")
 
     ticker: str = Field(description="Ticker symbol the signal applies to")
     signal: Literal["bullish", "bearish", "neutral"] = Field(
@@ -57,6 +63,8 @@ class TradeSignal(BaseModel):
 
 class UserIntent(BaseModel):
     """Top-level extraction combining assets, indicators, and query type."""
+
+    model_config = ConfigDict(extra="forbid")
 
     assets: list[AssetMention] = Field(
         default_factory=list,
