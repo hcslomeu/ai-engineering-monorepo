@@ -24,3 +24,7 @@ class HTTPClientError(PyCorError):
 
 class RedisClientError(PyCorError):
     """Raised when a Redis operation fails after retries."""
+
+
+class ExtractionError(PyCorError):
+    """Raised when structured LLM extraction fails."""

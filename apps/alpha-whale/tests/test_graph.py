@@ -68,8 +68,9 @@ class TestShouldContinue:
 
 
 class TestAgentNode:
+    @patch("agent.graph.extract_user_intent")
     @patch("agent.graph.get_model")
-    def test_agent_node_returns_messages(self, mock_get_model: MagicMock):
+    def test_agent_node_returns_messages(self, mock_get_model: MagicMock, _mock_extract: MagicMock):
         mock_llm = MagicMock()
         mock_llm.invoke.return_value = AIMessage(content="Hello!")
         mock_get_model.return_value = mock_llm
@@ -81,8 +82,9 @@ class TestAgentNode:
         assert len(result["messages"]) == 1
         assert result["messages"][0].content == "Hello!"
 
+    @patch("agent.graph.extract_user_intent")
     @patch("agent.graph.get_model")
-    def test_agent_node_passes_history(self, mock_get_model: MagicMock):
+    def test_agent_node_passes_history(self, mock_get_model: MagicMock, _mock_extract: MagicMock):
         mock_llm = MagicMock()
         mock_llm.invoke.return_value = AIMessage(content="Done")
         mock_get_model.return_value = mock_llm
@@ -193,8 +195,9 @@ class TestToolsNode:
 
 
 class TestRunFunction:
+    @patch("agent.graph.extract_user_intent")
     @patch("agent.graph.get_model")
-    def test_run_returns_final_answer(self, mock_get_model: MagicMock):
+    def test_run_returns_final_answer(self, mock_get_model: MagicMock, _mock_extract: MagicMock):
         mock_llm = MagicMock()
         mock_llm.invoke.return_value = AIMessage(content="BTC is at $50,000.")
         mock_get_model.return_value = mock_llm
@@ -202,8 +205,9 @@ class TestRunFunction:
         result = run("What is the BTC price?")
         assert result == "BTC is at $50,000."
 
+    @patch("agent.graph.extract_user_intent")
     @patch("agent.graph.get_model")
-    def test_run_with_tool_call_loop(self, mock_get_model: MagicMock):
+    def test_run_with_tool_call_loop(self, mock_get_model: MagicMock, _mock_extract: MagicMock):
         """Simulate: LLM requests tool -> tool runs -> LLM gives final answer."""
         from unittest.mock import patch as inner_patch
 

@@ -11,6 +11,8 @@ dependencies = [
     "httpx>=0.28",
     "tenacity>=9.0",
     "redis>=5.0",
+    "instructor>=1.0",
+    "openai>=1.0",
 ]
 
 [tool.uv]

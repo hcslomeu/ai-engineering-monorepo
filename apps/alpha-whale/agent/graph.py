@@ -9,7 +9,11 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, MessagesState, StateGraph
 
+from agent.models import UserIntent
 from agent.tools import compare_assets, get_stock_price, get_technical_indicators
+from py_core import ExtractionError, extract, get_logger
+
+logger = get_logger("agent.graph")
 
 TOOLS = [get_stock_price, get_technical_indicators, compare_assets]
 TOOLS_BY_NAME = {tool.name: tool for tool in TOOLS}
@@ -92,8 +96,31 @@ def get_model() -> Runnable:
     return _model
 
 
+def extract_user_intent(text: str) -> UserIntent | None:
+    """Extract structured intent from user input.
+
+    Returns None on failure — the agent continues with normal LLM routing.
+    """
+    try:
+        intent = extract(text, UserIntent)
+        logger.info(
+            "user_intent_extracted",
+            query_type=intent.query_type,
+            assets=[a.ticker for a in intent.assets],
+            indicators=[i.indicator for i in intent.indicators],
+        )
+        return intent
+    except ExtractionError:
+        logger.debug("user_intent_extraction_skipped", reason="extraction_failed", exc_info=True)
+        return None
+
+
 def agent_node(state: MessagesState) -> dict:
     """Call the LLM with the current messages and return its response."""
+    last_msg = state["messages"][-1]
+    if isinstance(last_msg, HumanMessage) and isinstance(last_msg.content, str):
+        extract_user_intent(last_msg.content)
+
     messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
     response = get_model().invoke(messages)
     return {"messages": [response]}
