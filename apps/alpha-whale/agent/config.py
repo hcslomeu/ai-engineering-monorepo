@@ -14,3 +14,7 @@ class AgentSettings(BaseSettings):
     langsmith_tracing: bool = False
     langsmith_api_key: SecretStr | None = None
     langsmith_project: str = "alpha-whale"
+
+    # LLM response caching (requires Redis)
+    llm_cache_enabled: bool = False
+    llm_cache_redis_url: str = "redis://localhost:6379/1"

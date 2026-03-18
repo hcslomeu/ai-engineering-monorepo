@@ -25,6 +25,7 @@ dev = [
     # Documentation
     "mkdocs-material>=9.5",
     "types-requests>=2.32",
+    "fakeredis>=2.26",
 ]
 
 [tool.ruff]

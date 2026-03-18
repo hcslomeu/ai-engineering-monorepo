@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import APISettings
 from ingestion.supabase_client import create_supabase_client
-from py_core import get_logger
+from py_core import AsyncRedisClient, get_logger
 
 load_dotenv()
 
@@ -24,8 +24,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         url=settings.supabase_url,
         key=settings.supabase_key.get_secret_value(),
     )
-    logger.info("api_started", app_name=settings.app_name)
-    yield
+
+    if settings.cache_enabled:
+        redis = AsyncRedisClient(
+            url=settings.redis_url,
+            key_prefix="aw:",
+            default_ttl=settings.cache_ttl,
+        )
+        async with redis:
+            app.state.redis_client = redis
+            logger.info("api_started", app_name=settings.app_name, cache="enabled")
+            yield
+    else:
+        app.state.redis_client = None
+        logger.info("api_started", app_name=settings.app_name, cache="disabled")
+        yield
+
     logger.info("api_shutdown")
 
 

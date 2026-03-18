@@ -64,9 +64,23 @@ def get_model() -> Runnable:
 
     Lazily creates the model on first call to avoid requiring an API key at
     import time. Subsequent calls return the cached instance.
+
+    When LLM caching is enabled, configures LangChain's global RedisCache
+    so identical prompts return cached responses (effective with temperature=0.0).
     """
     global _model  # noqa: PLW0603
     if _model is None:
+        from agent.config import AgentSettings
+
+        settings = AgentSettings()
+        if settings.llm_cache_enabled:
+            import redis as sync_redis_lib
+            from langchain_community.cache import RedisCache
+            from langchain_core.globals import set_llm_cache
+
+            sync_client = sync_redis_lib.Redis.from_url(settings.llm_cache_redis_url)
+            set_llm_cache(RedisCache(redis_=sync_client))
+
         llm = ChatOpenAI(model="gpt-5-mini", temperature=0.0)
         _model = llm.bind_tools(TOOLS)
     return _model

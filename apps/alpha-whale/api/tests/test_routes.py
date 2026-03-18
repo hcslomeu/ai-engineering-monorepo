@@ -21,12 +21,13 @@ async def test_health_includes_dependency_checks(client: AsyncClient) -> None:
     assert "pinecone" in data["checks"]
 
 
-async def test_health_checks_are_stubs(client: AsyncClient) -> None:
+async def test_health_checks_status(client: AsyncClient) -> None:
     response = await client.get("/health")
     data = response.json()
     for name, check in data["checks"].items():
         assert check["status"] == "ok", f"{name} check should be ok"
-        assert check["detail"] == "stub", f"{name} should be a stub"
+    assert data["checks"]["redis"]["detail"] == "disabled"
+    assert data["checks"]["pinecone"]["detail"] == "stub"
 
 
 # --- /market/{asset} endpoint ---

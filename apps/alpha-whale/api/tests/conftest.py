@@ -8,7 +8,7 @@ import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
-from api.dependencies import get_graph, get_supabase
+from api.dependencies import get_graph, get_redis_client, get_supabase
 from api.main import create_app
 
 SAMPLE_MARKET_ROWS = [
@@ -102,7 +102,9 @@ def app(monkeypatch: pytest.MonkeyPatch) -> FastAPI:
     """Create a fresh FastAPI app for each test."""
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
-    return create_app()
+    test_app = create_app()
+    test_app.dependency_overrides[get_redis_client] = lambda: None
+    return test_app
 
 
 @pytest.fixture

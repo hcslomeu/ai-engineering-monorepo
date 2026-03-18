@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(default="INFO")
     log_format: Literal["json", "console"] = Field(default="json")
 
+    # Redis
+    redis_url: str = Field(default="redis://localhost:6379/0")
+    redis_key_prefix: str = Field(default="ai-mono:")
+    redis_default_ttl: int = Field(default=300)
+    redis_connect_timeout: float = Field(default=5.0)
+    redis_max_retries: int = Field(default=3)
+
 
 @lru_cache
 def get_settings() -> Settings:
