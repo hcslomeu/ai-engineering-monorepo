@@ -2,6 +2,7 @@
 
 from py_core.exceptions.base import (
     ConfigurationError,
+    ExtractionError,
     HTTPClientError,
     PyCorError,
     RedisClientError,
@@ -11,6 +12,7 @@ from py_core.exceptions.base import (
 __all__ = [
     "PyCorError",
     "ConfigurationError",
+    "ExtractionError",
     "HTTPClientError",
     "RedisClientError",
     "ValidationError",
