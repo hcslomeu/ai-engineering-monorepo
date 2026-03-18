@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { PillNav } from "@/components/pill-nav";
 import { ChatPanel, type StudyConfig } from "@/components/chat-panel";
 import { TradingViewChart } from "@/components/tradingview-chart";
+import { Spinner } from "@/components/ui/spinner";
 
 // Oscillators render in a sub-pane — only one active at a time.
 // Overlays (EMA, SMA) render on the price series and may stack.
@@ -85,11 +86,10 @@ export default function Home() {
                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
                 style={{ backgroundColor: "rgba(26, 34, 46, 0.88)" }}
               >
-                <span className="flex gap-1.5 items-center">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
-                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
-                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
-                </span>
+                <div className="flex items-center gap-2">
+                  <Spinner className="size-5 text-primary" />
+                  <span className="text-sm text-muted-foreground">Loading chart...</span>
+                </div>
               </div>
             )}
           </div>

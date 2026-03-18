@@ -3,17 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeftRight,
-  ChartCandlestick,
+  BitcoinCircle,
   ChartLine,
-  DollarSign,
+  Dollar,
+  TrendingUp,
+  ChartCandlestick,
+} from "@mynaui/icons-react";
+import {
   Send,
   Square,
-  TrendingUp,
   User,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { StockDataCard } from "@/components/stock-data-card";
+import { IndicatorsCard } from "@/components/indicators-card";
+import { ComparisonCard } from "@/components/comparison-card";
 import { streamChat } from "@/lib/sse-client";
 import { cn } from "@/lib/utils";
 
@@ -141,12 +148,59 @@ function extractStudyCommand(text: string): { action: "add" | "remove"; studyCon
   return null;
 }
 
+const FINANCIAL_DATA_REGEX = /```financial-data\r?\n([\s\S]*?)\r?\n```/;
+
+function hasRequiredFields(data: unknown): boolean {
+  return typeof data === "object" && data !== null && "type" in data && "data" in data;
+}
+
+function renderMessageContent(content: string, isStreaming: boolean) {
+  if (isStreaming) return <>{content}</>;
+
+  const match = content.match(FINANCIAL_DATA_REGEX);
+  if (!match) return <>{content}</>;
+
+  try {
+    const raw = JSON.parse(match[1]);
+    if (!hasRequiredFields(raw)) return <>{content}</>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- validated above, catch handles malformed data
+    const parsed = raw as any;
+    return (
+      <>
+        {parsed.type === "stock" && (
+          <StockDataCard
+            ticker={String(parsed.ticker ?? "")}
+            data={Array.isArray(parsed.data) ? parsed.data : []}
+            summary={String(parsed.summary ?? "")}
+          />
+        )}
+        {parsed.type === "indicators" && (
+          <IndicatorsCard
+            ticker={String(parsed.ticker ?? "")}
+            data={Array.isArray(parsed.data) ? parsed.data : []}
+            summary={String(parsed.summary ?? "")}
+          />
+        )}
+        {parsed.type === "comparison" && (
+          <ComparisonCard
+            metric={String(parsed.metric ?? "close")}
+            tickers={Array.isArray(parsed.tickers) ? parsed.tickers : []}
+            data={parsed.data ?? {}}
+            summary={String(parsed.summary ?? "")}
+          />
+        )}
+      </>
+    );
+  } catch {
+    return <>{content}</>;
+  }
+}
+
 const SUGGESTION_CHIPS = [
-  { icon: DollarSign, label: "Get stock price", prompt: "How is NVDA performing this week?" },
+  { icon: ChartCandlestick, label: "Get stock price", prompt: "How is NVDA performing this week?" },
   { icon: ArrowLeftRight, label: "Compare assets", prompt: "Compare AAPL vs MSFT over the last 7 days" },
   { icon: ChartLine, label: "Add indicator", prompt: "Add RSI to the chart" },
-  { icon: TrendingUp, label: "Technical analysis", prompt: "What are the key technical indicators for TSLA?" },
-  { icon: ChartCandlestick, label: "Crypto check", prompt: "How is Bitcoin doing today?" },
+  { icon: BitcoinCircle, label: "Crypto check", prompt: "How is Bitcoin doing today?" },
 ] as const;
 
 interface ChatPanelProps {
@@ -154,10 +208,19 @@ interface ChatPanelProps {
   onStudyToggle?: (action: "add" | "remove", studyConfig: StudyConfig) => void;
 }
 
+const THINKING_PHRASES = [
+  "Thinking...",
+  "Investigating...",
+  "Gathering data...",
+  "Analyzing...",
+  "Crunching numbers...",
+];
+
 export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [thinkingIndex, setThinkingIndex] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollBottomRef = useRef<HTMLDivElement>(null);
   const streamingContentRef = useRef("");
@@ -171,6 +234,23 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
       abortRef.current?.abort();
     };
   }, []);
+
+  const isThinkingPhase =
+    isStreaming &&
+    messages.length > 0 &&
+    messages[messages.length - 1].role === "assistant" &&
+    messages[messages.length - 1].content === "";
+
+  useEffect(() => {
+    if (!isThinkingPhase) {
+      setThinkingIndex(0);
+      return;
+    }
+    const id = setInterval(() => {
+      setThinkingIndex((prev) => (prev + 1) % THINKING_PHRASES.length);
+    }, 2000);
+    return () => clearInterval(id);
+  }, [isThinkingPhase]);
 
   const handleSend = async () => {
     const trimmed = input.trim();
@@ -325,14 +405,15 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
                   )}
                 >
                   {isThinking ? (
-                    <span className="flex gap-1 items-center py-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:0ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:300ms]" />
+                    <span className="flex gap-1.5 items-center py-0.5 w-40">
+                      <Spinner className="size-4 text-muted-foreground shrink-0" />
+                      <span key={thinkingIndex} className="text-xs text-muted-foreground animate-fade-in">
+                        {THINKING_PHRASES[thinkingIndex]}
+                      </span>
                     </span>
                   ) : (
                     <>
-                      {message.content}
+                      {renderMessageContent(message.content, isTyping)}
                       {isTyping && (
                         <span className="inline-block w-1.5 h-4 bg-foreground/50 ml-0.5 animate-pulse" />
                       )}
@@ -384,14 +465,14 @@ export function ChatPanel({ onSymbolChange, onStudyToggle }: ChatPanelProps) {
         </div>
 
         {isInitialState && (
-          <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-hidden pb-1">
+          <div className="flex justify-center gap-2 mt-2 flex-wrap pb-1">
             {SUGGESTION_CHIPS.map((chip) => (
               <Button
                 key={chip.label}
                 variant="outline"
                 size="sm"
                 onClick={() => handleChipClick(chip.prompt)}
-                className="rounded-full text-muted-foreground hover:text-foreground"
+                className="rounded-full bg-card text-muted-foreground hover:text-foreground shadow-sm"
               >
                 <chip.icon />
                 {chip.label}

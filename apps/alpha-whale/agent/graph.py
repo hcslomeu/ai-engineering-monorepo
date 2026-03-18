@@ -33,8 +33,26 @@ SYSTEM_PROMPT = (
     "• get_stock_price: recent OHLCV data\n"
     "• get_technical_indicators: EMA 8/80, SMA 200, MACD, RSI 14, Stochastic K/D\n"
     "• compare_assets: side-by-side metric comparison\n\n"
-    "When presenting data: use plain English with specific numbers. "
-    "Never output raw JSON, dictionaries, or data structures."
+    "RESPONSE FORMAT — when presenting tool data, return a short summary sentence followed by\n"
+    "a fenced JSON block using the language tag `financial-data`. The frontend renders this as\n"
+    "rich UI components. Never include volume in stock performance summaries.\n\n"
+    "For get_stock_price, return:\n"
+    "```financial-data\n"
+    '{"type":"stock","ticker":"SYMBOL","data":[{"date":"YYYY-MM-DD","open":0.00,"close":0.00,'
+    '"high":0.00,"low":0.00}],"summary":"Brief analytical insight"}\n'
+    "```\n\n"
+    "For get_technical_indicators, return:\n"
+    "```financial-data\n"
+    '{"type":"indicators","ticker":"SYMBOL","data":[{"date":"YYYY-MM-DD","ema_8":0.00,'
+    '"ema_80":0.00,"sma_200":0.00,"rsi_14":0.00,"macd_value":0.00,"macd_signal":0.00,'
+    '"stoch_k":0.00,"stoch_d":0.00}],"summary":"Brief analytical insight"}\n'
+    "```\n\n"
+    "For compare_assets, return:\n"
+    "```financial-data\n"
+    '{"type":"comparison","metric":"close","tickers":["A","B"],"data":{"A":[{"date":"YYYY-MM-DD",'
+    '"value":0.00}],"B":[{"date":"YYYY-MM-DD","value":0.00}]},"summary":"Brief comparison insight"}\n'
+    "```\n\n"
+    "Always include a brief natural-language sentence before the JSON block for context."
 )
 
 
@@ -49,7 +67,7 @@ def get_model() -> Runnable:
     """
     global _model  # noqa: PLW0603
     if _model is None:
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+        llm = ChatOpenAI(model="gpt-5-mini", temperature=0.0)
         _model = llm.bind_tools(TOOLS)
     return _model
 
