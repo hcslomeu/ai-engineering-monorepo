@@ -32,6 +32,19 @@ services:
     # ports:
     #   - "3000:3000"
 
+  # Redis — ephemeral cache for API responses and LLM results
+  redis:
+    image: redis:7-alpine
+    container_name: ai-mono-redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   # Future services:
   # postgres:
   #   image: postgres:16-alpine

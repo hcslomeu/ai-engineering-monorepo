@@ -46,7 +46,7 @@ def _resolve_ticker(ticker: str) -> str:
 
 
 @tool
-def get_stock_price(ticker: str, days: int = 5) -> dict:
+def get_stock_price(ticker: str, days: int = 7) -> dict:
     """Fetch recent daily OHLCV price data for a stock or crypto asset.
 
     Returns the latest N days of open, high, low, close, and volume data.
@@ -55,7 +55,7 @@ def get_stock_price(ticker: str, days: int = 5) -> dict:
 
     Args:
         ticker: Asset symbol (e.g. "AAPL", "BTC").
-        days: Number of recent trading days to return. Default is 5.
+        days: Number of recent trading days to return. Default is 7.
     """
     if error := _validate_days(days):
         return error
@@ -77,7 +77,7 @@ def get_stock_price(ticker: str, days: int = 5) -> dict:
 
 
 @tool
-def get_technical_indicators(ticker: str, days: int = 5) -> dict:
+def get_technical_indicators(ticker: str, days: int = 7) -> dict:
     """Fetch recent daily technical indicators for a stock or crypto asset.
 
     Returns EMA (8, 80), SMA (200), MACD (value, signal, histogram),
@@ -87,7 +87,7 @@ def get_technical_indicators(ticker: str, days: int = 5) -> dict:
 
     Args:
         ticker: Asset symbol (e.g. "NVDA", "ETH").
-        days: Number of recent trading days to return. Default is 5.
+        days: Number of recent trading days to return. Default is 7.
     """
     if error := _validate_days(days):
         return error
@@ -113,11 +113,11 @@ def get_technical_indicators(ticker: str, days: int = 5) -> dict:
 
 
 @tool
-def compare_assets(tickers: list[str], metric: str = "close", days: int = 5) -> dict:
+def compare_assets(tickers: list[str], metric: str = "close", days: int = 7) -> dict:
     """Compare a metric across multiple assets for recent trading days.
 
     Returns side-by-side values for each ticker, useful for questions like
-    "Compare NVDA vs TSLA volume last 5 days".
+    "Compare NVDA vs TSLA volume last 7 days".
 
     Supported tickers: AAPL, MSFT, GOOGL, AMZN, NVDA, META, TSLA, BTC, ETH, SOL.
     Supported metrics: open, high, low, close, volume.
@@ -125,7 +125,7 @@ def compare_assets(tickers: list[str], metric: str = "close", days: int = 5) -> 
     Args:
         tickers: List of asset symbols to compare (e.g. ["NVDA", "TSLA"]).
         metric: OHLCV field to compare. Default is "close".
-        days: Number of recent trading days to return. Default is 5.
+        days: Number of recent trading days to return. Default is 7.
     """
     if error := _validate_days(days):
         return error

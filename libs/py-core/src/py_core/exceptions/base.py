@@ -20,3 +20,7 @@ class ValidationError(PyCorError):
 
 class HTTPClientError(PyCorError):
     """Raised when an HTTP request fails after retries."""
+
+
+class RedisClientError(PyCorError):
+    """Raised when a Redis operation fails after retries."""

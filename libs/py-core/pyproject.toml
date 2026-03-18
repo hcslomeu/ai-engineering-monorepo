@@ -10,6 +10,7 @@ dependencies = [
     "structlog>=24.0",
     "httpx>=0.28",
     "tenacity>=9.0",
+    "redis>=5.0",
 ]
 
 [tool.uv]

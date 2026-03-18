@@ -17,4 +17,9 @@ class APISettings(BaseSettings):
     supabase_url: str = Field(validation_alias="SUPABASE_URL")
     supabase_key: SecretStr = Field(validation_alias="SUPABASE_KEY")
 
+    # Redis cache
+    redis_url: SecretStr = SecretStr("redis://localhost:6379/0")
+    cache_ttl: int = 300
+    cache_enabled: bool = False
+
     model_config = {"env_prefix": "API_", "populate_by_name": True}
