@@ -67,8 +67,11 @@ async def get_market_data(
     if redis is not None:
         cached = await redis.get(cache_key)
         if cached is not None:
-            logger.info("cache_hit", key=cache_key)
-            return [MarketDataResponse(**row) for row in json.loads(cached)]
+            try:
+                logger.info("cache_hit", key=cache_key)
+                return [MarketDataResponse(**row) for row in json.loads(cached)]
+            except (json.JSONDecodeError, TypeError, KeyError) as exc:
+                logger.warning("cache_deserialize_failed", key=cache_key, error=str(exc))
 
     result = (
         await supabase.table("market_data_daily")
@@ -102,8 +105,11 @@ async def get_indicator_data(
     if redis is not None:
         cached = await redis.get(cache_key)
         if cached is not None:
-            logger.info("cache_hit", key=cache_key)
-            return [IndicatorDataResponse(**row) for row in json.loads(cached)]
+            try:
+                logger.info("cache_hit", key=cache_key)
+                return [IndicatorDataResponse(**row) for row in json.loads(cached)]
+            except (json.JSONDecodeError, TypeError, KeyError) as exc:
+                logger.warning("cache_deserialize_failed", key=cache_key, error=str(exc))
 
     result = (
         await supabase.table("technical_indicators_daily")

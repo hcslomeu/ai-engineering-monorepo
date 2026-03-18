@@ -27,13 +27,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     if settings.cache_enabled:
         redis = AsyncRedisClient(
-            url=settings.redis_url,
+            url=settings.redis_url.get_secret_value(),
             key_prefix="aw:",
             default_ttl=settings.cache_ttl,
         )
-        async with redis:
-            app.state.redis_client = redis
-            logger.info("api_started", app_name=settings.app_name, cache="enabled")
+        try:
+            async with redis:
+                app.state.redis_client = redis
+                logger.info("api_started", app_name=settings.app_name, cache="enabled")
+                yield
+        except Exception:
+            logger.warning("redis_unavailable", msg="falling back to no cache")
+            app.state.redis_client = None
+            logger.info("api_started", app_name=settings.app_name, cache="disabled")
             yield
     else:
         app.state.redis_client = None

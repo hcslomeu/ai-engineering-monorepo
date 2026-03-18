@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any, Self
+from urllib.parse import urlparse
 
 import redis.asyncio as aioredis
 import redis.exceptions as redis_exc
@@ -12,6 +13,14 @@ from tenacity import retry_if_exception_type, stop_after_attempt, wait_exponenti
 from py_core.logging import get_logger
 
 logger = get_logger("redis")
+
+
+def _safe_url(url: str) -> str:
+    """Redact credentials from a Redis URL for safe logging."""
+    parsed = urlparse(url)
+    if parsed.password:
+        return url.replace(f":{parsed.password}@", ":***@")
+    return url
 
 
 def _log_retry(retry_state: tenacity.RetryCallState) -> None:
@@ -53,7 +62,7 @@ class AsyncRedisClient:
                 decode_responses=True,
             )
         await self._client.ping()  # type: ignore[misc]
-        logger.info("redis_connected", url=self._url)
+        logger.info("redis_connected", url=_safe_url(self._url))
         return self
 
     async def __aexit__(
@@ -90,8 +99,7 @@ class AsyncRedisClient:
                     return result
         except Exception:
             logger.warning("redis_get_failed", key=key)
-            return None
-        return None  # pragma: no cover
+        return None
 
     async def set(self, key: str, value: str, ttl: int | None = None) -> bool:
         """Store a value with TTL. Returns False on error."""
@@ -106,8 +114,7 @@ class AsyncRedisClient:
                     return True
         except Exception:
             logger.warning("redis_set_failed", key=key)
-            return False
-        return False  # pragma: no cover
+        return False
 
     async def delete(self, key: str) -> bool:
         """Remove a key. Returns False on error."""
@@ -118,8 +125,7 @@ class AsyncRedisClient:
                     return True
         except Exception:
             logger.warning("redis_delete_failed", key=key)
-            return False
-        return False  # pragma: no cover
+        return False
 
     async def health_check(self) -> bool:
         """Check Redis connectivity via PING."""

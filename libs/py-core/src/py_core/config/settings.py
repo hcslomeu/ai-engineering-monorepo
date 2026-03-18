@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = Field(default="redis://localhost:6379/0")
     redis_key_prefix: str = Field(default="ai-mono:")
-    redis_default_ttl: int = Field(default=300)
-    redis_connect_timeout: float = Field(default=5.0)
-    redis_max_retries: int = Field(default=3)
+    redis_default_ttl: int = Field(default=300, ge=1)
+    redis_connect_timeout: float = Field(default=5.0, gt=0)
+    redis_max_retries: int = Field(default=3, ge=0)
 
 
 @lru_cache

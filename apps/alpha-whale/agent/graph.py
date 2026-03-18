@@ -74,12 +74,18 @@ def get_model() -> Runnable:
 
         settings = AgentSettings()
         if settings.llm_cache_enabled:
-            import redis as sync_redis_lib
-            from langchain_community.cache import RedisCache
-            from langchain_core.globals import set_llm_cache
+            try:
+                import redis as sync_redis_lib
+                from langchain_community.cache import RedisCache
+                from langchain_core.globals import set_llm_cache
 
-            sync_client = sync_redis_lib.Redis.from_url(settings.llm_cache_redis_url)
-            set_llm_cache(RedisCache(redis_=sync_client))
+                sync_client = sync_redis_lib.Redis.from_url(settings.llm_cache_redis_url)
+                sync_client.ping()
+                set_llm_cache(RedisCache(redis_=sync_client))
+            except Exception:
+                from py_core import get_logger
+
+                get_logger("agent").warning("llm_cache_init_failed", reason="Redis unavailable")
 
         llm = ChatOpenAI(model="gpt-5-mini", temperature=0.0)
         _model = llm.bind_tools(TOOLS)
