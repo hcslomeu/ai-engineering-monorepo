@@ -7,6 +7,17 @@ class ChatRequest(BaseModel):
     """POST body for /chat/stream."""
 
     message: str = Field(..., min_length=1, max_length=2000)
+    thread_id: str | None = Field(
+        default=None,
+        description="Conversation thread ID. Auto-generated if not provided.",
+    )
+
+
+class ApprovalRequest(BaseModel):
+    """POST body for /chat/approve."""
+
+    thread_id: str = Field(..., description="Thread ID of the paused conversation.")
+    approved: bool = Field(..., description="Whether the trade signal is approved.")
 
 
 class ChatStreamEvent(BaseModel):

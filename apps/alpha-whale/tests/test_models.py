@@ -3,7 +3,14 @@
 import pytest
 from pydantic import ValidationError
 
-from agent.models import AssetMention, IndicatorRequest, TradeSignal, UserIntent
+from agent.models import (
+    AssetMention,
+    IndicatorRequest,
+    RiskAssessment,
+    RiskLevel,
+    TradeSignal,
+    UserIntent,
+)
 
 # ---------------------------------------------------------------------------
 # TestAssetMention
@@ -151,3 +158,73 @@ class TestUserIntent:
         """Rejects query types not in the Literal."""
         with pytest.raises(ValidationError):
             UserIntent(query_type="sentiment")
+
+
+# ---------------------------------------------------------------------------
+# TestRiskLevel
+# ---------------------------------------------------------------------------
+
+
+class TestRiskLevel:
+    """Tests for the RiskLevel enum."""
+
+    def test_values(self):
+        """Enum has exactly three levels."""
+        assert set(RiskLevel) == {RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH}
+
+    def test_string_comparison(self):
+        """Enum values compare equal to their string representation."""
+        assert RiskLevel.HIGH == "high"
+        assert RiskLevel.LOW == "low"
+
+    def test_serialises_to_string(self):
+        """StrEnum serialises directly to its value string."""
+        assert str(RiskLevel.MEDIUM) == "medium"
+        assert RiskLevel.MEDIUM.value == "medium"
+
+
+# ---------------------------------------------------------------------------
+# TestRiskAssessment
+# ---------------------------------------------------------------------------
+
+
+class TestRiskAssessment:
+    """Tests for the RiskAssessment model."""
+
+    def test_valid_assessment(self):
+        """Accepts a complete valid risk assessment."""
+        assessment = RiskAssessment(
+            level=RiskLevel.HIGH,
+            reasoning="Confidence 0.9 on bullish signal",
+            requires_approval=True,
+        )
+        assert assessment.level == RiskLevel.HIGH
+        assert assessment.requires_approval is True
+
+    def test_accepts_string_level(self):
+        """Accepts raw string that matches enum value."""
+        assessment = RiskAssessment(
+            level="low",
+            reasoning="Low confidence neutral signal",
+            requires_approval=False,
+        )
+        assert assessment.level == RiskLevel.LOW
+
+    def test_rejects_invalid_level(self):
+        """Rejects risk levels not in the enum."""
+        with pytest.raises(ValidationError):
+            RiskAssessment(
+                level="critical",
+                reasoning="test",
+                requires_approval=True,
+            )
+
+    def test_rejects_extra_fields(self):
+        """extra='forbid' rejects unknown fields."""
+        with pytest.raises(ValidationError):
+            RiskAssessment(
+                level="high",
+                reasoning="test",
+                requires_approval=True,
+                severity=10,
+            )

@@ -5,6 +5,11 @@ import os
 from langchain_core.tools import tool
 from supabase import Client, create_client
 
+from agent.models import TradeSignal
+from py_core import ExtractionError, extract, get_logger
+
+logger = get_logger("agent.tools")
+
 # Maps user-friendly ticker symbols to Polygon.io format stored in Supabase
 TICKER_MAP: dict[str, str] = {
     "BTC": "X:BTCUSD",
@@ -150,3 +155,29 @@ def compare_assets(tickers: list[str], metric: str = "close", days: int = 7) -> 
         comparison[ticker.upper()] = result.data if result.data else []
 
     return {"metric": metric, "days": days, "data": comparison}
+
+
+@tool
+def generate_trade_signal(ticker: str, analysis_context: str) -> dict:
+    """Generate a structured trade signal from market analysis.
+
+    Uses LLM extraction to produce a TradeSignal with direction (bullish/bearish/neutral),
+    confidence score, reasoning, and indicators used.
+
+    Args:
+        ticker: Asset symbol (e.g. "NVDA", "BTC").
+        analysis_context: Market analysis text to extract the signal from.
+    """
+    prompt = f"Based on this analysis for {ticker}, extract a trade signal:\n\n{analysis_context}"
+    try:
+        signal = extract(prompt, TradeSignal)
+        return signal.model_dump()
+    except ExtractionError:
+        logger.warning("trade_signal_extraction_failed", ticker=ticker)
+        return {
+            "ticker": ticker.upper(),
+            "signal": "neutral",
+            "confidence": 0.0,
+            "reasoning": "Extraction failed — defaulting to neutral",
+            "indicators_used": [],
+        }
