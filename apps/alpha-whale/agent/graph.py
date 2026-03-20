@@ -1,21 +1,36 @@
 """AlphaWhale agent graph — LangGraph StateGraph implementation.
 
-Replaces the manual tool-calling loop from chain.py with a declarative graph:
-START → agent_node → [has tool calls?] → tools_node → agent_node → ... → END
+Graph architecture:
+START → agent_node → [has tool calls?]
+                      ├─ No → END
+                      └─ Yes → tools_node → [trade signal generated?]
+                                             ├─ No → agent_node (loop)
+                                             └─ Yes → risk_assessment_node → [high risk?]
+                                                                              ├─ No → agent_node
+                                                                              └─ Yes → human_approval_node (INTERRUPT)
+                                                                                        → agent_node → END
 """
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_openai import ChatOpenAI
-from langgraph.graph import END, START, MessagesState, StateGraph
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.types import interrupt
 
-from agent.models import UserIntent
-from agent.tools import compare_assets, get_stock_price, get_technical_indicators
+from agent.models import RiskLevel, TradeSignal, UserIntent
+from agent.state import AgentState
+from agent.tools import (
+    compare_assets,
+    generate_trade_signal,
+    get_stock_price,
+    get_technical_indicators,
+)
 from py_core import ExtractionError, extract, get_logger
 
 logger = get_logger("agent.graph")
 
-TOOLS = [get_stock_price, get_technical_indicators, compare_assets]
+TOOLS = [get_stock_price, get_technical_indicators, compare_assets, generate_trade_signal]
 TOOLS_BY_NAME = {tool.name: tool for tool in TOOLS}
 
 SYSTEM_PROMPT = (
@@ -56,7 +71,12 @@ SYSTEM_PROMPT = (
     '{"type":"comparison","metric":"close","tickers":["A","B"],"data":{"A":[{"date":"YYYY-MM-DD",'
     '"value":0.00}],"B":[{"date":"YYYY-MM-DD","value":0.00}]},"summary":"Brief comparison insight"}\n'
     "```\n\n"
-    "Always include a brief natural-language sentence before the JSON block for context."
+    "Always include a brief natural-language sentence before the JSON block for context.\n\n"
+    "DISCLAIMER — always include at the end of any response that contains trade signals or "
+    "market analysis:\n"
+    "'⚠️ This is not financial advice. AlphaWhale is an educational tool demonstrating "
+    "AI engineering concepts. Always consult a qualified financial advisor before making "
+    "investment decisions.'"
 )
 
 
@@ -115,7 +135,7 @@ def extract_user_intent(text: str) -> UserIntent | None:
         return None
 
 
-def agent_node(state: MessagesState) -> dict:
+def agent_node(state: AgentState) -> dict:
     """Call the LLM with the current messages and return its response."""
     last_msg = state["messages"][-1]
     if isinstance(last_msg, HumanMessage) and isinstance(last_msg.content, str):
@@ -126,23 +146,78 @@ def agent_node(state: MessagesState) -> dict:
     return {"messages": [response]}
 
 
-def tools_node(state: MessagesState) -> dict:
-    """Execute tool calls from the last AI message and return results."""
+def tools_node(state: AgentState) -> dict:
+    """Execute tool calls from the last AI message and return results.
+
+    When a generate_trade_signal tool is called, the result is parsed
+    into a TradeSignal and accumulated in state.
+    """
     last_message = state["messages"][-1]
     if not isinstance(last_message, AIMessage):
         return {"messages": []}
+
     results = []
+    new_signals: list[TradeSignal] = []
+
     for call in last_message.tool_calls:
         tool = TOOLS_BY_NAME.get(call["name"])
         if tool is None:
             output = f"Error: unknown tool '{call['name']}'"
         else:
-            output = tool.invoke(call["args"])
+            try:
+                output = tool.invoke(call["args"])
+            except Exception as exc:
+                logger.warning("tool_invocation_failed", tool=call["name"], error=str(exc))
+                output = f"Error: tool '{call['name']}' failed — {exc}"
+
+        # Capture trade signals for risk assessment routing
+        if call["name"] == "generate_trade_signal" and isinstance(output, dict):
+            try:
+                new_signals.append(TradeSignal(**output))
+            except Exception:
+                logger.debug("trade_signal_parse_skipped", tool_output=str(output)[:200])
+
         results.append(ToolMessage(content=str(output), tool_call_id=call["id"]))
-    return {"messages": results}
+
+    update: dict = {"messages": results}
+    if new_signals:
+        update["trade_signals"] = new_signals
+    return update
 
 
-def should_continue(state: MessagesState) -> str:
+def risk_assessment_node(state: AgentState) -> dict:
+    """Evaluate the latest trade signal and classify its risk level.
+
+    Risk rules (deterministic, no LLM call):
+    - confidence >= 0.8 AND bullish/bearish → high
+    - confidence >= 0.5 → medium
+    - otherwise → low
+    """
+    signals = state.get("trade_signals", [])
+    if not signals:
+        return {"risk_level": RiskLevel.LOW, "pending_approval": False}
+
+    signal = signals[-1]
+    if signal.confidence >= 0.8 and signal.signal in ("bullish", "bearish"):
+        level = RiskLevel.HIGH
+    elif signal.confidence >= 0.5:
+        level = RiskLevel.MEDIUM
+    else:
+        level = RiskLevel.LOW
+
+    requires_approval = level == RiskLevel.HIGH
+    logger.info(
+        "risk_assessed",
+        ticker=signal.ticker,
+        signal=signal.signal,
+        confidence=signal.confidence,
+        risk_level=level.value,
+        requires_approval=requires_approval,
+    )
+    return {"risk_level": level, "pending_approval": requires_approval}
+
+
+def should_continue(state: AgentState) -> str:
     """Route to tools_node if the LLM made tool calls, otherwise end."""
     last_message = state["messages"][-1]
     if isinstance(last_message, AIMessage) and last_message.tool_calls:
@@ -150,34 +225,99 @@ def should_continue(state: MessagesState) -> str:
     return END
 
 
+def route_after_tools(state: AgentState) -> str:
+    """Route after tools_node: to risk assessment if trade signal generated, else back to agent."""
+    if state.get("trade_signals", []):
+        return "risk_assessment_node"
+    return "agent_node"
+
+
+def route_after_risk(state: AgentState) -> str:
+    """Route after risk assessment: to human approval if high risk, else back to agent."""
+    if state.get("pending_approval", False):
+        return "human_approval_node"
+    return "agent_node"
+
+
+def human_approval_node(state: AgentState) -> dict:
+    """Pause for human approval on high-risk trade signals.
+
+    Uses LangGraph's interrupt() to pause execution and surface the
+    trade signal to the caller. The graph resumes when the caller
+    invokes with Command(resume=<bool>).
+    """
+    signal = state["trade_signals"][-1]
+    decision = interrupt(
+        {
+            "type": "approval_request",
+            "signal": signal.model_dump(),
+            "risk_level": state.get("risk_level", RiskLevel.HIGH).value,
+            "message": (
+                f"High-confidence {signal.signal} signal for {signal.ticker} "
+                f"(confidence: {signal.confidence:.0%}). Approve?"
+            ),
+        }
+    )
+    approved = decision if isinstance(decision, bool) else bool(decision)
+    risk_level = state.get("risk_level")
+    logger.info(
+        "human_approval_decision",
+        ticker=signal.ticker,
+        approved=approved,
+        risk_level=risk_level.value if risk_level else "unknown",
+    )
+    if not approved:
+        return {
+            "pending_approval": False,
+            "messages": [
+                SystemMessage(content=f"Trade signal for {signal.ticker} was rejected by the user.")
+            ],
+        }
+    return {"pending_approval": False}
+
+
 def build_graph() -> StateGraph:
     """Construct the AlphaWhale agent graph (uncompiled)."""
-    graph = StateGraph(MessagesState)
+    graph = StateGraph(AgentState)
 
     graph.add_node("agent_node", agent_node)
     graph.add_node("tools_node", tools_node)
+    graph.add_node("risk_assessment_node", risk_assessment_node)
+    graph.add_node("human_approval_node", human_approval_node)
 
     graph.add_edge(START, "agent_node")
     graph.add_conditional_edges("agent_node", should_continue, ["tools_node", END])
-    graph.add_edge("tools_node", "agent_node")
+    graph.add_conditional_edges(
+        "tools_node", route_after_tools, ["agent_node", "risk_assessment_node"]
+    )
+    graph.add_conditional_edges(
+        "risk_assessment_node", route_after_risk, ["agent_node", "human_approval_node"]
+    )
+    graph.add_edge("human_approval_node", "agent_node")
 
     return graph
 
 
 # Compiled graph ready for invocation
-app = build_graph().compile()
+checkpointer = MemorySaver()
+app = build_graph().compile(checkpointer=checkpointer)
 
 
-def run(user_input: str) -> str:
+def run(user_input: str, *, thread_id: str = "default") -> str:
     """Run the AlphaWhale agent graph on a user question.
 
     Args:
         user_input: The user's question about crypto markets.
+        thread_id: Conversation thread identifier for state persistence.
 
     Returns:
         The agent's final text response.
     """
-    config: RunnableConfig = {"run_name": "alpha-whale-agent", "tags": ["alpha-whale"]}
+    config: RunnableConfig = {
+        "run_name": "alpha-whale-agent",
+        "tags": ["alpha-whale"],
+        "configurable": {"thread_id": thread_id},
+    }
     result = app.invoke(
         {"messages": [HumanMessage(content=user_input)]},  # type: ignore[call-overload]
         config=config,

@@ -29,7 +29,7 @@ def get_redis_client(request: Request) -> AsyncRedisClient | None:
 
 
 def get_graph() -> CompiledStateGraph:
-    """Return the compiled LangGraph agent."""
+    """Return the compiled LangGraph agent (with MemorySaver checkpointer)."""
     from agent.graph import app as agent_app
 
     graph: CompiledStateGraph = agent_app

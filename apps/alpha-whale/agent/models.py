@@ -7,9 +7,30 @@ Field descriptions are sent to the LLM as part of the JSON Schema.
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class RiskLevel(StrEnum):
+    """Risk classification for trade signals."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+class RiskAssessment(BaseModel):
+    """Result of evaluating a trade signal's risk."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    level: RiskLevel = Field(description="Assessed risk level")
+    reasoning: str = Field(description="Explanation of the risk classification")
+    requires_approval: bool = Field(
+        description="Whether this signal needs human approval before acting"
+    )
 
 
 class AssetMention(BaseModel):

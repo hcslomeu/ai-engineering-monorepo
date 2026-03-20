@@ -1,15 +1,15 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-02-26
+> **Last Updated:** 2026-03-20
 
 ---
 
 ## Current Position
 
 - **Active Phase:** AlphaWhale Flagship Roadmap (9 phases, 12 WPs)
-- **Active WP:** WP-116 complete — Massive API + Supabase migration
-- **Next WP:** WP-119 (Redis Caching — Phase 4)
+- **Active WP:** WP-114 complete — Agent v1: Multi-Tool + Human-in-the-Loop
+- **Next WP:** WP-205 (Pinecone Vector Store — Phase 6a)
 - **Blocker:** None
 - **Flagship:** AlphaWhale — conversational trading assistant (React chat UI, SSE streaming, RAG, LangGraph agent)
 
@@ -37,8 +37,9 @@
 | Claude Code hooks | ✅ Practised | WP-007 | 🟡 Needs more reps |
 | Claude Code commands (prompts) | ✅ Practised | WP-007 | 🟡 Needs more reps |
 | LangSmith tracing | ✅ Practised | WP-106 | 🟢 Comfortable |
-| LangGraph StateGraph | ✅ Practised | WP-104 | 🟡 Needs more reps |
-| LangGraph human-in-loop | ⬜ Not started | WP-114 | 🔴 |
+| LangGraph StateGraph | ✅ Practised | WP-104, WP-114 | 🟢 Comfortable |
+| LangGraph checkpointing (MemorySaver) | ✅ Practised | WP-114 | 🟡 Needs more reps |
+| LangGraph interrupt() / human-in-loop | ✅ Practised | WP-114 | 🟡 Needs more reps |
 | BigQuery Python client | ✅ Practised | WP-101 | 🟢 Comfortable |
 | Airflow DAGs | ⬜ Not started | WP-102 | 🔴 |
 | Technical indicators (RSI/MACD) | ✅ Practised | WP-116 | 🟢 Comfortable |
@@ -52,10 +53,10 @@
 | TypeScript basics | ✅ Practised | WP-004 | 🟡 Needs more reps |
 | Next.js / React | ✅ Practised | WP-004 | 🟡 Needs more reps |
 | shadcn/ui | ✅ Practised | WP-004 | 🟡 Needs more reps |
-| Redis async + caching | ⬜ Not started | WP-119 | 🔴 |
-| Instructor (structured extraction) | ⬜ Not started | WP-120 | 🔴 |
-| LangGraph multi-tool agents | ⬜ Not started | WP-114 | 🔴 |
-| LangGraph human-in-loop | ⬜ Not started | WP-114 | 🔴 |
+| Redis async + caching | ✅ Practised | WP-119 | 🟡 Needs more reps |
+| Instructor (structured extraction) | ✅ Practised | WP-120 | 🟡 Needs more reps |
+| LangGraph multi-tool agents | ✅ Practised | WP-114 | 🟡 Needs more reps |
+| LangGraph Command(resume) | ✅ Practised | WP-114 | 🟡 Needs more reps |
 | Pinecone + VectorStore abstraction | ⬜ Not started | WP-205 | 🔴 |
 | LlamaIndex (RAG ingestion/retrieval) | ⬜ Not started | WP-121 | 🔴 |
 | Hybrid search (BM25 + vector) | ⬜ Not started | WP-121 | 🔴 |
@@ -94,6 +95,11 @@
 | WP-004 | Chat UI | Feb 26, 2026 | #160 | Next.js 15 + shadcn/ui + TradingView chart, SSE streaming client, Replit design integration rebranded to AlphaWhale |
 | WP-116 | Massive API + Supabase Migration | Mar 13, 2026 | #162 | Migrated from Alpha Vantage + BigQuery to Polygon.io (Massive API) + Supabase. New ingestion pipeline: OHLCV + 5 technical indicators + stochastic oscillator. API reads from Supabase, no live API calls in request path. 10 tickers backfilled (MAG 7 + BTC/ETH/SOL), ~5 years of data. 118 tests, all CI checks passing |
 | WP-126 | Poetry to uv Migration | Mar 13, 2026 | #161 | Migrated dependency management from Poetry to uv across entire monorepo |
+| WP-107 | AlphaWhale Trading UI | Mar 14, 2026 | #163 | TradingView chart integration, trading workspace layout, suggestion chips |
+| WP-128 | Rich Agent Output | Mar 17, 2026 | #167 | Structured data cards (stock, indicators, comparison) via financial-data JSON blocks |
+| WP-119 | Redis Shared Lib + Caching | Mar 18, 2026 | #168 | AsyncRedisClient in py-core, LangChain RedisCache, graceful degradation, fakeredis tests |
+| WP-120 | Instructor Structured Extraction | Mar 18, 2026 | #169 | Instructor wrapper in py-core, domain models (TradeSignal, AssetMention, UserIntent), agent integration, 25 tests |
+| WP-114 | Agent v1: Multi-Tool + Human-in-the-Loop | Mar 19, 2026 | #170 | Custom AgentState, 4th tool (generate_trade_signal), risk assessment node, MemorySaver checkpointing, interrupt() for human approval, thread-based conversations, approval API endpoint, 34 new tests (147 total). Manual UI checks pending. |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

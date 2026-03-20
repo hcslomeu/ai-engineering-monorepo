@@ -120,6 +120,7 @@ def mock_graph(app: Any) -> None:
     """Override graph dependency with a fake streaming graph."""
     mock = MagicMock()
     mock.astream_events = _fake_stream_events
+    mock.aget_state = AsyncMock(return_value=MagicMock(tasks=[]))
     app.dependency_overrides[get_graph] = lambda: mock
 
 
