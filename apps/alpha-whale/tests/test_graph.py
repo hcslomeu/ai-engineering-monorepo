@@ -225,8 +225,11 @@ class TestToolsNode:
         assert len(result["trade_signals"]) == 1
         assert result["trade_signals"][0].ticker == "NVDA"
 
+    @patch("agent.graph.logger")
     @patch("agent.tools.extract")
-    def test_trade_signal_surfaces_error_on_extraction_failure(self, mock_extract: MagicMock):
+    def test_trade_signal_surfaces_error_on_extraction_failure(
+        self, mock_extract: MagicMock, _mock_logger: MagicMock
+    ):
         """Trade signal extraction failure surfaces as a tool error, not a neutral signal."""
         from py_core import ExtractionError
 

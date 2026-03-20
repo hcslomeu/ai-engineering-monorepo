@@ -23,8 +23,10 @@ def mock_graph():
 
 
 @pytest.fixture
-def app(mock_graph):
+def app(mock_graph, monkeypatch):
     """Create a test app with mocked dependencies."""
+    monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+    monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
     test_app = create_app()
     test_app.state.supabase = AsyncMock()
     test_app.state.redis_client = None
