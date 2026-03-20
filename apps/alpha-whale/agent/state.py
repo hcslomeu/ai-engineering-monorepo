@@ -6,6 +6,9 @@ on top of the built-in message accumulation behavior.
 
 from __future__ import annotations
 
+from operator import add
+from typing import Annotated
+
 from langgraph.graph import MessagesState
 
 from agent.models import RiskLevel, TradeSignal
@@ -19,5 +22,5 @@ class AgentState(MessagesState):
     """
 
     risk_level: RiskLevel
-    trade_signals: list[TradeSignal]
+    trade_signals: Annotated[list[TradeSignal], add]
     pending_approval: bool

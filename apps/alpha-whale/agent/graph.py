@@ -164,7 +164,11 @@ def tools_node(state: AgentState) -> dict:
         if tool is None:
             output = f"Error: unknown tool '{call['name']}'"
         else:
-            output = tool.invoke(call["args"])
+            try:
+                output = tool.invoke(call["args"])
+            except Exception as exc:
+                logger.warning("tool_invocation_failed", tool=call["name"], error=str(exc))
+                output = f"Error: tool '{call['name']}' failed — {exc}"
 
         # Capture trade signals for risk assessment routing
         if call["name"] == "generate_trade_signal" and isinstance(output, dict):
@@ -177,7 +181,7 @@ def tools_node(state: AgentState) -> dict:
 
     update: dict = {"messages": results}
     if new_signals:
-        update["trade_signals"] = state.get("trade_signals", []) + new_signals
+        update["trade_signals"] = new_signals
     return update
 
 
@@ -266,11 +270,12 @@ def human_approval_node(state: AgentState) -> dict:
         }
     )
     approved = decision if isinstance(decision, bool) else bool(decision)
+    risk_level = state.get("risk_level")
     logger.info(
         "human_approval_decision",
         ticker=signal.ticker,
         approved=approved,
-        risk_level=state.get("risk_level", "unknown"),
+        risk_level=risk_level.value if risk_level else "unknown",
     )
     if not approved:
         return {

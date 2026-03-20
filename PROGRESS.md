@@ -1,7 +1,7 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-03-18
+> **Last Updated:** 2026-03-20
 
 ---
 
@@ -99,7 +99,7 @@
 | WP-128 | Rich Agent Output | Mar 17, 2026 | #167 | Structured data cards (stock, indicators, comparison) via financial-data JSON blocks |
 | WP-119 | Redis Shared Lib + Caching | Mar 18, 2026 | #168 | AsyncRedisClient in py-core, LangChain RedisCache, graceful degradation, fakeredis tests |
 | WP-120 | Instructor Structured Extraction | Mar 18, 2026 | #169 | Instructor wrapper in py-core, domain models (TradeSignal, AssetMention, UserIntent), agent integration, 25 tests |
-| WP-114 | Agent v1: Multi-Tool + Human-in-the-Loop | Mar 19, 2026 | — | Custom AgentState, 4th tool (generate_trade_signal), risk assessment node, MemorySaver checkpointing, interrupt() for human approval, thread-based conversations, approval API endpoint, 34 new tests (147 total) |
+| WP-114 | Agent v1: Multi-Tool + Human-in-the-Loop | Mar 19, 2026 | #170 | Custom AgentState, 4th tool (generate_trade_signal), risk assessment node, MemorySaver checkpointing, interrupt() for human approval, thread-based conversations, approval API endpoint, 34 new tests (147 total). Manual UI checks pending. |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

@@ -6,7 +6,7 @@ from langchain_core.tools import tool
 from supabase import Client, create_client
 
 from agent.models import TradeSignal
-from py_core import ExtractionError, extract, get_logger
+from py_core import extract, get_logger
 
 logger = get_logger("agent.tools")
 
@@ -169,15 +169,13 @@ def generate_trade_signal(ticker: str, analysis_context: str) -> dict:
         analysis_context: Market analysis text to extract the signal from.
     """
     prompt = f"Based on this analysis for {ticker}, extract a trade signal:\n\n{analysis_context}"
-    try:
-        signal = extract(prompt, TradeSignal)
-        return signal.model_dump()
-    except ExtractionError:
-        logger.warning("trade_signal_extraction_failed", ticker=ticker)
-        return {
-            "ticker": ticker.upper(),
-            "signal": "neutral",
-            "confidence": 0.0,
-            "reasoning": "Extraction failed — defaulting to neutral",
-            "indicators_used": [],
-        }
+    signal = extract(prompt, TradeSignal)
+    payload = signal.model_dump()
+    if payload["ticker"].upper() != ticker.upper():
+        logger.warning(
+            "trade_signal_ticker_mismatch",
+            requested_ticker=ticker.upper(),
+            extracted_ticker=payload["ticker"],
+        )
+    payload["ticker"] = ticker.upper()
+    return payload

@@ -226,8 +226,8 @@ class TestToolsNode:
         assert result["trade_signals"][0].ticker == "NVDA"
 
     @patch("agent.tools.extract")
-    def test_trade_signal_fallback_on_extraction_failure(self, mock_extract: MagicMock):
-        """Trade signal tool returns neutral fallback when extraction fails."""
+    def test_trade_signal_surfaces_error_on_extraction_failure(self, mock_extract: MagicMock):
+        """Trade signal extraction failure surfaces as a tool error, not a neutral signal."""
         from py_core import ExtractionError
 
         mock_extract.side_effect = ExtractionError("fail")
@@ -243,10 +243,9 @@ class TestToolsNode:
         result = tools_node(state)
 
         assert len(result["messages"]) == 1
-        # Fallback signal is still captured in trade_signals
-        assert "trade_signals" in result
-        assert result["trade_signals"][0].signal == "neutral"
-        assert result["trade_signals"][0].confidence == 0.0
+        # Error is surfaced in the ToolMessage, no signal added to state
+        assert "Error" in result["messages"][0].content
+        assert "trade_signals" not in result
 
 
 # --- Risk assessment node ---

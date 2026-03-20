@@ -53,8 +53,12 @@ async def _stream_agent(
 
         # Check if the graph paused at an interrupt
         state = await graph.aget_state(config)
-        if state.tasks and any(hasattr(t, "interrupts") and t.interrupts for t in state.tasks):
-            interrupt_value = state.tasks[0].interrupts[0].value
+        interrupted_task = next(
+            (t for t in (state.tasks or []) if hasattr(t, "interrupts") and t.interrupts),
+            None,
+        )
+        if interrupted_task:
+            interrupt_value = interrupted_task.interrupts[0].value
             yield {
                 "event": "approval_request",
                 "data": json.dumps(interrupt_value),
