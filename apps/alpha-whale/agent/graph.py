@@ -227,19 +227,8 @@ def should_continue(state: AgentState) -> str:
 
 def route_after_tools(state: AgentState) -> str:
     """Route after tools_node: to risk assessment if trade signal generated, else back to agent."""
-    signals = state.get("trade_signals", [])
-    last_message = state["messages"][-1]
-
-    # Check if the most recent tool execution included generate_trade_signal
-    if isinstance(last_message, ToolMessage):
-        # Walk back through messages to find the AI message with tool calls
-        for msg in reversed(state["messages"]):
-            if isinstance(msg, AIMessage) and msg.tool_calls:
-                for call in msg.tool_calls:
-                    if call["name"] == "generate_trade_signal" and signals:
-                        return "risk_assessment_node"
-                break
-
+    if state.get("trade_signals", []):
+        return "risk_assessment_node"
     return "agent_node"
 
 

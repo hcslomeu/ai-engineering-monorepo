@@ -4,10 +4,12 @@ Tests use httpx AsyncClient with FastAPI dependency overrides.
 """
 
 import json
+from collections.abc import AsyncGenerator, Callable
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from langgraph.types import Command
 
 from api.dependencies import get_graph
 from api.main import create_app
@@ -42,7 +44,7 @@ async def client(app):
         yield ac
 
 
-def _make_async_iter(items):
+def _make_async_iter(items: list) -> Callable[..., AsyncGenerator]:
     """Return a callable that produces a fresh async iterator each time."""
 
     async def _iter(*_args, **_kwargs):
@@ -96,13 +98,18 @@ class TestChatStream:
 
 
 class TestChatApprove:
+    # TODO: add test asserting 403 when a user attempts to approve a thread they
+    # do not own (e.g. thread_id belonging to a different user_id). Requires
+    # ownership enforcement on the /chat/approve endpoint (not yet implemented).
+
     async def test_approve_resumes_graph(self, client: AsyncClient, mock_graph: AsyncMock):
-        """POST /chat/approve should resume the graph and stream tokens."""
+        """POST /chat/approve should resume the graph with Command(resume=True) and stream tokens."""
         token_event = {
             "event": "on_chat_model_stream",
             "data": {"chunk": MagicMock(content="Signal approved!")},
         }
-        mock_graph.astream_events = _make_async_iter([token_event])
+        astream_mock = MagicMock(side_effect=_make_async_iter([token_event]))
+        mock_graph.astream_events = astream_mock
 
         response = await client.post(
             "/chat/approve",
@@ -115,13 +122,17 @@ class TestChatApprove:
         token_data = json.loads(data_lines[0])
         assert token_data["token"] == "Signal approved!"
 
+        astream_mock.assert_called_once()
+        assert astream_mock.call_args[0][0] == Command(resume=True)
+
     async def test_reject_resumes_graph(self, client: AsyncClient, mock_graph: AsyncMock):
-        """POST /chat/approve with approved=false should resume with rejection."""
+        """POST /chat/approve with approved=false should resume with Command(resume=False)."""
         token_event = {
             "event": "on_chat_model_stream",
             "data": {"chunk": MagicMock(content="Signal rejected.")},
         }
-        mock_graph.astream_events = _make_async_iter([token_event])
+        astream_mock = MagicMock(side_effect=_make_async_iter([token_event]))
+        mock_graph.astream_events = astream_mock
 
         response = await client.post(
             "/chat/approve",
@@ -132,6 +143,9 @@ class TestChatApprove:
         data_lines = _parse_sse_data_lines(response.text)
         token_data = json.loads(data_lines[0])
         assert token_data["token"] == "Signal rejected."
+
+        astream_mock.assert_called_once()
+        assert astream_mock.call_args[0][0] == Command(resume=False)
 
 
 class TestApprovalRequestValidation:
