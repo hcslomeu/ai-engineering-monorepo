@@ -1,7 +1,7 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-03-20
+> **Last Updated:** 2026-03-21
 
 ---
 
@@ -106,11 +106,19 @@
 |----|-------|---------|----------------|-------|
 | — | — | — | — | — |
 
+### 📋 Planned
+| WP | Title | Issue | Depends On | Notes |
+|----|-------|-------|------------|-------|
+| WP-130 | Signal Screening System | #171 | WP-114 ✅, WP-116 ✅ | 5 signal types, ~100 tickers, Supabase + API + frontend + agent tool |
+| WP-131 | Airflow DAG for Daily Screening Pipeline | #172 | WP-130 | Docker Compose Airflow, subsumes WP-102 |
+| WP-132 | Signal Backtesting | #173 | WP-130 | Forward returns (5/10/20d), hit rates, pure Python |
+| WP-133 | Signal Alert Notifications | #174 | WP-130 | Resend email, Protocol-based design, feature flag |
+
 ### ⏸️ Deferred
 | WP | Title | Reason | Revisit When |
 |----|-------|--------|-------------|
-| WP-102 | Airflow Hello World | Reprioritized behind AlphaWhale flagship | After flagship complete |
-| WP-113 | Airflow Bronze→Silver | Reprioritized behind AlphaWhale flagship | After WP-102 |
+| WP-102 | Airflow Hello World | Subsumed by WP-131 (Airflow DAG for real screening pipeline) | N/A |
+| WP-113 | Airflow Bronze→Silver | Reprioritized behind AlphaWhale flagship | After WP-131 |
 | WP-103 (Databricks) | Databricks Feature Eng | User taking a Databricks course separately | After hired |
 | WP-301-309 | RailSense (all except WP-304) | Depth > breadth for now | After AlphaWhale flagship |
 | WP-308 | Terraform | DevOps skill | After deployment |
@@ -177,6 +185,7 @@ WP-118 → WP-119 → WP-120 → WP-114 (agent orchestration)
 WP-114 → WP-124 (guardrails)
 WP-118 → WP-123 (observability)
 WP-304 (independent)
+WP-130 → WP-131 (cron), WP-132 (backtest), WP-133 (alerts) — independent of each other
 ```
 
 ### Previous Roadmap (Superseded)
