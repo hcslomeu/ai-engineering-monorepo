@@ -86,9 +86,7 @@ class PineconeVectorStore:
         # Generate embeddings for documents without pre-computed vectors
         docs_to_embed = [doc for doc in documents if doc.vector is None]
         if docs_to_embed:
-            embeddings = await self._embedding_provider.embed(
-                [doc.text for doc in docs_to_embed]
-            )
+            embeddings = await self._embedding_provider.embed([doc.text for doc in docs_to_embed])
             for doc, embedding in zip(docs_to_embed, embeddings, strict=True):
                 doc.vector = embedding
 

@@ -137,7 +137,9 @@ class TestQuery:
         mock_embedding_provider: AsyncMock,
     ) -> None:
         mock_embedding_provider.embed.return_value = [[0.1, 0.2, 0.3]]
-        match = MagicMock(id="vec-1", score=0.95, metadata={"source": "test", "text": "hello world"})
+        match = MagicMock(
+            id="vec-1", score=0.95, metadata={"source": "test", "text": "hello world"}
+        )
         mock_index.query.return_value = MagicMock(matches=[match])
 
         results = await store.query("hello", top_k=3)

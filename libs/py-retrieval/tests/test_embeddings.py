@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from pydantic import SecretStr
@@ -88,8 +88,9 @@ class TestEmbed:
         assert len(result) == _MAX_BATCH_SIZE + 10
         assert provider._client.embeddings.create.call_count == 2
 
+    @patch("py_retrieval.embeddings.logger")
     async def test_api_error_raises_embedding_error(
-        self, provider: OpenAIEmbeddingProvider
+        self, _mock_logger: MagicMock, provider: OpenAIEmbeddingProvider
     ) -> None:
         provider._client.embeddings.create = AsyncMock(side_effect=ValueError("unexpected error"))
 
