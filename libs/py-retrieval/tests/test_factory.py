@@ -50,5 +50,6 @@ class TestCreateVectorStore:
 
     def test_passes_config_to_store(self, pinecone_config: VectorStoreConfig) -> None:
         store = create_vector_store(pinecone_config)
+        assert isinstance(store, PineconeVectorStore)
         assert store._config.index_name == "test-index"
         assert store._config.embedding_model == "text-embedding-3-small"

@@ -102,6 +102,19 @@ class TestUpsert:
         vectors = call_kwargs.kwargs.get("vectors") or call_kwargs[1].get("vectors")
         assert vectors[0][0] == "doc-1"
         assert vectors[0][1] == [0.1, 0.2, 0.3]
+        assert vectors[0][2]["text"] == "hello"
+
+    async def test_upsert_preserves_existing_text_in_metadata(
+        self, store: PineconeVectorStore, mock_index: MagicMock, mock_embedding_provider: AsyncMock
+    ) -> None:
+        mock_embedding_provider.embed.return_value = [[0.1, 0.2, 0.3]]
+        docs = [Document(id="doc-1", text="hello", metadata={"text": "custom text"})]
+
+        await store.upsert(docs)
+
+        call_kwargs = mock_index.upsert.call_args
+        vectors = call_kwargs.kwargs.get("vectors") or call_kwargs[1].get("vectors")
+        assert vectors[0][2]["text"] == "custom text"
 
     async def test_upsert_error_raises_vectorstore_error(
         self,
@@ -124,7 +137,7 @@ class TestQuery:
         mock_embedding_provider: AsyncMock,
     ) -> None:
         mock_embedding_provider.embed.return_value = [[0.1, 0.2, 0.3]]
-        match = MagicMock(id="vec-1", score=0.95, metadata={"source": "test"})
+        match = MagicMock(id="vec-1", score=0.95, metadata={"source": "test", "text": "hello world"})
         mock_index.query.return_value = MagicMock(matches=[match])
 
         results = await store.query("hello", top_k=3)
@@ -132,7 +145,8 @@ class TestQuery:
         assert len(results) == 1
         assert results[0].id == "vec-1"
         assert results[0].score == 0.95
-        assert results[0].metadata == {"source": "test"}
+        assert results[0].text == "hello world"
+        assert results[0].metadata == {"source": "test", "text": "hello world"}
 
     async def test_query_passes_filters(
         self,

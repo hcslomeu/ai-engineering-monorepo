@@ -85,8 +85,8 @@ class OpenAIEmbeddingProvider:
                 "embeddings_failed",
                 total_texts=len(texts),
                 model=self._model,
-                error=str(exc),
+                error_type=type(exc).__name__,
             )
-            raise EmbeddingError(f"Failed to generate embeddings: {exc}") from exc
+            raise EmbeddingError("Failed to generate embeddings") from exc
 
         return all_embeddings

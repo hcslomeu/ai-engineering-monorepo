@@ -6,9 +6,10 @@ from py_retrieval.embeddings import OpenAIEmbeddingProvider
 from py_retrieval.exceptions import VectorStoreError
 from py_retrieval.models import VectorStoreConfig
 from py_retrieval.pinecone_store import PineconeVectorStore
+from py_retrieval.protocols import VectorStore
 
 
-def create_vector_store(config: VectorStoreConfig) -> PineconeVectorStore:
+def create_vector_store(config: VectorStoreConfig) -> VectorStore:
     """Create a vector store instance based on configuration.
 
     Args:

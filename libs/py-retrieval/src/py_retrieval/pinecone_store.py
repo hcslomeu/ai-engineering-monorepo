@@ -84,17 +84,21 @@ class PineconeVectorStore:
                 doc.id = str(uuid.uuid4())
 
         # Generate embeddings for documents without pre-computed vectors
-        texts_to_embed = [doc.text for doc in documents if doc.vector is None]
-        if texts_to_embed:
-            embeddings = await self._embedding_provider.embed(texts_to_embed)
-            embed_idx = 0
-            for doc in documents:
-                if doc.vector is None:
-                    doc.vector = embeddings[embed_idx]
-                    embed_idx += 1
+        docs_to_embed = [doc for doc in documents if doc.vector is None]
+        if docs_to_embed:
+            embeddings = await self._embedding_provider.embed(
+                [doc.text for doc in docs_to_embed]
+            )
+            for doc, embedding in zip(docs_to_embed, embeddings, strict=True):
+                doc.vector = embedding
 
-        # Convert to Pinecone tuple format and upsert in batches
-        vectors = [(doc.id, doc.vector, doc.metadata) for doc in documents]
+        # Merge text into metadata for persistence (Pinecone stores metadata, not raw text)
+        vectors = []
+        for doc in documents:
+            metadata = dict(doc.metadata or {})
+            if doc.text is not None:
+                metadata.setdefault("text", doc.text)
+            vectors.append((doc.id, doc.vector, metadata))
 
         try:
             for i in range(0, len(vectors), _UPSERT_BATCH_SIZE):
@@ -148,6 +152,7 @@ class PineconeVectorStore:
                 QueryResult(
                     id=match.id,
                     score=match.score,
+                    text=match.metadata.get("text") if match.metadata else None,
                     metadata=match.metadata or {},
                 )
                 for match in response.matches
