@@ -1,0 +1,29 @@
+{
+  "name": "py-retrieval",
+  "sourceRoot": "libs/py-retrieval/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "lang:python"],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run pytest libs/py-retrieval/tests -v",
+        "cwd": "."
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run ruff check libs/py-retrieval/src",
+        "cwd": "."
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "uv run mypy libs/py-retrieval/src",
+        "cwd": "."
+      }
+    }
+  }
+}
