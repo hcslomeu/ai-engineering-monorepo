@@ -11,6 +11,7 @@ from ingestion.rag.chunking import chunk_articles, chunk_filings
 from ingestion.rag.config import RAGSettings
 from ingestion.rag.edgar import EdgarClient, EdgarFiling, EdgarSearchResult, FilingType
 from ingestion.rag.firecrawl_source import FirecrawlNewsSource, NewsArticle, NewsArticleMetadata
+from ingestion.rag.indexing import build_embed_model, build_vector_store, index_nodes
 
 __all__ = [
     "EdgarClient",
@@ -21,6 +22,9 @@ __all__ = [
     "NewsArticle",
     "NewsArticleMetadata",
     "RAGSettings",
+    "build_embed_model",
+    "build_vector_store",
     "chunk_articles",
     "chunk_filings",
+    "index_nodes",
 ]
