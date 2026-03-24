@@ -12,6 +12,7 @@ from ingestion.rag.config import RAGSettings
 from ingestion.rag.edgar import EdgarClient, EdgarFiling, EdgarSearchResult, FilingType
 from ingestion.rag.firecrawl_source import FirecrawlNewsSource, NewsArticle, NewsArticleMetadata
 from ingestion.rag.indexing import build_embed_model, build_vector_store, index_nodes
+from ingestion.rag.retrieval import build_hybrid_retriever, build_reranker, retrieve_and_rerank
 
 __all__ = [
     "EdgarClient",
@@ -23,8 +24,11 @@ __all__ = [
     "NewsArticleMetadata",
     "RAGSettings",
     "build_embed_model",
+    "build_hybrid_retriever",
+    "build_reranker",
     "build_vector_store",
     "chunk_articles",
     "chunk_filings",
     "index_nodes",
+    "retrieve_and_rerank",
 ]
