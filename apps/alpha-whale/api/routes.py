@@ -3,6 +3,9 @@
 import json
 import uuid
 from collections.abc import AsyncGenerator
+from contextlib import nullcontext
+from time import perf_counter
+from typing import Any
 
 from fastapi import APIRouter, Query
 from langchain_core.messages import HumanMessage
@@ -19,11 +22,63 @@ from api.models import (
     IndicatorDataResponse,
     MarketDataResponse,
 )
-from py_core import get_logger
+from py_core import get_logfire_instance, get_logger
 
 logger = get_logger("api.routes")
 
 router = APIRouter()
+
+_stream_duration_histogram: Any | None = None
+_stream_error_counter: Any | None = None
+
+
+def _get_stream_duration_histogram() -> Any | None:
+    """Return a cached histogram for agent stream duration."""
+    global _stream_duration_histogram
+    if _stream_duration_histogram is None:
+        logfire = get_logfire_instance()
+        if logfire is None:
+            return None
+        _stream_duration_histogram = logfire.metric_histogram(
+            "alpha_whale.agent.stream.duration",
+            unit="ms",
+            description="Duration of agent SSE streams in milliseconds.",
+        )
+    return _stream_duration_histogram
+
+
+def _get_stream_error_counter() -> Any | None:
+    """Return a cached counter for agent stream errors."""
+    global _stream_error_counter
+    if _stream_error_counter is None:
+        logfire = get_logfire_instance()
+        if logfire is None:
+            return None
+        _stream_error_counter = logfire.metric_counter(
+            "alpha_whale.agent.stream.errors",
+            unit="1",
+            description="Number of agent SSE stream failures.",
+        )
+    return _stream_error_counter
+
+
+def _record_stream_metrics(*, route: str, duration_ms: float, approval_requested: bool) -> None:
+    """Record latency metrics for an agent stream."""
+    histogram = _get_stream_duration_histogram()
+    if histogram is None:
+        return
+    histogram.record(
+        duration_ms,
+        attributes={"route": route, "approval_requested": approval_requested},
+    )
+
+
+def _record_stream_error(*, route: str, error_type: str) -> None:
+    """Increment the agent stream error counter."""
+    counter = _get_stream_error_counter()
+    if counter is None:
+        return
+    counter.add(1, attributes={"route": route, "error_type": error_type})
 
 
 async def _stream_agent(
@@ -33,44 +88,72 @@ async def _stream_agent(
 ) -> AsyncGenerator[dict[str, str], None]:
     """Yield SSE-formatted dicts from the LangGraph agent stream."""
     config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
-
-    yield {
-        "event": "metadata",
-        "data": json.dumps({"thread_id": thread_id}),
-    }
-
-    try:
-        async for event in graph.astream_events(
-            {"messages": [HumanMessage(content=message)]},
-            config=config,
-            version="v2",
-        ):
-            if event["event"] == "on_chat_model_stream" and event["data"]["chunk"].content:
-                yield {
-                    "event": "message",
-                    "data": json.dumps({"token": event["data"]["chunk"].content}),
-                }
-
-        # Check if the graph paused at an interrupt
-        state = await graph.aget_state(config)
-        interrupted_task = next(
-            (t for t in (state.tasks or []) if hasattr(t, "interrupts") and t.interrupts),
-            None,
+    logfire = get_logfire_instance()
+    start_time = perf_counter()
+    approval_requested = False
+    span_context = (
+        logfire.span(
+            "agent.stream_request",
+            thread_id=thread_id,
+            message_length=len(message),
         )
-        if interrupted_task:
-            interrupt_value = interrupted_task.interrupts[0].value
-            yield {
-                "event": "approval_request",
-                "data": json.dumps(interrupt_value),
-            }
-    except Exception as exc:
-        logger.error("stream_error", error=str(exc))
+        if logfire is not None
+        else nullcontext()
+    )
+
+    with span_context as span:
         yield {
-            "event": "error",
-            "data": json.dumps({"error": str(exc)}),
+            "event": "metadata",
+            "data": json.dumps({"thread_id": thread_id}),
         }
-    finally:
-        yield {"event": "message", "data": "[DONE]"}
+
+        try:
+            async for event in graph.astream_events(
+                {"messages": [HumanMessage(content=message)]},
+                config=config,
+                version="v2",
+            ):
+                if event["event"] == "on_chat_model_stream" and event["data"]["chunk"].content:
+                    yield {
+                        "event": "message",
+                        "data": json.dumps({"token": event["data"]["chunk"].content}),
+                    }
+
+            # Check if the graph paused at an interrupt
+            state = await graph.aget_state(config)
+            interrupted_task = next(
+                (t for t in (state.tasks or []) if hasattr(t, "interrupts") and t.interrupts),
+                None,
+            )
+            if interrupted_task:
+                approval_requested = True
+                if span is not None:
+                    span.set_attribute("approval_requested", True)
+                yield {
+                    "event": "approval_request",
+                    "data": json.dumps(interrupted_task.interrupts[0].value),
+                }
+        except Exception as exc:
+            error_type = type(exc).__name__
+            logger.error("stream_error", error=str(exc), thread_id=thread_id)
+            _record_stream_error(route="/chat/stream", error_type=error_type)
+            if span is not None:
+                span.set_attribute("error.type", error_type)
+            yield {
+                "event": "error",
+                "data": json.dumps({"error": str(exc)}),
+            }
+        finally:
+            duration_ms = (perf_counter() - start_time) * 1000
+            if span is not None:
+                span.set_attribute("approval_requested", approval_requested)
+                span.set_attribute("stream.duration_ms", duration_ms)
+            _record_stream_metrics(
+                route="/chat/stream",
+                duration_ms=duration_ms,
+                approval_requested=approval_requested,
+            )
+            yield {"event": "message", "data": "[DONE]"}
 
 
 @router.post("/chat/stream")
@@ -87,25 +170,51 @@ async def chat_approve(body: ApprovalRequest, graph: GraphDep) -> EventSourceRes
 
     async def _stream_resume() -> AsyncGenerator[dict[str, str], None]:
         config: RunnableConfig = {"configurable": {"thread_id": thread_id}}
-        try:
-            async for event in graph.astream_events(
-                Command(resume=body.approved),
-                config=config,
-                version="v2",
-            ):
-                if event["event"] == "on_chat_model_stream" and event["data"]["chunk"].content:
-                    yield {
-                        "event": "message",
-                        "data": json.dumps({"token": event["data"]["chunk"].content}),
-                    }
-        except Exception as exc:
-            logger.error("approval_stream_error", error=str(exc), thread_id=thread_id)
-            yield {
-                "event": "error",
-                "data": json.dumps({"error": str(exc)}),
-            }
-        finally:
-            yield {"event": "message", "data": "[DONE]"}
+        logfire = get_logfire_instance()
+        start_time = perf_counter()
+        span_context = (
+            logfire.span(
+                "agent.resume_request",
+                thread_id=thread_id,
+                approved=body.approved,
+            )
+            if logfire is not None
+            else nullcontext()
+        )
+
+        with span_context as span:
+            try:
+                async for event in graph.astream_events(
+                    Command(resume=body.approved),
+                    config=config,
+                    version="v2",
+                ):
+                    if event["event"] == "on_chat_model_stream" and event["data"]["chunk"].content:
+                        yield {
+                            "event": "message",
+                            "data": json.dumps({"token": event["data"]["chunk"].content}),
+                        }
+            except Exception as exc:
+                error_type = type(exc).__name__
+                logger.error("approval_stream_error", error=str(exc), thread_id=thread_id)
+                _record_stream_error(route="/chat/approve", error_type=error_type)
+                if span is not None:
+                    span.set_attribute("error.type", error_type)
+                yield {
+                    "event": "error",
+                    "data": json.dumps({"error": str(exc)}),
+                }
+            finally:
+                duration_ms = (perf_counter() - start_time) * 1000
+                if span is not None:
+                    span.set_attribute("approval_requested", False)
+                    span.set_attribute("stream.duration_ms", duration_ms)
+                _record_stream_metrics(
+                    route="/chat/approve",
+                    duration_ms=duration_ms,
+                    approval_requested=False,
+                )
+                yield {"event": "message", "data": "[DONE]"}
 
     return EventSourceResponse(_stream_resume())
 

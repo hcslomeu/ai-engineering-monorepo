@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import APISettings
 from ingestion.supabase_client import create_supabase_client
-from py_core import AsyncRedisClient, get_logger
+from py_core import AsyncRedisClient, get_logger, instrument_fastapi_app
 
 load_dotenv()
 
@@ -68,5 +68,6 @@ def create_app() -> FastAPI:
     from api.routes import router
 
     app.include_router(router)
+    instrument_fastapi_app(app, service_name="alpha-whale-api")
 
     return app

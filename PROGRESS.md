@@ -1,14 +1,14 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-03-21
+> **Last Updated:** 2026-03-24
 
 ---
 
 ## Current Position
 
 - **Active Phase:** AlphaWhale Flagship Roadmap (9 phases, 12 WPs)
-- **Active WP:** WP-114 complete — Agent v1: Multi-Tool + Human-in-the-Loop
+- **Active WP:** WP-123 complete — Logfire Observability
 - **Next WP:** WP-205 (Pinecone Vector Store — Phase 6a)
 - **Blocker:** None
 - **Flagship:** AlphaWhale — conversational trading assistant (React chat UI, SSE streaming, RAG, LangGraph agent)
@@ -67,7 +67,7 @@
 | HuggingFace fine-tuning (embeddings) | ⬜ Not started | WP-125 | 🔴 |
 | HuggingFace Hub (model publishing) | ⬜ Not started | WP-125 | 🔴 |
 | AI safety guardrails | ⬜ Not started | WP-124 | 🔴 |
-| Logfire + OpenTelemetry | ⬜ Not started | WP-123 | 🔴 |
+| Logfire + OpenTelemetry | ✅ Practised | WP-123 | 🟡 Needs more reps |
 | FastMCP | ⬜ Not started | WP-112 | 🔴 |
 | HuggingFace local models | ⬜ Not started | WP-202 | 🔴 |
 | WhatsApp Evolution API | ⬜ Not started | WP-105 | 🔴 |
@@ -100,6 +100,7 @@
 | WP-119 | Redis Shared Lib + Caching | Mar 18, 2026 | #168 | AsyncRedisClient in py-core, LangChain RedisCache, graceful degradation, fakeredis tests |
 | WP-120 | Instructor Structured Extraction | Mar 18, 2026 | #169 | Instructor wrapper in py-core, domain models (TradeSignal, AssetMention, UserIntent), agent integration, 25 tests |
 | WP-114 | Agent v1: Multi-Tool + Human-in-the-Loop | Mar 19, 2026 | #170 | Custom AgentState, 4th tool (generate_trade_signal), risk assessment node, MemorySaver checkpointing, interrupt() for human approval, thread-based conversations, approval API endpoint, 34 new tests (147 total). Manual UI checks pending. |
+| WP-123 | Logfire Observability | Mar 24, 2026 | — | Added shared Logfire bootstrap in py-core, FastAPI instrumentation, LangGraph/SSE spans and metrics, OpenAI SDK instrumentation to complement LangSmith, and focused observability tests. |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

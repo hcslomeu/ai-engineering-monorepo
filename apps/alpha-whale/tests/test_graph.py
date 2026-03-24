@@ -6,6 +6,7 @@ Tests verify graph structure, routing logic, and end-to-end execution.
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
@@ -22,6 +23,67 @@ from agent.graph import (
     tools_node,
 )
 from agent.models import RiskLevel, TradeSignal
+
+
+class _FakeMetric:
+    """Simple metric test double for record/add calls."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[float | int, dict | None]] = []
+
+    def record(self, value: float, *, attributes: dict | None = None) -> None:
+        self.calls.append((value, attributes))
+
+    def add(self, value: int, *, attributes: dict | None = None) -> None:
+        self.calls.append((value, attributes))
+
+
+class _FakeSpan:
+    """Context manager that stores span attributes."""
+
+    def __init__(self, name: str, attributes: dict[str, object]) -> None:
+        self.name = name
+        self.initial_attributes = attributes
+        self.attributes: dict[str, object] = {}
+
+    def __enter__(self) -> "_FakeSpan":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        return False
+
+    def set_attribute(self, key: str, value: object) -> None:
+        self.attributes[key] = value
+
+
+class _FakeLogfire:
+    """Minimal Logfire double for spans and metrics."""
+
+    def __init__(self) -> None:
+        self.spans: list[_FakeSpan] = []
+        self.histograms: dict[str, _FakeMetric] = {}
+        self.counters: dict[str, _FakeMetric] = {}
+
+    def span(self, name: str, **attributes: object) -> _FakeSpan:
+        span = _FakeSpan(name, attributes)
+        self.spans.append(span)
+        return span
+
+    def metric_histogram(self, name: str, **_kwargs: object) -> _FakeMetric:
+        metric = self.histograms.setdefault(name, _FakeMetric())
+        return metric
+
+    def metric_counter(self, name: str, **_kwargs: object) -> _FakeMetric:
+        metric = self.counters.setdefault(name, _FakeMetric())
+        return metric
+
+
+@pytest.fixture(autouse=True)
+def reset_observability_metrics(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reset graph-level observability caches between tests."""
+    monkeypatch.setattr("agent.graph._tool_latency_histogram", None)
+    monkeypatch.setattr("agent.graph._tool_error_counter", None)
+
 
 # --- Graph structure ---
 
@@ -249,6 +311,68 @@ class TestToolsNode:
         # Error is surfaced in the ToolMessage, no signal added to state
         assert "Error" in result["messages"][0].content
         assert "trade_signals" not in result
+
+    def test_records_success_telemetry_for_tool_call(self, monkeypatch: pytest.MonkeyPatch):
+        fake_logfire = _FakeLogfire()
+        fake_tool = MagicMock()
+        fake_tool.invoke.return_value = {"ok": True}
+        monkeypatch.setattr("agent.graph.get_logfire_instance", lambda: fake_logfire)
+        monkeypatch.setitem(TOOLS_BY_NAME, "get_stock_price", fake_tool)
+
+        tool_call = {
+            "name": "get_stock_price",
+            "args": {"ticker": "AAPL"},
+            "id": "call_obs_ok",
+            "type": "tool_call",
+        }
+        state = {
+            "messages": [
+                HumanMessage(content="price?"),
+                AIMessage(content="", tool_calls=[tool_call]),
+            ]
+        }
+
+        result = tools_node(state)
+
+        assert len(result["messages"]) == 1
+        histogram_calls = fake_logfire.histograms["alpha_whale.agent.tool.duration"].calls
+        assert histogram_calls[0][1] == {"tool_name": "get_stock_price", "success": True}
+        assert "alpha_whale.agent.tool.errors" not in fake_logfire.counters
+        assert fake_logfire.spans[0].name == "agent.tool_call"
+        assert fake_logfire.spans[0].initial_attributes == {"tool_name": "get_stock_price"}
+        assert fake_logfire.spans[0].attributes["tool.success"] is True
+
+    def test_records_failure_telemetry_for_tool_error(self, monkeypatch: pytest.MonkeyPatch):
+        fake_logfire = _FakeLogfire()
+        fake_tool = MagicMock()
+        fake_tool.invoke.side_effect = RuntimeError("boom")
+        monkeypatch.setattr("agent.graph.get_logfire_instance", lambda: fake_logfire)
+        monkeypatch.setitem(TOOLS_BY_NAME, "get_stock_price", fake_tool)
+
+        tool_call = {
+            "name": "get_stock_price",
+            "args": {"ticker": "AAPL"},
+            "id": "call_obs_fail",
+            "type": "tool_call",
+        }
+        state = {
+            "messages": [
+                HumanMessage(content="price?"),
+                AIMessage(content="", tool_calls=[tool_call]),
+            ]
+        }
+
+        result = tools_node(state)
+
+        assert "Error: tool 'get_stock_price' failed" in result["messages"][0].content
+        histogram_calls = fake_logfire.histograms["alpha_whale.agent.tool.duration"].calls
+        counter_calls = fake_logfire.counters["alpha_whale.agent.tool.errors"].calls
+        assert histogram_calls[0][1] == {"tool_name": "get_stock_price", "success": False}
+        assert counter_calls == [
+            (1, {"tool_name": "get_stock_price", "error_type": "RuntimeError"})
+        ]
+        assert fake_logfire.spans[0].attributes["tool.success"] is False
+        assert fake_logfire.spans[0].attributes["error.type"] == "RuntimeError"
 
 
 # --- Risk assessment node ---
