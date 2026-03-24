@@ -15,6 +15,59 @@ from api.dependencies import get_graph
 from api.main import create_app
 
 
+class _FakeMetric:
+    """Simple metric test double for record/add calls."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[float | int, dict | None]] = []
+
+    def record(self, value: float, *, attributes: dict | None = None) -> None:
+        self.calls.append((value, attributes))
+
+    def add(self, value: int, *, attributes: dict | None = None) -> None:
+        self.calls.append((value, attributes))
+
+
+class _FakeSpan:
+    """Context manager that stores span attributes."""
+
+    def __init__(self, name: str, attributes: dict[str, object]) -> None:
+        self.name = name
+        self.initial_attributes = attributes
+        self.attributes: dict[str, object] = {}
+
+    def __enter__(self) -> "_FakeSpan":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        return False
+
+    def set_attribute(self, key: str, value: object) -> None:
+        self.attributes[key] = value
+
+
+class _FakeLogfire:
+    """Minimal Logfire double for spans and metrics."""
+
+    def __init__(self) -> None:
+        self.spans: list[_FakeSpan] = []
+        self.histograms: dict[str, _FakeMetric] = {}
+        self.counters: dict[str, _FakeMetric] = {}
+
+    def span(self, name: str, **attributes: object) -> _FakeSpan:
+        span = _FakeSpan(name, attributes)
+        self.spans.append(span)
+        return span
+
+    def metric_histogram(self, name: str, **_kwargs: object) -> _FakeMetric:
+        metric = self.histograms.setdefault(name, _FakeMetric())
+        return metric
+
+    def metric_counter(self, name: str, **_kwargs: object) -> _FakeMetric:
+        metric = self.counters.setdefault(name, _FakeMetric())
+        return metric
+
+
 @pytest.fixture
 def mock_graph():
     """Create a mock compiled graph."""
@@ -29,6 +82,7 @@ def app(mock_graph, monkeypatch):
     """Create a test app with mocked dependencies."""
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
+    monkeypatch.setenv("LOGFIRE_ENABLED", "false")
     test_app = create_app()
     test_app.state.supabase = AsyncMock()
     test_app.state.redis_client = None
@@ -95,6 +149,72 @@ class TestChatStream:
         metadata = json.loads(data_lines[0])
         assert "thread_id" in metadata
         assert len(metadata["thread_id"]) == 36  # UUID format
+
+
+class TestAppFactoryObservability:
+    def test_create_app_calls_fastapi_instrumentation(self, monkeypatch: pytest.MonkeyPatch):
+        """App factory should delegate FastAPI instrumentation to py-core."""
+        instrument_mock = MagicMock(return_value=True)
+        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+        monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
+        monkeypatch.setattr("api.main.instrument_fastapi_app", instrument_mock)
+
+        app = create_app()
+
+        instrument_mock.assert_called_once_with(app, service_name="alpha-whale-api")
+
+    def test_create_app_remains_usable_when_instrumentation_is_skipped(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
+        """App factory should still return a working app when Logfire is disabled."""
+        instrument_mock = MagicMock(return_value=False)
+        monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
+        monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
+        monkeypatch.setattr("api.main.instrument_fastapi_app", instrument_mock)
+
+        app = create_app()
+
+        assert app.title == "AlphaWhale API"
+        instrument_mock.assert_called_once_with(app, service_name="alpha-whale-api")
+
+
+class TestStreamObservability:
+    async def test_chat_stream_records_error_telemetry(
+        self,
+        client: AsyncClient,
+        mock_graph: AsyncMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        """Streaming errors should emit SSE error events and observability metrics."""
+
+        async def _failing_stream(*_args, **_kwargs):
+            raise RuntimeError("stream exploded")
+            yield
+
+        fake_logfire = _FakeLogfire()
+        mock_graph.astream_events = _failing_stream
+        monkeypatch.setattr("api.routes.get_logfire_instance", lambda: fake_logfire)
+        monkeypatch.setattr("api.routes._stream_duration_histogram", None)
+        monkeypatch.setattr("api.routes._stream_error_counter", None)
+
+        response = await client.post(
+            "/chat/stream",
+            json={"message": "Hello", "thread_id": "stream-obs-1"},
+        )
+
+        assert response.status_code == 200
+        assert '"error": "stream exploded"' in response.text
+        assert "[DONE]" in response.text
+        counter_calls = fake_logfire.counters["alpha_whale.agent.stream.errors"].calls
+        histogram_calls = fake_logfire.histograms["alpha_whale.agent.stream.duration"].calls
+        assert counter_calls == [(1, {"route": "/chat/stream", "error_type": "RuntimeError"})]
+        assert histogram_calls[0][1] == {
+            "route": "/chat/stream",
+            "approval_requested": False,
+        }
+        assert fake_logfire.spans[0].name == "agent.stream_request"
+        assert fake_logfire.spans[0].initial_attributes["thread_id"] == "stream-obs-1"
+        assert fake_logfire.spans[0].attributes["error.type"] == "RuntimeError"
 
 
 class TestChatApprove:

@@ -11,6 +11,10 @@ START → agent_node → [has tool calls?]
                                                                                         → agent_node → END
 """
 
+from contextlib import nullcontext
+from time import perf_counter
+from typing import Any
+
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_openai import ChatOpenAI
@@ -26,7 +30,7 @@ from agent.tools import (
     get_stock_price,
     get_technical_indicators,
 )
-from py_core import ExtractionError, extract, get_logger
+from py_core import ExtractionError, extract, get_logfire_instance, get_logger
 
 logger = get_logger("agent.graph")
 
@@ -81,6 +85,54 @@ SYSTEM_PROMPT = (
 
 
 _model: Runnable | None = None
+_tool_latency_histogram: Any | None = None
+_tool_error_counter: Any | None = None
+
+
+def _get_tool_latency_histogram() -> Any | None:
+    """Return a cached histogram for tool execution time."""
+    global _tool_latency_histogram
+    if _tool_latency_histogram is None:
+        logfire = get_logfire_instance()
+        if logfire is None:
+            return None
+        _tool_latency_histogram = logfire.metric_histogram(
+            "alpha_whale.agent.tool.duration",
+            unit="ms",
+            description="Duration of LangGraph tool executions in milliseconds.",
+        )
+    return _tool_latency_histogram
+
+
+def _get_tool_error_counter() -> Any | None:
+    """Return a cached counter for tool failures."""
+    global _tool_error_counter
+    if _tool_error_counter is None:
+        logfire = get_logfire_instance()
+        if logfire is None:
+            return None
+        _tool_error_counter = logfire.metric_counter(
+            "alpha_whale.agent.tool.errors",
+            unit="1",
+            description="Number of LangGraph tool execution failures.",
+        )
+    return _tool_error_counter
+
+
+def _record_tool_metrics(*, tool_name: str, duration_ms: float, success: bool) -> None:
+    """Record latency metrics for a tool invocation."""
+    histogram = _get_tool_latency_histogram()
+    if histogram is None:
+        return
+    histogram.record(duration_ms, attributes={"tool_name": tool_name, "success": success})
+
+
+def _record_tool_error(*, tool_name: str, error_type: str) -> None:
+    """Increment the tool failure counter."""
+    counter = _get_tool_error_counter()
+    if counter is None:
+        return
+    counter.add(1, attributes={"tool_name": tool_name, "error_type": error_type})
 
 
 def get_model() -> Runnable:
@@ -160,15 +212,43 @@ def tools_node(state: AgentState) -> dict:
     new_signals: list[TradeSignal] = []
 
     for call in last_message.tool_calls:
+        logfire = get_logfire_instance()
+        start_time = perf_counter()
+        success = False
+        error_type: str | None = None
         tool = TOOLS_BY_NAME.get(call["name"])
-        if tool is None:
-            output = f"Error: unknown tool '{call['name']}'"
-        else:
-            try:
-                output = tool.invoke(call["args"])
-            except Exception as exc:
-                logger.warning("tool_invocation_failed", tool=call["name"], error=str(exc))
-                output = f"Error: tool '{call['name']}' failed — {exc}"
+        span_context = (
+            logfire.span("agent.tool_call", tool_name=call["name"])
+            if logfire is not None
+            else nullcontext()
+        )
+
+        with span_context as span:
+            if tool is None:
+                error_type = "unknown_tool"
+                output = f"Error: unknown tool '{call['name']}'"
+            else:
+                try:
+                    output = tool.invoke(call["args"])
+                    success = True
+                except Exception as exc:
+                    error_type = type(exc).__name__
+                    logger.warning("tool_invocation_failed", tool=call["name"], error=str(exc))
+                    output = f"Error: tool '{call['name']}' failed — {exc}"
+
+            duration_ms = (perf_counter() - start_time) * 1000
+            if span is not None:
+                span.set_attribute("tool.success", success)
+                span.set_attribute("tool.duration_ms", duration_ms)
+                if error_type is not None:
+                    span.set_attribute("error.type", error_type)
+            _record_tool_metrics(
+                tool_name=call["name"],
+                duration_ms=duration_ms,
+                success=success,
+            )
+            if error_type is not None:
+                _record_tool_error(tool_name=call["name"], error_type=error_type)
 
         # Capture trade signals for risk assessment routing
         if call["name"] == "generate_trade_signal" and isinstance(output, dict):

@@ -102,6 +102,7 @@ def app(monkeypatch: pytest.MonkeyPatch) -> FastAPI:
     """Create a fresh FastAPI app for each test."""
     monkeypatch.setenv("SUPABASE_URL", "https://test.supabase.co")
     monkeypatch.setenv("SUPABASE_KEY", "test-supabase-key")
+    monkeypatch.setenv("LOGFIRE_ENABLED", "false")
     test_app = create_app()
     test_app.dependency_overrides[get_redis_client] = lambda: None
     return test_app
