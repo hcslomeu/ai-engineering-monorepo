@@ -3,6 +3,7 @@
 import json
 
 import pytest
+import structlog
 
 from py_core.logging import configure_logging, get_logger
 
@@ -32,6 +33,12 @@ class TestGetLogger:
 
 class TestConfigureLogging:
     """Tests for configure_logging function."""
+
+    @pytest.fixture(autouse=True)
+    def _reset_structlog(self) -> None:  # noqa: PT004
+        """Reset structlog after each test to prevent stale file handles."""
+        yield  # type: ignore[misc]
+        structlog.reset_defaults()
 
     def test_json_format_produces_valid_json(self, capsys: pytest.CaptureFixture[str]) -> None:
         """JSON format should output parseable JSON."""

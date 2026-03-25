@@ -1,15 +1,15 @@
 # PROGRESS.md — Skills & Work Package Tracker
 
 > **Purpose:** Pick up exactly where we left off in new sessions.
-> **Last Updated:** 2026-03-21
+> **Last Updated:** 2026-03-25
 
 ---
 
 ## Current Position
 
 - **Active Phase:** AlphaWhale Flagship Roadmap (9 phases, 12 WPs)
-- **Active WP:** WP-114 complete — Agent v1: Multi-Tool + Human-in-the-Loop
-- **Next WP:** WP-205 (Pinecone Vector Store — Phase 6a)
+- **Active WP:** WP-121 complete — RAG Pipeline with LlamaIndex
+- **Next WP:** WP-122 (RAG Evaluation — Phase 7a)
 - **Blocker:** None
 - **Flagship:** AlphaWhale — conversational trading assistant (React chat UI, SSE streaming, RAG, LangGraph agent)
 
@@ -57,11 +57,13 @@
 | Instructor (structured extraction) | ✅ Practised | WP-120 | 🟡 Needs more reps |
 | LangGraph multi-tool agents | ✅ Practised | WP-114 | 🟡 Needs more reps |
 | LangGraph Command(resume) | ✅ Practised | WP-114 | 🟡 Needs more reps |
-| Pinecone + VectorStore abstraction | ⬜ Not started | WP-205 | 🔴 |
-| LlamaIndex (RAG ingestion/retrieval) | ⬜ Not started | WP-121 | 🔴 |
-| Hybrid search (BM25 + vector) | ⬜ Not started | WP-121 | 🔴 |
-| Reranking (Cohere/SentenceTransformer) | ⬜ Not started | WP-121 | 🔴 |
-| Firecrawl web scraping | ⬜ Not started | WP-121 | 🔴 |
+| Pinecone + VectorStore abstraction | ✅ Practised | WP-205 | 🟡 Needs more reps |
+| LlamaIndex (RAG ingestion/retrieval) | ✅ Practised | WP-121 | 🟡 Needs more reps |
+| Hybrid search (BM25 + vector) | ✅ Practised | WP-121 | 🟡 Needs more reps |
+| Reranking (Cohere rerank-v3.5) | ✅ Practised | WP-121 | 🟡 Needs more reps |
+| Firecrawl web scraping | ✅ Practised | WP-121 | 🟡 Needs more reps |
+| EDGAR EFTS API (SEC filings) | ✅ Practised | WP-121 | 🟡 Needs more reps |
+| LlamaIndex metadata-enhanced embeddings | ✅ Practised | WP-121 | 🟡 Needs more reps |
 | RAGAS evaluation | ⬜ Not started | WP-122 | 🔴 |
 | Retrieval metrics (MRR, NDCG) | ⬜ Not started | WP-122 | 🔴 |
 | HuggingFace fine-tuning (embeddings) | ⬜ Not started | WP-125 | 🔴 |
@@ -100,6 +102,8 @@
 | WP-119 | Redis Shared Lib + Caching | Mar 18, 2026 | #168 | AsyncRedisClient in py-core, LangChain RedisCache, graceful degradation, fakeredis tests |
 | WP-120 | Instructor Structured Extraction | Mar 18, 2026 | #169 | Instructor wrapper in py-core, domain models (TradeSignal, AssetMention, UserIntent), agent integration, 25 tests |
 | WP-114 | Agent v1: Multi-Tool + Human-in-the-Loop | Mar 19, 2026 | #170 | Custom AgentState, 4th tool (generate_trade_signal), risk assessment node, MemorySaver checkpointing, interrupt() for human approval, thread-based conversations, approval API endpoint, 34 new tests (147 total). Manual UI checks pending. |
+| WP-205 | Pinecone VectorStore Abstraction | Mar 21, 2026 | #175 | Factory Pattern VectorStore interface in shared lib, Pinecone backend |
+| WP-121 | RAG Pipeline with LlamaIndex | Mar 25, 2026 | #177 | 8-phase medallion pipeline: EDGAR + Firecrawl (Bronze), SentenceSplitter chunking (Silver), Pinecone + OpenAI embeddings (Gold), BM25 + vector hybrid search with Cohere reranking (Retrieval), query_knowledge_base agent tool, end-to-end orchestration. 294 tests. |
 
 ### 🔄 In Progress
 | WP | Title | Started | Est. Completion | Notes |

@@ -195,6 +195,7 @@ class TestToolsNode:
             "get_technical_indicators",
             "compare_assets",
             "generate_trade_signal",
+            "query_knowledge_base",
         }
         assert len(TOOLS_BY_NAME) == len(TOOLS)
 

@@ -1,11 +1,21 @@
 """Finance tools for the AlphaWhale agent backed by Supabase."""
 
+from __future__ import annotations
+
 import os
+import threading
+from typing import Any
 
 from langchain_core.tools import tool
+from llama_index.core import VectorStoreIndex
+from llama_index.core.retrievers import VectorIndexRetriever
+from llama_index.core.vector_stores.types import ExactMatchFilter, MetadataFilters
+from llama_index.postprocessor.cohere_rerank import CohereRerank
 from supabase import Client, create_client
 
 from agent.models import TradeSignal
+from ingestion.rag.config import RAGSettings
+from ingestion.rag.indexing import build_embed_model, build_vector_store
 from py_core import extract, get_logger
 
 logger = get_logger("agent.tools")
@@ -48,6 +58,88 @@ def _resolve_ticker(ticker: str) -> str:
     """Normalise a ticker to its Supabase-stored format (uppercase, crypto mapped)."""
     upper = ticker.upper()
     return TICKER_MAP.get(upper, upper)
+
+
+_rag_index: VectorStoreIndex | None = None
+_rag_settings: RAGSettings | None = None
+_rag_lock = threading.Lock()
+
+
+def _get_rag_index() -> tuple[VectorStoreIndex, RAGSettings]:
+    """Return a cached VectorStoreIndex and RAGSettings, lazily initialised."""
+    global _rag_index, _rag_settings  # noqa: PLW0603
+    if _rag_index is not None and _rag_settings is not None:
+        return _rag_index, _rag_settings
+    with _rag_lock:
+        if _rag_index is None or _rag_settings is None:
+            _rag_settings = RAGSettings()
+            vector_store = build_vector_store(_rag_settings)
+            embed_model = build_embed_model(_rag_settings)
+            _rag_index = VectorStoreIndex.from_vector_store(
+                vector_store=vector_store,
+                embed_model=embed_model,
+            )
+    return _rag_index, _rag_settings
+
+
+@tool
+def query_knowledge_base(
+    query: str, ticker_filter: str | None = None, top_k: int = 5
+) -> dict[str, Any]:
+    """Search the AlphaWhale financial knowledge base for relevant context.
+
+    Queries SEC 10-K/10-Q filings and financial news articles indexed in Pinecone.
+    Use this when the user asks about company fundamentals, earnings, filings,
+    or recent financial news that goes beyond price/indicator data.
+
+    Args:
+        query: Natural language search query (e.g. "Apple revenue growth drivers").
+        ticker_filter: Optional ticker to filter results (e.g. "AAPL"). None for all.
+        top_k: Number of results to return after reranking. Default is 5.
+    """
+    try:
+        index, settings = _get_rag_index()
+    except Exception as exc:
+        logger.warning("rag_init_failed", error=str(exc))
+        return {"error": "Knowledge base unavailable"}
+
+    filters: MetadataFilters | None = None
+    if ticker_filter:
+        filters = MetadataFilters(
+            filters=[ExactMatchFilter(key="ticker", value=ticker_filter.upper())]
+        )
+
+    retriever = VectorIndexRetriever(
+        index=index,
+        similarity_top_k=settings.similarity_top_k,
+        filters=filters,
+    )
+    reranker = CohereRerank(
+        model=settings.cohere_rerank_model,
+        top_n=top_k,
+        api_key=settings.cohere_api_key.get_secret_value(),
+    )
+
+    try:
+        nodes = retriever.retrieve(query)
+        if not nodes:
+            return {"query": query, "results": [], "count": 0}
+        reranked = reranker.postprocess_nodes(nodes, query_str=query)
+    except Exception as exc:
+        logger.warning("rag_query_failed", query=query, error_type=type(exc).__name__)
+        return {"error": "Knowledge base query failed"}
+
+    results = []
+    for node in reranked:
+        results.append(
+            {
+                "text": node.node.get_content()[:500],
+                "score": round(node.score, 4) if node.score else None,
+                "metadata": node.node.metadata,
+            }
+        )
+
+    return {"query": query, "results": results, "count": len(results)}
 
 
 @tool

@@ -25,12 +25,19 @@ from agent.tools import (
     generate_trade_signal,
     get_stock_price,
     get_technical_indicators,
+    query_knowledge_base,
 )
 from py_core import ExtractionError, extract, get_logger
 
 logger = get_logger("agent.graph")
 
-TOOLS = [get_stock_price, get_technical_indicators, compare_assets, generate_trade_signal]
+TOOLS = [
+    get_stock_price,
+    get_technical_indicators,
+    compare_assets,
+    generate_trade_signal,
+    query_knowledge_base,
+]
 TOOLS_BY_NAME = {tool.name: tool for tool in TOOLS}
 
 SYSTEM_PROMPT = (
@@ -51,7 +58,9 @@ SYSTEM_PROMPT = (
     "DATA QUERIES — use tools only when the user explicitly asks for analysis, prices, or performance.\n"
     "• get_stock_price: recent OHLCV data\n"
     "• get_technical_indicators: EMA 8/80, SMA 200, MACD, RSI 14, Stochastic K/D\n"
-    "• compare_assets: side-by-side metric comparison\n\n"
+    "• compare_assets: side-by-side metric comparison\n"
+    "• query_knowledge_base: search SEC filings (10-K/10-Q) and financial news for fundamentals, "
+    "earnings, company strategy, or recent news context. Use ticker_filter to scope results.\n\n"
     "RESPONSE FORMAT — when presenting tool data, return a short summary sentence followed by\n"
     "a fenced JSON block using the language tag `financial-data`. The frontend renders this as\n"
     "rich UI components. Never include volume in stock performance summaries.\n\n"
