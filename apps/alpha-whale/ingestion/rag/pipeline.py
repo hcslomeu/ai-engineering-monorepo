@@ -72,16 +72,20 @@ async def ingest_filings(
     return filings
 
 
-def ingest_articles(
+async def ingest_articles(
     request: IngestionRequest,
     settings: RAGSettings,
 ) -> list[NewsArticle]:
-    """Bronze layer — scrape financial news articles via Firecrawl."""
+    """Bronze layer — scrape financial news articles via Firecrawl.
+
+    Firecrawl SDK is synchronous, so scraping runs in a thread to
+    avoid blocking the async event loop.
+    """
     if not request.news_urls:
         return []
 
     source = FirecrawlNewsSource(settings=settings)
-    articles = source.scrape_urls(request.news_urls)
+    articles = await asyncio.to_thread(source.scrape_urls, request.news_urls)
     logger.info("articles_ingested", count=len(articles))
     return articles
 
@@ -133,7 +137,7 @@ async def run_pipeline(
 
     # Bronze
     filings = await ingest_filings(request, settings)
-    articles = ingest_articles(request, settings)
+    articles = await ingest_articles(request, settings)
 
     # Silver
     nodes = chunk(filings, articles, settings)

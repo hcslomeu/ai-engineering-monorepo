@@ -34,12 +34,13 @@ def _filing_to_document(filing: EdgarFiling) -> Document:
     )
 
 
-def _article_to_document(article: NewsArticle) -> Document:
+def _article_to_document(article: NewsArticle, *, ticker: str = "") -> Document:
     """Convert a NewsArticle into a LlamaIndex Document with news metadata."""
     return Document(
         text=article.text,
         metadata={
             "source": "firecrawl",
+            "ticker": ticker,
             "title": article.metadata.title or "",
             "published_date": article.metadata.published_date or "",
             "source_domain": article.metadata.source_domain or "",
@@ -78,12 +79,15 @@ def chunk_filings(
 def chunk_articles(
     articles: list[NewsArticle],
     settings: RAGSettings,
+    *,
+    ticker: str = "",
 ) -> list[TextNode]:
     """Chunk news articles into TextNodes for vector indexing.
 
     Args:
         articles: Bronze-layer article data from FirecrawlNewsSource.
         settings: RAG pipeline configuration (chunk_size, chunk_overlap).
+        ticker: Optional ticker to tag on all article chunks for filtering.
 
     Returns:
         List of TextNodes with preserved article metadata.
@@ -91,7 +95,7 @@ def chunk_articles(
     if not articles:
         return []
 
-    documents = [_article_to_document(a) for a in articles]
+    documents = [_article_to_document(a, ticker=ticker) for a in articles]
     splitter = SentenceSplitter(
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,

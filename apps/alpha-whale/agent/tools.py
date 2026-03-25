@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import threading
 from typing import Any
 
 from langchain_core.tools import tool
@@ -61,19 +62,23 @@ def _resolve_ticker(ticker: str) -> str:
 
 _rag_index: VectorStoreIndex | None = None
 _rag_settings: RAGSettings | None = None
+_rag_lock = threading.Lock()
 
 
 def _get_rag_index() -> tuple[VectorStoreIndex, RAGSettings]:
     """Return a cached VectorStoreIndex and RAGSettings, lazily initialised."""
     global _rag_index, _rag_settings  # noqa: PLW0603
-    if _rag_index is None or _rag_settings is None:
-        _rag_settings = RAGSettings()
-        vector_store = build_vector_store(_rag_settings)
-        embed_model = build_embed_model(_rag_settings)
-        _rag_index = VectorStoreIndex.from_vector_store(
-            vector_store=vector_store,
-            embed_model=embed_model,
-        )
+    if _rag_index is not None and _rag_settings is not None:
+        return _rag_index, _rag_settings
+    with _rag_lock:
+        if _rag_index is None or _rag_settings is None:
+            _rag_settings = RAGSettings()
+            vector_store = build_vector_store(_rag_settings)
+            embed_model = build_embed_model(_rag_settings)
+            _rag_index = VectorStoreIndex.from_vector_store(
+                vector_store=vector_store,
+                embed_model=embed_model,
+            )
     return _rag_index, _rag_settings
 
 
@@ -121,8 +126,8 @@ def query_knowledge_base(
             return {"query": query, "results": [], "count": 0}
         reranked = reranker.postprocess_nodes(nodes, query_str=query)
     except Exception as exc:
-        logger.warning("rag_query_failed", query=query, error=str(exc))
-        return {"error": f"Knowledge base query failed: {exc}"}
+        logger.warning("rag_query_failed", query=query, error_type=type(exc).__name__)
+        return {"error": "Knowledge base query failed"}
 
     results = []
     for node in reranked:

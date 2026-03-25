@@ -152,7 +152,7 @@ class TestArticleToDocument:
 
     def test_metadata_keys(self, sample_article: NewsArticle) -> None:
         doc = _article_to_document(sample_article)
-        expected_keys = {"source", "title", "published_date", "source_domain", "url"}
+        expected_keys = {"source", "ticker", "title", "published_date", "source_domain", "url"}
         assert set(doc.metadata.keys()) == expected_keys
 
     def test_metadata_values(self, sample_article: NewsArticle) -> None:

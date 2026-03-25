@@ -119,18 +119,21 @@ class EdgarClient:
             file_path = hit.get("_id", "")
 
             accession_raw = source.get("file_num", "")
-            accession = accession_raw.replace("-", "") if accession_raw else file_path
+            accession = accession_raw.replace("-", "") if accession_raw else ""
 
             filed_str = source.get("file_date", "")
-            period_str = source.get("period_of_report", "")
+            if not filed_str:
+                logger.warning("edgar_hit_missing_date", hit_id=file_path)
+                continue
 
+            period_str = source.get("period_of_report", "")
             filing_url = f"https://www.sec.gov/Archives/{file_path}" if file_path else ""
 
             results.append(
                 EdgarSearchResult(
                     accession_number=accession,
                     filing_type=filing_type,
-                    filed_date=date.fromisoformat(filed_str) if filed_str else date.today(),
+                    filed_date=date.fromisoformat(filed_str),
                     period_of_report=date.fromisoformat(period_str) if period_str else None,
                     company_name=source.get("display_names", [ticker])[0],
                     filing_url=filing_url,

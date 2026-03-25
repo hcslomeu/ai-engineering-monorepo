@@ -198,30 +198,35 @@ class TestIngestFilings:
 
 
 class TestIngestArticles:
+    @patch("ingestion.rag.pipeline.asyncio")
     @patch("ingestion.rag.pipeline.FirecrawlNewsSource")
-    def test_scrapes_news_urls(
+    async def test_scrapes_news_urls(
         self,
         mock_source_cls: MagicMock,
+        mock_asyncio: MagicMock,
         sample_article: NewsArticle,
         rag_settings: RAGSettings,
     ) -> None:
         mock_source = mock_source_cls.return_value
         mock_source.scrape_urls.return_value = [sample_article]
+        mock_asyncio.to_thread = AsyncMock(return_value=[sample_article])
 
         request = IngestionRequest(news_urls=["https://example.com"])
-        articles = ingest_articles(request, rag_settings)
+        articles = await ingest_articles(request, rag_settings)
 
         assert len(articles) == 1
-        mock_source.scrape_urls.assert_called_once_with(["https://example.com"])
+        mock_asyncio.to_thread.assert_called_once_with(
+            mock_source.scrape_urls, ["https://example.com"]
+        )
 
     @patch("ingestion.rag.pipeline.FirecrawlNewsSource")
-    def test_empty_urls_returns_empty(
+    async def test_empty_urls_returns_empty(
         self,
         mock_source_cls: MagicMock,
         rag_settings: RAGSettings,
     ) -> None:
         request = IngestionRequest(news_urls=[])
-        articles = ingest_articles(request, rag_settings)
+        articles = await ingest_articles(request, rag_settings)
         assert articles == []
         mock_source_cls.assert_not_called()
 
@@ -275,12 +280,12 @@ class TestRunPipeline:
     @pytest.mark.asyncio()
     @patch("ingestion.rag.pipeline.index")
     @patch("ingestion.rag.pipeline.chunk")
-    @patch("ingestion.rag.pipeline.ingest_articles")
+    @patch("ingestion.rag.pipeline.ingest_articles", new_callable=AsyncMock)
     @patch("ingestion.rag.pipeline.ingest_filings", new_callable=AsyncMock)
     async def test_full_pipeline_returns_result(
         self,
         mock_ingest_filings: AsyncMock,
-        mock_ingest_articles: MagicMock,
+        mock_ingest_articles: AsyncMock,
         mock_chunk: MagicMock,
         mock_index: MagicMock,
         rag_settings: RAGSettings,
@@ -307,12 +312,12 @@ class TestRunPipeline:
     @pytest.mark.asyncio()
     @patch("ingestion.rag.pipeline.index")
     @patch("ingestion.rag.pipeline.chunk")
-    @patch("ingestion.rag.pipeline.ingest_articles")
+    @patch("ingestion.rag.pipeline.ingest_articles", new_callable=AsyncMock)
     @patch("ingestion.rag.pipeline.ingest_filings", new_callable=AsyncMock)
     async def test_empty_nodes_skips_indexing(
         self,
         mock_ingest_filings: AsyncMock,
-        mock_ingest_articles: MagicMock,
+        mock_ingest_articles: AsyncMock,
         mock_chunk: MagicMock,
         mock_index: MagicMock,
         rag_settings: RAGSettings,
@@ -330,12 +335,12 @@ class TestRunPipeline:
     @pytest.mark.asyncio()
     @patch("ingestion.rag.pipeline.index")
     @patch("ingestion.rag.pipeline.chunk")
-    @patch("ingestion.rag.pipeline.ingest_articles")
+    @patch("ingestion.rag.pipeline.ingest_articles", new_callable=AsyncMock)
     @patch("ingestion.rag.pipeline.ingest_filings", new_callable=AsyncMock)
     async def test_uses_default_settings_when_none(
         self,
         mock_ingest_filings: AsyncMock,
-        mock_ingest_articles: MagicMock,
+        mock_ingest_articles: AsyncMock,
         mock_chunk: MagicMock,
         mock_index: MagicMock,
     ) -> None:
@@ -353,12 +358,12 @@ class TestRunPipeline:
     @pytest.mark.asyncio()
     @patch("ingestion.rag.pipeline.index")
     @patch("ingestion.rag.pipeline.chunk")
-    @patch("ingestion.rag.pipeline.ingest_articles")
+    @patch("ingestion.rag.pipeline.ingest_articles", new_callable=AsyncMock)
     @patch("ingestion.rag.pipeline.ingest_filings", new_callable=AsyncMock)
     async def test_show_progress_forwarded(
         self,
         mock_ingest_filings: AsyncMock,
-        mock_ingest_articles: MagicMock,
+        mock_ingest_articles: AsyncMock,
         mock_chunk: MagicMock,
         mock_index: MagicMock,
         rag_settings: RAGSettings,
