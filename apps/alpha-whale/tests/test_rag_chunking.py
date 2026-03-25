@@ -19,6 +19,7 @@ from ingestion.rag.firecrawl_source import NewsArticle, NewsArticleMetadata
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def rag_settings() -> RAGSettings:
     return RAGSettings(
@@ -240,9 +241,7 @@ class TestChunkFilings:
         assert "filed_date" in node.excluded_embed_metadata_keys
         assert "filing_url" in node.excluded_embed_metadata_keys
 
-    def test_long_filing_produces_multiple_chunks(
-        self, small_chunk_settings: RAGSettings
-    ) -> None:
+    def test_long_filing_produces_multiple_chunks(self, small_chunk_settings: RAGSettings) -> None:
         filing = EdgarFiling(
             accession_number="0000320193-24-000081",
             ticker="AAPL",
@@ -258,9 +257,7 @@ class TestChunkFilings:
             assert node.metadata["ticker"] == "AAPL"
             assert node.metadata["source"] == "edgar"
 
-    def test_multiple_filings_chunked_together(
-        self, rag_settings: RAGSettings
-    ) -> None:
+    def test_multiple_filings_chunked_together(self, rag_settings: RAGSettings) -> None:
         filings = [
             EdgarFiling(
                 accession_number=f"acc-{i}",
@@ -308,9 +305,7 @@ class TestChunkArticles:
         assert "published_date" in node.excluded_embed_metadata_keys
         assert "url" in node.excluded_embed_metadata_keys
 
-    def test_long_article_produces_multiple_chunks(
-        self, small_chunk_settings: RAGSettings
-    ) -> None:
+    def test_long_article_produces_multiple_chunks(self, small_chunk_settings: RAGSettings) -> None:
         article = NewsArticle(
             text=_long_text(50),
             metadata=NewsArticleMetadata(
@@ -334,7 +329,10 @@ class TestChunkArticles:
         article = NewsArticle(
             text=text,
             metadata=NewsArticleMetadata(
-                title="Test", published_date=None, source_domain=None, url=None,
+                title="Test",
+                published_date=None,
+                source_domain=None,
+                url=None,
             ),
         )
         no_overlap = RAGSettings(

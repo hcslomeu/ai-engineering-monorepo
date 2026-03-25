@@ -105,9 +105,7 @@ class TestBuildVectorStore:
         )
 
     @patch("ingestion.rag.indexing.Pinecone")
-    def test_return_type(
-        self, mock_pinecone_cls: MagicMock, rag_settings: RAGSettings
-    ) -> None:
+    def test_return_type(self, mock_pinecone_cls: MagicMock, rag_settings: RAGSettings) -> None:
         result = build_vector_store(rag_settings)
         assert isinstance(result, PineconeVectorStore)
 

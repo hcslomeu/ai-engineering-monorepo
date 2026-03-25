@@ -187,9 +187,7 @@ class TestBuildReranker:
         assert reranker.top_n == 5
 
     @patch("ingestion.rag.retrieval.CohereRerank")
-    def test_api_key_passed(
-        self, mock_rerank_cls: MagicMock, rag_settings: RAGSettings
-    ) -> None:
+    def test_api_key_passed(self, mock_rerank_cls: MagicMock, rag_settings: RAGSettings) -> None:
         build_reranker(rag_settings)
         mock_rerank_cls.assert_called_once_with(
             model="rerank-v3.5",
@@ -221,9 +219,7 @@ class TestRetrieveAndRerank:
 
         retrieve_and_rerank("AAPL revenue", mock_retriever, mock_reranker)
 
-        mock_reranker.postprocess_nodes.assert_called_once_with(
-            fused, query_str="AAPL revenue"
-        )
+        mock_reranker.postprocess_nodes.assert_called_once_with(fused, query_str="AAPL revenue")
 
     def test_returns_reranked_results(self) -> None:
         mock_retriever = MagicMock()

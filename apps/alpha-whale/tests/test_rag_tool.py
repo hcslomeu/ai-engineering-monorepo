@@ -21,9 +21,7 @@ def _reset_rag_globals() -> None:
     tools_module._rag_settings = None
 
 
-def _make_node_with_score(
-    text: str, score: float, metadata: dict | None = None
-) -> NodeWithScore:
+def _make_node_with_score(text: str, score: float, metadata: dict | None = None) -> NodeWithScore:
     node = TextNode(text=text, metadata=metadata or {})
     return NodeWithScore(node=node, score=score)
 
@@ -122,9 +120,7 @@ class TestQueryKnowledgeBase:
         mock_get_index.return_value = (MagicMock(), _mock_settings())
         mock_vir_cls.return_value.retrieve.return_value = []
 
-        query_knowledge_base.invoke(
-            {"query": "revenue", "ticker_filter": "aapl"}
-        )
+        query_knowledge_base.invoke({"query": "revenue", "ticker_filter": "aapl"})
 
         call_kwargs = mock_vir_cls.call_args.kwargs
         assert call_kwargs["filters"] is not None
@@ -157,9 +153,7 @@ class TestQueryKnowledgeBase:
         mock_rerank_cls: MagicMock,
     ) -> None:
         mock_get_index.return_value = (MagicMock(), _mock_settings())
-        mock_vir_cls.return_value.retrieve.return_value = [
-            _make_node_with_score("text", 0.9)
-        ]
+        mock_vir_cls.return_value.retrieve.return_value = [_make_node_with_score("text", 0.9)]
         mock_rerank_cls.return_value.postprocess_nodes.return_value = []
 
         query_knowledge_base.invoke({"query": "test", "top_k": 3})
